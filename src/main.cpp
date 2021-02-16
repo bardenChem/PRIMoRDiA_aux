@@ -1,7 +1,7 @@
-//ooccupy.cpp
+//main.cpp
 
 /*********************************************************************/
-/* This source code file is part of OOCCuPy++ software project created 
+/* This source code file is part of LQQCMModels software project created 
  * by Igor Barden Grillo at Federal University of Paraíba. 
  * barden.igor@gmail.com ( Personal e-mail ) 
  * igor.grillo@acad.pucrs.br ( Academic e-mail )
@@ -16,12 +16,12 @@
 /***********************************/
 
 #include <iostream>
-#include "../include/ooccupy.h"
+#include "../include/interface.h"
 
 /***********************************/
 int main(int argc, char** argv){
-	ooccupy interface(argc,argv);
-	interface.run();
+	interface program(argc,argv);
+	program.run();
 	return 0;	
 }
-//=======================================
+//======================================= 
