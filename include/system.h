@@ -86,11 +86,11 @@ class pdbAtom{
 /*********************************************************************/
 class residue{
 	public:
-		std::string type;
+		std::string res3n;
+		std::string res1n;
+		enum res_type { WAT,HOH,ION,AA,DNA } type;
 		bool ligand;
 		bool terminal;
-		bool WAT;
-		bool ION;
 		int fCharge;
 		unsigned int nHydrogens;
 		unsigned int nAtoms;
