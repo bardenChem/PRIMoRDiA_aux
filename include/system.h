@@ -130,31 +130,4 @@ class pdbModel{
 		void update_residues();
 };
 /*********************************************************************/
-class PDB{
-	public:
-		unsigned int nModels;
-		std::string PDB_ID;
-		std::vector<pdbModel> models;
-		bool Traj;
-		bool NMR;
-		PDB();
-		PDB(std::vector<pdbModel> mods);
-		PDB(const char* pdb_file);
-		PDB(std::vector< std::string> > pdb_file_list);
-		~PDB();
-		PDB(const PDB& rhs);
-		PDB& operator=(const PDB& rhs);
-		PDB(PDB&& rhs) noexcept;
-		PDB& operator=(PDB&& rhs) noexcept;
-		void split_models_in_files();
-		void read_models_from_file(const char* pdb_file);
-		void read_model_from_file(const char* pdb_file,unsigned int modN);
-		void add_model(pdbModel model);
-		void remove_model(unsigned int model);
-		void write_pdb;
-		system get_system_from_model(unsigned int model);
-		std::vector<system> get_systems();
-		
-};
-/*********************************************************************/
 #endif

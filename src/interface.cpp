@@ -22,7 +22,7 @@
 
 #include "../include/global.h"
 #include "../include/interface.h"
-#include "../include/traj.h"
+#include "../include/traj_script.h"
 
 using std::cout;
 using std::endl;
