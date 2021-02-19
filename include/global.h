@@ -2,7 +2,7 @@
 //Declarations for functions and source file with constant values. 
 
 /*********************************************************************/
-/* This source code file is part of OOCCuPy++ software project created 
+/* This source code file is part of LQQCMMtools software project created 
  * by Igor Barden Grillo at Federal University of Paraíba. 
  * barden.igor@gmail.com ( Personal e-mail ) 
  * igor.grillo@acad.pucrs.br ( Academic e-mail )
@@ -40,3 +40,17 @@ double sum_dvec(std::vector<double>& vec);
 double sd_dvec(std::vector<double>& vec);
 std::vector<double> scale_dvec(std::vector<double>& vec);
 #endif
+//------------------------------------------------------------
+class Line{
+	public:
+		std::vector<std::string> words;
+		unsigned int line_len;
+		Line();
+		~Line();
+		Line(std::string line);
+		Line(const char* line);
+		Line(const Line& rhs);
+		Line& operator=(const Line& rhs);
+		Line(Line&& rhs) noexcept;
+		Line& operator=(Line&& rhs) noexcept;
+};

@@ -54,6 +54,7 @@ class PDB{
 	public:
 		unsigned int nModels;
 		std::string PDB_ID;
+		std::string basename;
 		std::vector<pdbModel> models;
 		bool Traj;
 		bool NMR;

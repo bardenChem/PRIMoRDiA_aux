@@ -1,7 +1,7 @@
 //traj.cpp
 
 /*********************************************************************/
-/* This source code file is part of OOCCuPy software project created 
+/* This source code file is part of LQQCMMtools software project created 
  * by Igor Barden Grillo at Federal University of Paraíba. 
  * barden.igor@gmail.com ( Personal e-mail ) 
  * igor.grillo@acad.pucrs.br ( Academic e-mail )
@@ -24,7 +24,7 @@
 #include <sstream>
 #include <cmath>
 
-#include "../include/traj_script.h"
+#include "../include/traj_analysis.h"
 #include "../include/global.h"
 #include <experimental/filesystem>
 
@@ -35,11 +35,11 @@ using std::endl;
 namespace fs = std::experimental::filesystem;
 
 /***********************************************************************/
-traj::traj(){
+traj_an::traj_an(){
 	
 }
 /***********************************************************************/
-traj::traj(string file_name):
+traj_an::traj_an(string file_name):
 	traj_file(file_name)		{
 		
 	py_name = remove_extension( file_name.c_str() );
@@ -52,10 +52,9 @@ traj::traj(string file_name):
 	
 	R_script.open( R_name.c_str() );
 	
-	
 }
 /***********************************************************************/
-traj::traj(string file_name, vector<int> atoms):
+traj_an::traj_an(string file_name, vector<int> atoms):
 	traj_file(file_name)					   ,
 	atoms_pairs(atoms)						   {
 		
@@ -69,10 +68,10 @@ traj::traj(string file_name, vector<int> atoms):
 	R_script.open( R_name.c_str() );
 }
 /***********************************************************************/
-traj::~traj(){
+traj_an::~traj_an(){
 }
 /***********************************************************************/
-void traj::mdtraj_geo(){
+void traj_an::mdtraj_geo(){
 	string topname = change_extension( traj_file.c_str(),".pdb" );
 	
 	python_script << " #/usr/bin/env python \n"
@@ -166,7 +165,7 @@ void traj::mdtraj_geo(){
 	R_script.close();
 }
 /***********************************************************************/
-void traj::calc_distances(const char* pdb_file){
+void traj_an::calc_distances(const char* pdb_file){
 	std::ifstream pdb_traj;
 	pdb_traj.open( pdb_file );
 		
@@ -257,7 +256,7 @@ void traj::calc_distances(const char* pdb_file){
 	
 }
 /***********************************************************************/
-void traj::extract_frame(const char* pdb_file, int frames){
+void traj_an::extract_frame(const char* pdb_file, int frames){
 	
 	string frame = std::to_string(frames);
 	string frame_name = remove_extension(pdb_file);
@@ -296,7 +295,7 @@ void traj::extract_frame(const char* pdb_file, int frames){
 	pdb_frame.close();
 }
 /***********************************************************************/
-void traj::extract_frames(const char* pdb_file, int interval,int fr_sz){
+void traj_an::extract_frames(const char* pdb_file, int interval,int fr_sz){
 	for( int i=1;i<=fr_sz;i++){
 		if ( i%interval == 0 ){
 			this->extract_frame(pdb_file,i);
@@ -304,7 +303,7 @@ void traj::extract_frames(const char* pdb_file, int interval,int fr_sz){
 	}
 }
 /***********************************************************************/
-int traj::bi_most_probable_point( vector<double> v1, vector<double> v2 ){
+int traj_an::bi_most_probable_point( vector<double> v1, vector<double> v2 ){
 	int result = 0;
 	vector<double> sc_v1 = scale_dvec(v1);
 	vector<double> sc_v2 = scale_dvec(v2);

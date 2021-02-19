@@ -1,4 +1,5 @@
-//QCPinput.h
+//orcaInput.h
+//Declarations for functions and source file with constant values. 
 
 /*********************************************************************/
 /* This source code file is part of LQQCMMtools software project created 
@@ -15,33 +16,28 @@
  
 /*********************************************************************/
 
-#ifndef QCP_INPUT
-#define QCP_INPUT
+#ifndef ORCA_INP
+#define ORCA_INP
 
 #include <string>
 
-enum package{
-	MOPAC,
-	GAMESS,
-	ORCA,
+enum OrcaRunType{
+	SP,
+	OPT,
 	
-	NumOfPackages
-}
-
-class QCPinput{
-	public:
-		package program;
-		unsigned int base_multi;
-		int base_charge;
-		std::string QMmethod;
-		QCPinput();
-		~QCPinput();
-		QCPinput(const QCPinput& rhs) delete;
-		QCPinput& operator=(const QCPinput& rhs) delete;
-		void make_input_from_folder(int QCP,unsigned int bs_mlt,int bs_chg);
-		// for finite differences calculations
-		void make_input_from_folder_FD(int QCP,unsigned int bs_mlt,int bs_chg,int chg_diff); 		
+	NUmOfopts
 };
 
+/********************************************************************/
+class orcaInput{
+	public:
+		unsigned int multi;
+		int charge;
+		std::string qm_method;
+		orcaInput();
+		~orcaInput();
+		void write_input_file(std::string out_file);
+};
 
-#endif 
+///////////////////////////////////////////////////////////////////////
+#endif

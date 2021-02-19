@@ -128,6 +128,8 @@ class pdbModel{
 		void remove_ions();
 		void remove_residue(unsigned int i);
 		void update_residues();
+		void split_complex(std::string mol);
+		void built_complex(const char* pdb_mol);
 };
 /*********************************************************************/
 #endif

@@ -24,7 +24,7 @@
 #include <fstream>
 
 
-class traj_script{
+class traj_an{
 	public:
 		std::vector<int> atoms_pairs;
 		std::string traj_file;
@@ -32,19 +32,19 @@ class traj_script{
 		std::string R_name;
 		std::ofstream python_script;
 		std::ofstream R_script;
-		traj_script();
-		traj_script(std::string file_name);
-		traj_script(std::string file_name, std::vector<int> atoms);
-		traj_script( const traj_script& rhs ) =  delete;
-		traj_script& operator=( const traj_script& rhs ) =  delete;
-		~traj_script();
+		traj_an();
+		traj_an(std::string file_name);
+		traj_an(std::string file_name, std::vector<int> atoms);
+		traj_an(const traj_an& rhs)=delete;
+		traj_an& operator=(const traj_an& rhs)=delete;
+		~traj_an();
 		void mdtraj_geo();
 		void calc_distances(const char* pdb_file);
 		void extract_frame(const char* pdb_file, int frames);
 		void extract_frames(const char* pdb_file, int interval,int fr_sz);
 		int bi_most_probable_point( std::vector<double> v1, std::vector<double> v2 );
-		void prune_waters(int radius);
-	
+		void prune_waters(int radius);	
 };
+/****************************************************/
 
 #endif

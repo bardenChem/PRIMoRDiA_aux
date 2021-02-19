@@ -16,13 +16,12 @@
 /*********************************************************************/
 
 #include <iostream>
-#include <ctime>
 #include <string>
 #include <vector>
 
 #include "../include/global.h"
 #include "../include/interface.h"
-#include "../include/traj_script.h"
+#include "../include/traj_analysis.h"
 
 using std::cout;
 using std::endl;
@@ -30,13 +29,9 @@ using std::string;
 using std::vector;
 
 /**********************************************************************/
-interface::interface(){
-	
-}
+interface::interface(){}
 /**********************************************************************/
-interface::~interface(){
-	
-}
+interface::~interface(){}
 /**********************************************************************/
 interface::interface(int argc, char* argv[]):
 	m_argc(argc)						{
@@ -45,17 +40,19 @@ interface::interface(int argc, char* argv[]):
 		m_argv.emplace_back(argv[i]);
 	}
 	
-	time_t now	= time(0);
-	char* dt	= ctime(&now);
-	cout << "Starting interface++ ! "	<< endl;
-	
+	cout << "Starting interface++ ! "	<< endl;	
 }
 /**********************************************************************/
 void interface::run(){
+	
+	/********************************/
+	//Trajectory analysis with mdtraj
 	if ( m_argv[1] == "-traj_geo"){
 		traj Trajectory( m_argv[2] );
 		Trajectory.mdtraj_geo();
 	}
+	/********************************/
+	//Distance analysis from PDB traj
 	else if ( m_argv[1] == "-dist_an" ){
 		vector<int> ats;
 		for(int i=3;i<m_argc;i++){
@@ -64,16 +61,42 @@ void interface::run(){
 		traj Trajectory(m_argv[2],ats);
 		Trajectory.calc_distances( m_argv[2].c_str() );
 	}
-	else if ( m_argv[1] == "-extract_frame"){
+	/********************************/
+	//Extract frame from a trajectory
+	else if ( m_argv[1] == "-extract_frame" ){
 		int arg3 = stoi(m_argv[3]);
 		traj Trajectory;
 		Trajectory.extract_frame(m_argv[2].c_str(),arg3);
 	}
-	else if ( m_argv[1] == "-extract_frames"){
+	/********************************/
+	//Extract frames from a trajectory
+	else if ( m_argv[1] == "-extract_frames" ){
 		int arg3 = stoi(m_argv[3]);
 		int arg4 = stoi(m_argv[4]);
 		traj Trajectory;
 		Trajectory.extract_frames(m_argv[2].c_str(),arg3,arg4);
 	}
+	/********************************/
+	//Check if is ok the output from QCP 
+	else if ( m_argv[1] == "-check_QCP_outs" ){
+		
+	}
+	/********************************/
+	//creat input from QCP calculations
+	else if ( m_argv[1] == "-built_QCP_inp" ){
+		
+	}
+	/********************************/
+	else if ( m_argv[1] == "-MDprep" ){
+		
+	}
 }
 /**********************************************************************/
+void interface::print_options(){
+	
+}
+/**********************************************************************/
+void interface::help(){
+	
+}
+////////////////////////////////////////////////////////////////////////

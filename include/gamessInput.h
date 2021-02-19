@@ -178,6 +178,7 @@ class gms_input{
 		void read_input(const char* file_name);
 		void restart_input(const char* inp_name, const char* vec_data);
 		void write_input(std::string out_name);
+		void clear_directory();
 
 		
 };
