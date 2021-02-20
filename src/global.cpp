@@ -29,8 +29,9 @@
 //=============================================================================
 using std::string;
 using std::vector;
-namespace fs = std::experimental::filesystem;
+using std::move;
 
+namespace fs = std::experimental::filesystem;
 /*********************************************************************************/
 bool IF_file(const char* name){
 	fs::path file_name(name);
@@ -169,3 +170,67 @@ std::string residue_3Lname[] = {"ALA","ARG","ASN","ASP","CYS","GLN","GLU","GLY",
 /************************************************************************************************************/
 std::string residue_1Lname[] = {"A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"};
 /************************************************************************************************************/
+
+///////////////////////////////////////////
+//CLASS///
+Line::Line()	:
+	line_len(0)	{
+}
+/*****************************************/
+Line::~Line(){}
+/*****************************************/
+Line::Line(stdstring line):
+	line_len(0)			  {
+		
+	words.reserve(30);
+	std::stringstream stream(line);
+	string word;
+	word.reserve(20);
+	
+	while (stream >> word){
+		words.emplace_back( word );
+		line_len++;
+	}
+}
+/*****************************************/
+Line::Line(const char* line):
+	line_len(0)				{
+		
+	words.reserve(30);
+	std::stringstream stream(line);
+	string word;
+	word.reserve(20);
+	
+	while (stream >> word){
+		words.emplace_back( word );
+		line_len++;
+	}
+}
+/*****************************************/
+Line::Line(const Line& rhs)	:
+	words(rhs.words)		,
+	line_len(rhs.line_len)	{
+}
+/*****************************************/
+Line& Line::operator=(const Line& rhs){
+	if ( this != &rhs ){
+		words 		= rhs.words;
+		line_len 	= rhs.line_len;
+	}
+	return *this;
+}
+/*****************************************/
+Line::Line(Line&& rhs) noexcept:
+	words( move(rhs.words) ),
+	line_len(rhs.line_len){
+	
+}
+/*****************************************/
+Line& Line::operator=(Line&& rhs) noexcept{
+	if ( this != &rhs ){
+		words = move(rhs.words);
+		line_len = rhs.line_len;
+	}
+	return *this;
+}
+////////////////////////////////////////////
