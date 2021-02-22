@@ -138,6 +138,18 @@ vector<double> scale_dvec(vector<double>& vec){
 	}
 	return result;
 }
+/******************************************************************************/
+float get_atom_mass(std::string sym){
+	int indx = 0;
+	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) indx = i;
+	return atomMass[indx];
+}
+/******************************************************************************/
+int get_atomic_number(std::string sym){
+	int atomic_num;
+	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) atomic_num = i+1;
+	return atomic_num;
+}
 //==================================================================================
 string atomType[] = {
 					 "H",																			      "He",
@@ -220,10 +232,9 @@ Line& Line::operator=(const Line& rhs){
 	return *this;
 }
 /*****************************************/
-Line::Line(Line&& rhs) noexcept:
-	words( move(rhs.words) ),
-	line_len(rhs.line_len){
-	
+Line::Line(Line&& rhs) noexcept	:
+	words( move(rhs.words) )	,
+	line_len(rhs.line_len)		{	
 }
 /*****************************************/
 Line& Line::operator=(Line&& rhs) noexcept{

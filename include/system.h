@@ -21,6 +21,15 @@
 #include <vector>
 #include <string>
 
+
+enum res_type { 
+	WAT,
+	HOH,
+	ION,
+	AA,
+	DNA 
+};
+	
 /*********************************************************************/
 class atom{
 	public:
@@ -28,12 +37,11 @@ class atom{
 		double yc;
 		double zc;
 		float pCharge;
-		double aMass;
+		float aMass;
 		std::string element;
-		unsigned int nmb;
 		atom();
 		~atom();
-		atom(double xc, double yc, double zc, std::string type);
+		atom(double x, double y, double z, std::string type);
 		atom(const atom& rhs);
 		atom& operator=(const atom& rhs);
 		atom(atom&& rhs) noexcept;
@@ -60,6 +68,9 @@ class system{
 		system& operator=(const system& rhs);
 		system(system&& rhs) noexcept;
 		system& operator=(system&& rhs) noexcept;
+		void add_atom(atom a);
+		void add_atom(double x,double y, double z, std::string el);
+		void remove_atom(unsigned int i);
 		
 };
 /*********************************************************************/
@@ -81,14 +92,14 @@ class pdbAtom{
 		pdbAtom& operator=(const pdbAtom& rhs);
 		pdbAtom(pdbAtom&& rhs) noexcept;
 		pdbAtom& operator=(pdbAtom&& rhs) noexcept;
-		bool pdbAtom operator!=(const pdbAtom& rhs);
+		bool operator!=(const pdbAtom& rhs);
 };
 /*********************************************************************/
 class residue{
 	public:
 		std::string res3n;
 		std::string res1n;
-		enum res_type { WAT,HOH,ION,AA,DNA } type;
+		res_type type;
 		bool ligand;
 		bool terminal;
 		int fCharge;

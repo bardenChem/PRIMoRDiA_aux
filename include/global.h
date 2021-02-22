@@ -38,6 +38,8 @@ double max_dvec(std::vector<double>& vec);
 double min_dvec(std::vector<double>& vec);
 double sum_dvec(std::vector<double>& vec);
 double sd_dvec(std::vector<double>& vec);
+float get_atom_mass(std::string sym);
+int get_atomic_number(std::string sym)
 std::vector<double> scale_dvec(std::vector<double>& vec);
 #endif
 //------------------------------------------------------------
