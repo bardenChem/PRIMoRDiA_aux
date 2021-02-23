@@ -41,7 +41,8 @@ double sd_dvec(std::vector<double>& vec);
 float get_atom_mass(std::string sym);
 int get_atomic_number(std::string sym)
 std::vector<double> scale_dvec(std::vector<double>& vec);
-#endif
+std::string get_res1n( int i );
+std::string get_res3n( int i );
 //------------------------------------------------------------
 class Line{
 	public:
@@ -56,3 +57,5 @@ class Line{
 		Line(Line&& rhs) noexcept;
 		Line& operator=(Line&& rhs) noexcept;
 };
+
+#endif

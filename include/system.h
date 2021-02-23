@@ -23,6 +23,7 @@
 
 
 enum res_type { 
+	UNK,
 	WAT,
 	HOH,
 	ION,
@@ -46,7 +47,7 @@ class atom{
 		atom& operator=(const atom& rhs);
 		atom(atom&& rhs) noexcept;
 		atom& operator=(atom&& rhs) noexcept;
-		void set_element( std::string type);
+		void set_element( std::string Type);
 		void set_coord(double x, double y, double z);
 		double get_distance(const atom& a2);
 };
@@ -80,19 +81,20 @@ class pdbAtom{
 		unsigned int indx;
 		std::string res_name;
 		std::string chain_name;
-		double occupancy;
+		short occupancy;
 		double b_factor;
 		bool sideC;
-		double xc;
-		double yc;
-		double zc;
+		float xc;
+		float yc;
+		float zc;
 		pdbAtom();
 		~pdbAtom();
 		pdbAtom(const pdbAtom& rhs);
 		pdbAtom& operator=(const pdbAtom& rhs);
 		pdbAtom(pdbAtom&& rhs) noexcept;
 		pdbAtom& operator=(pdbAtom&& rhs) noexcept;
-		bool operator!=(const pdbAtom& rhs);
+		bool operator==(const pdbAtom& rhs);
+		bool is_hydrogen(int i);
 };
 /*********************************************************************/
 class residue{
@@ -107,6 +109,7 @@ class residue{
 		unsigned int nAtoms;
 		std::vector<pdbAtom> r_atoms;		
 		residue();
+		residue(std::vector<pdbAtom> resAtoms, int resTyp, int resMon);
 		~residue();
 		residue(const residue& rhs);
 		residue& operator=(const residue& rhs);
