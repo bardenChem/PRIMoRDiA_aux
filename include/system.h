@@ -47,7 +47,7 @@ class atom{
 		atom(atom&& rhs) noexcept;
 		atom& operator=(atom&& rhs) noexcept;
 		void set_element( std::string type);
-		void set_coord(double xc, double yc, double zc);
+		void set_coord(double x, double y, double z);
 		double get_distance(const atom& a2);
 };
 /********************************************************************/
