@@ -142,7 +142,7 @@ system::system(const system& rhs):
 	}
 	
 }
-/*********************************************************/
+/**********************************************************/
 system& system::operator=(const system& rhs){
 	if( this != &rhs ){
 		nAtoms 		= rhs.nAtoms;
@@ -217,6 +217,7 @@ pdbAtom::pdbAtom()		:
 	atom_name("nonamed"),
 	indx(1)				,
 	res_name("UNK")		,
+	res_indx(0)			,
 	chain_name(" ")		,
 	occupancy(0.0)		,
 	b_factor(0.00)		,
@@ -232,6 +233,7 @@ pdbAtom::pdbAtom(const pdbAtom& rhs):
 	atom_name(rhs.atom_name)		,
 	indx(rhs.indx)					,
 	res_name(rhs.res_name)			,
+	res_indx(0)						,
 	chain_name(rhs.chain_name)		,
 	occupancy(rhs.occupancy)		,
 	b_factor(rhs.b_factor)			,
@@ -246,6 +248,7 @@ pdbAtom& pdbAtom::operator=(const pdbAtom& rhs){
 		atom_name	= rhs.atom_name;
 		indx		= rhs.indx;
 		res_name	= rhs.res_name;
+		res_indx	= rhs.res_indx;
 		chain_name	= rhs.chain_name;
 		occupancy	= rhs.occupancy;
 		b_factor	= rhs.b_factor;
@@ -261,6 +264,7 @@ pdbAtom::pdbAtom(pdbAtom&& rhs) noexcept:
 	atom_name( move(rhs.atom_name) )	,
 	indx(rhs.indx)						,
 	res_name( move(rhs.res_name) )		,
+	res_indx( rhs.res_indx )			,
 	chain_name( move(rhs.chain_name) )  ,
 	occupancy(rhs.occupancy)			,
 	b_factor(rhs.b_factor)				,
@@ -276,6 +280,7 @@ pdbAtom& pdbAtom::operator=(pdbAtom&& rhs) noexcept{
 		atom_name	= move(rhs.atom_name);
 		indx		= rhs.indx;
 		res_name	= move(rhs.res_name);
+		res_indx	= rhs.res_indx; 
 		chain_name	= move(rhs.chain_name);
 		occupancy	= rhs.occupancy;
 		b_factor	= rhs.b_factor;
@@ -286,31 +291,52 @@ pdbAtom& pdbAtom::operator=(pdbAtom&& rhs) noexcept{
 	}
 	return *this;
 }
+/*********************************************************/
+bool pdbAtom::is_hydrogen(){
+	if ( atom_name[0] == "H" ) return true;
+	else if ( atom_name.substr( atom_name.begin(),2 ) == "1H" ) return true;
+	else if ( atom_name.substr( atom_name.begin(),2 ) == "2H" ) return true;
+	else if ( atom_name.substr( atom_name.begin(),2 ) == "3H" ) return true;
+	else false;
+}
+////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////
 residue::residue()	:
 	res1n("n")		,
 	res3n("UNK")	,
 	type(UNK)		,
+	AAname(OTH)     ,
 	ligand(false)	,
 	terminal(false)	,
+	first(false)    ,
 	nHydrogens(0)	,
 	fCharge(0)		,
+	pdb_index(0)	,
 	nAtoms(0)		{
 }
 /*********************************************************/
-residue::residue( vector<pdbAtom> resAtoms,int resType, int resMon ):
+residue::residue( vector<pdbAtom> resAtoms	,
+				int resType					,
+				int resMon 					):
+				
 	r_atoms(resAtoms)	,
 	type(resType)		,
+	AAname(OTH)			,
 	ligand(false)		,
 	terminal(false)		,
+	first(false)        ,
+	pdb_index			,
 	fCharge(0)			{
 		
 	res1n 	= get_res1n(resMon);
 	res3n 	= get_res3n(resMon);
+	AAname 	= resMon;
+	
 	
 	for(int=0;i<resAtoms.size();i++){
-		if ( resAtoms[i].atom_name[] ==  )
+		if ( resAtoms[i].is_hydrogen() ) nHydrogens++;
 	}
+	 
 }
 /*********************************************************/
 residue::~residue(){}
@@ -319,10 +345,12 @@ residue::residue(const residue& rhs):
 	res1n(rhs.res1n)				,
 	res3n(rhs.res3n)				,
 	type(rhs.type)					,
+	AAname(rhs.AAname)				,
 	ligand(rhs.ligand)				,
 	terminal(rhs.terminal)			,
 	nHydrogens(rhs.nHydrogens)		,
 	fCharge(rhs.fCharge)			,
+	pdb_index(rhs.pdb_index)        ,
 	nAtoms(rhs.nAtoms)				,
 	r_atoms(rhs.r_atoms)			{	
 }
@@ -331,9 +359,12 @@ residue& residue::operator=(const residue& rhs){
 	if ( this != &rhs ){
 		res1n 		= rhs.res1n;				
 		res3n 		= rhs.res3n;			
-		type 		= rhs.type;				
+		type 		= rhs.type;
+		AAname		= rhs.AAname;
 		ligand		= rhs.ligand;				
 		terminal	= rhs.terminal;	
+		first		= rhs.first;
+		pdb_index	= rhs.pdb_index;
 		nHydrogens	= rhs.nHydrogens;		
 		fCharge 	= rhs.fCharge;			
 		nAtoms 		= rhs.nAtoms;				
@@ -345,9 +376,12 @@ residue& residue::operator=(const residue& rhs){
 residue::residue( residue&& rhs) noexcept:
 	res1n( move(rhs.res1n) )			,
 	res3n( move(rhs.res3n) )			,
-	type( move(rhs.type) )				,
+	type( rhs.type )					,
+	AAname(rhs.AAname)					,
 	ligand(rhs.ligand)					,
 	terminal(rhs.terminal)				,
+	first(rhs.first)					,
+	pdb_index(rhs.pdb_index )			,
 	nHydrogens(rhs.nHydrogens)			,
 	fCharge(rhs.fCharge)				,
 	nAtoms( move(rhs.nAtoms) )			,
@@ -359,9 +393,12 @@ residue& residue::operator=( residue&& rhs) noexcept{
 	if ( this != &rhs ){
 		res1n 		= move(rhs.res1n);				
 		res3n 		= move(rhs.res3n);			
-		type 		= move(rhs.type);				
+		type 		= rhs.type;
+		AAname		= rhs.AAname;
 		ligand		= rhs.ligand;				
 		terminal	= rhs.terminal;	
+		first		= rhs.first;
+		pdb_index	= rhs.pdb_index;
 		nHydrogens	= rhs.nHydrogens;		
 		fCharge 	= rhs.fCharge;			
 		nAtoms 		= rhs.nAtoms;				
@@ -370,12 +407,80 @@ residue& residue::operator=( residue&& rhs) noexcept{
 	return *this;	
 }
 /*********************************************************/
+bool residue::is_ion(){
+	if ( r_atoms[0].res_name == "Cl-" ||
+		 r_atoms[0].res_name == "Na+" ||
+		 r_atoms[0].res_name == "K+"  ||
+		 r_atoms[0].res_name == "Mg+" ||
+		 r_atoms[0].res_name == "Zn+" ||
+		 r_atoms[0].res_name == "SO4" ) {
+	
+		type = ION;
+		return true;
+	}
+}
+/*********************************************************/
 void residue::set_charge(){
 	
-	if ( type == AA ){
-		
-	}
+	int base_HN = get_AAnHy(AAname);
 	
+	if ( type == AA ){
+		switch ( AAname ){
+			case ASP:
+			case GLU:
+				if ( first || terminal ){
+					fCharge = nHydrogens - base_HN - 2;				
+				}else{
+					fCharge = nHydrogens - base_HN  -1;
+				} 
+			break;
+			/-------
+			case ARG:
+			case LYS:
+				if ( first || terminal ) {
+					fCharge = nHydrogens - base_HN;					
+				}
+				else {
+					fCharge = nHydrogens - base_HN +1;
+				}
+			break;
+			/-------
+			case HIS:
+				if ( first || terminal ) {
+					fCharge = nHydrogens - base_HN;
+				}
+				else {
+					fCharge = nHydrogens - base_HN +1;
+				}
+			break;
+			/-------
+			case CYS:
+				fCharge = nHydrogens - base_HN - 1;
+			break;
+			/-------
+			case default:
+				if ( first || terminal ){
+					fCharge = nHydrogens - base_HN -1;
+				}
+				else fCharge = 0;
+			break;
+			
+		}		
+	}
+	else if ( type == ION ){
+		if ( r_atoms[0].res_name == "Cl-" )
+			fCharge = -1;
+		else if  ( 	r_atoms[0].res_name == "Na+" ||
+					r_atoms[0].res_name == "K+"  )
+			fCharge = +1;
+		else if (   r_atoms[0].res_name == "Mg+" ||
+					r_atoms[0].res_name == "Zn+" )
+			fCharge = +2;
+		else if (  r_atoms[0].res_name == "SO4" ) 
+			fCharge = -2;
+		else fCharge = 0;
+		
+	}	
 }
 ////////////////////////////////////////////////////////////
 pdbModel::pdbModel(){

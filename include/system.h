@@ -21,7 +21,12 @@
 #include <vector>
 #include <string>
 
-
+enum AAres{
+	OTH=-1,
+	ALA, ARG, ASN, ASP, CYS, GLN, GLU, GLY, HIS, ILE, LEU, LYS, MET, PHE,
+	PRO, SER, THR, TRP, TYR, VAL	
+};
+/*********************************************************************/
 enum res_type { 
 	UNK,
 	WAT,
@@ -80,6 +85,7 @@ class pdbAtom{
 		std::string atom_name;
 		unsigned int indx;
 		std::string res_name;
+		int res_indx;
 		std::string chain_name;
 		short occupancy;
 		double b_factor;
@@ -94,7 +100,7 @@ class pdbAtom{
 		pdbAtom(pdbAtom&& rhs) noexcept;
 		pdbAtom& operator=(pdbAtom&& rhs) noexcept;
 		bool operator==(const pdbAtom& rhs);
-		bool is_hydrogen(int i);
+		bool is_hydrogen();
 };
 /*********************************************************************/
 class residue{
@@ -102,9 +108,12 @@ class residue{
 		std::string res3n;
 		std::string res1n;
 		res_type type;
+		AAres AAname;
 		bool ligand;
 		bool terminal;
+		bool first;
 		int fCharge;
+		int pdb_index;
 		unsigned int nHydrogens;
 		unsigned int nAtoms;
 		std::vector<pdbAtom> r_atoms;		
@@ -116,6 +125,7 @@ class residue{
 		residue( residue&& rhs) noexcept;
 		residue& operator=( residue&& rhs) noexcept;
 		void set_charge();
+		bool is_ion();
 };
 /*********************************************************************/
 class pdbModel{

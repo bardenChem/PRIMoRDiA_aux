@@ -42,7 +42,9 @@ bool IF_file(fs::path& name){
 	return fs::exists(name);
 }
 /*********************************************************************************/
-bool check_file_ext(string ext,const char* file_name){
+bool check_file_ext(string ext				,
+					const char* file_name){
+
 	fs::path f_name(file_name);
 	if ( f_name.extension() == ext ) return true;
 	else return false;
@@ -66,19 +68,26 @@ string remove_extension(const char* file_name){
 	return file_name_string.substr(0,file_name_string.size()-pos);
 }
 /*********************************************************************************/
-string change_extension(const char* file_name,string new_ext){
+string change_extension(const char* file_name,
+						string new_ext		){
+							
 	string name_wth_ext = remove_extension(file_name);
 	name_wth_ext += new_ext;
 	return name_wth_ext;
 }
 /*********************************************************************************/
-void rename_file(const char* file_name,string new_file_name){
+void rename_file(const char* file_name,
+				string new_file_name){
+					
 	fs::path f_name(file_name);
 	fs::path nf_name( fs::current_path() / new_file_name );
 	fs::rename(f_name,nf_name);
 }
 /*********************************************************************************/
-string str_array(string& line, int in, int fin){
+string str_array(string& line,
+				int in		 , 
+				int fin)	 {
+					
 	string result = "";
 	result.resize(fin-in+2);
 	int cnt = 0;
