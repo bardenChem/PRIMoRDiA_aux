@@ -44,6 +44,7 @@ class atom{
 		double zc;
 		float pCharge;
 		float aMass;
+		unsigned int aNmb;
 		std::string element;
 		atom();
 		~atom();
@@ -55,6 +56,7 @@ class atom{
 		void set_element( std::string Type);
 		void set_coord(double x, double y, double z);
 		double get_distance(const atom& a2);
+		void set_pCharge(double chg);
 };
 /********************************************************************/
 class system{
@@ -69,6 +71,7 @@ class system{
 		double ver_inf[3];
 		double ver_sup[3];
 		system();
+		system(std::vector<atom> ats, std::string nme);
 		~system();
 		system(const system& rhs);
 		system& operator=(const system& rhs);
@@ -87,20 +90,22 @@ class pdbAtom{
 		std::string res_name;
 		int res_indx;
 		std::string chain_name;
-		short occupancy;
+		float occupancy;
 		double b_factor;
 		bool sideC;
-		float xc;
-		float yc;
-		float zc;
+		double xc;
+		double yc;
+		double zc;
 		pdbAtom();
 		~pdbAtom();
 		pdbAtom(const pdbAtom& rhs);
 		pdbAtom& operator=(const pdbAtom& rhs);
 		pdbAtom(pdbAtom&& rhs) noexcept;
 		pdbAtom& operator=(pdbAtom&& rhs) noexcept;
+		pdbAtom(std::string& pdb_line);
 		bool operator==(const pdbAtom& rhs);
 		bool is_hydrogen();
+		
 };
 /*********************************************************************/
 class residue{
@@ -137,9 +142,10 @@ class pdbModel{
 		unsigned int model;
 		unsigned int nChains;
 		unsigned int nResidues;
-		unsigned int nAtoms;
-		pdbModel();
+		unsigned int nAtoms;		
+		pdbModel()
 		pdbModel(std::vector<residue> residues);
+		pdbModel(const char* pdb_file, int mdl);
 		~pdbModel();
 		pdbModel(const pdbModel& rhs);
 		pdbModel& operator=(const pdbModel& rhs);
@@ -148,10 +154,10 @@ class pdbModel{
 		void write_model(std::string out_name);
 		void prune_atoms();
 		void remove_waters();
-		void remove_waters(double radius);
+		void remove_waters(double radius, unsigned int res);
 		void remove_ions();
+		void remove_atom(unsigned int res, unsigned int at);
 		void remove_residue(unsigned int i);
-		void update_residues();
 		void split_complex(std::string mol);
 		void built_complex(const char* pdb_mol);
 };

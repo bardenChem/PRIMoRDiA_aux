@@ -34,6 +34,7 @@ enum units{
 class XYZ{
 	public:
 		unsigned int nAtoms;
+		std::string name;
 		std::vector<double> xc;
 		std::vector<double> yc;
 		std::vector<double> zc;
@@ -41,13 +42,14 @@ class XYZ{
 		std::string commentary;
 		XYZ();
 		~XYZ();
+		XYZ( const char* xyz_file);
+		XYZ( const system& mol )
 		XYZ(const XYZ& rhs);
 		XYZ& operator=(const XYZ& rhs);
 		XYZ(XYZ&& rhs) noexcept;
 		XYZ& operator=(XYZ&& rhs) noexcept;
 		void write_xyz(std::string out_name);
 		system get_molecule();
-		void init_from_system(const system& molecule);
 };
 /*********************************************************************/
 class PDB{
@@ -56,10 +58,10 @@ class PDB{
 		std::string PDB_ID;
 		std::string basename;
 		std::vector<pdbModel> models;
-		bool Traj;
-		bool NMR;
+		bool MULTI;
 		PDB();
 		~PDB();
+		PDB(const char* pdb_file);
 		PDB(const PDB& rhs);
 		PDB& operator=(const PDB& rhs);
 		PDB(PDB&& rhs) noexcept;
