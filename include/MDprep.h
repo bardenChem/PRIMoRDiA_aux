@@ -23,6 +23,7 @@
 class pdbModel
 //-----------------
 enum mdPKG{
+	undef,
 	AMBER,
 	GROMACS,
 	
@@ -30,6 +31,7 @@ enum mdPKG{
 }
 //-----------------
 enum mdTask{
+	undefined,
 	parametrization,
 	topology,
 	minimization,
@@ -54,9 +56,9 @@ class MDprep{
 		std::vector<std::string> ligands_n;
 		std::vector<int> liganf_chg;
 		MDprep();
-		MDprep(std::string bs_name,int pkg, int Job);
-		MDprep(const MDprep& rhs);
-		MDprep& operator=(const MDprep& rhs);
+		MDprep(std::string bs_name,mdPKG pkg, mdTask Job);
+		MDprep(const MDprep& rhs) = delete;
+		MDprep& operator=(const MDprep& rhs) = delete ;
 		~MDprep();
 		void prepare_ligand(int nligand, bool ambTools);
 		void prepare_complex(int nligand);

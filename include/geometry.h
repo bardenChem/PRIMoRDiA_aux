@@ -20,16 +20,17 @@
 
 #include <vector>
 #include <string>
-
+#include "global.h"
+#include "system.h"
+#include "geometry.h"
 
 class system;
 class pdbAtom;
 class pdbModel;
-
-enum units{
-	Ang,
-	Bohr
-};
+//===============================================
+enum units	{ Ang, Bohr };
+//----------------------------------
+enum GEO_file{ INVALID, xyz_, mol2_	, GRO_, CRD_, pdb_ };
 /*********************************************************************/
 class XYZ{
 	public:
@@ -66,11 +67,9 @@ class PDB{
 		PDB& operator=(const PDB& rhs);
 		PDB(PDB&& rhs) noexcept;
 		PDB& operator=(PDB&& rhs) noexcept;
-		void split_models_in_files(std::string ref_name);
-		void read_models_from_file(const char* pdb_file);
-		void read_model_from_file(const char* pdb_file,unsigned int modN);
+		void split_models_in_files();
 		void add_model(pdbModel model);
-		void cat_pdbs(std::string file_list);
+		void cat_pdbs(std::vector<std::string> file_list);
 		void remove_model(unsigned int model);
 		void write_pdb(std::string out_name);
 		void init_from_system(const system& molecule);
@@ -91,19 +90,19 @@ class MOL2{
 /*********************************************************************/
 class geometry{
 	public:
-		std::string type;
+		GEO_file type;
 		XYZ xyz;
 		PDB pdb;
 		MOL2 mol2;
 		system molecule;
 		units cUnit;
-		geometry();
+		geometry()
+		geometry(const char* file_name, int Typ);
 		~geometry();
 		geometry(const geometry& rhs);
 		geometry& operator=(const geometry& rhs);
 		geometry(geometry&& rhs) noexcept;
 		geometry& operator=(geometry&& rhs) noexcept;
-		void init_from_file(const char* file_name, std:string Type);
 		void read_QCPinput(const char* file_name, std:string program);
 		void read_QCPoutput(const char* file_name, std:string program,bool last);
 		void convert_to_ang();

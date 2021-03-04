@@ -158,11 +158,34 @@ PDB::PDB()			:
 /*********************************************************************/
 PDB::PDB(const char* pdb_file){
 	vector<int> mod_lines;	
+	
+	basename = remove_extension(pdb_file);
+	char pdb_line[10];
+	string word = "#";
+	word.reserve(10);
+	int line = 0;
+	
 	if ( IF_file( pdb_name ) ){
 		std::ifstream buf(pdb_file);
 		while( !buf.eof() ){
-			
+			buf.getline(pdb_line,10);
+			word = pdb_line;
+			word = word.substr(0,6);
+			if ( word == "MODEL " ) { 
+				mod_lines.emplace_back(line);
+			}
+			line++;
 		}
+	}	
+	
+	if ( mod_lines.size() > 0 ) {
+		MULTI = true;
+		for(int j=0;j<mod_lines.size();j++){
+			models.emplace_back(pdb_file,mod_lines[j]);
+		}
+	}else{
+		models.emplace_back(pdb_file,0);
+		nModels++;
 	}
 		
 }
@@ -207,96 +230,194 @@ PDB& PDB::operator=(PDB&& rhs) noexcept{
 	return *this;	
 }
 /*********************************************************************/
-void PDB::split_models_in_files(std::string ref_name){
-	
-}
-/*********************************************************************/
-void PDB::read_models_from_file(const char* pdb_file){
-	
-}
-/*********************************************************************/
-void PDB::read_model_from_file(const char* pdb_file,unsigned int modN){
-	
+void PDB::split_models_in_files(){
+	string name_ = "";
+	for( int i=0;i<nModels;i++){
+		name_ = basename + "_" + string(i) +"_.pdb";
+		models[i].write_model(name_);
+	}
 }
 /*********************************************************************/
 void PDB::add_model(pdbModel model){
-	
+	models.eḿplace_back(model);
+	nModels++;
 }
 /*********************************************************************/
-void PDB::cat_pdbs(std::string file_list){
-	
+void PDB::cat_pdbs(vector<string> file_list){
+	for(int i=0;i<){
+		models.emplace_back( file_list[i].c_str(),0 );
+		nModels++;
+	}
 }
 /*********************************************************************/
 void PDB::remove_model(unsigned int model){
-	
+	models.erase( models.begin()+model );
+	nModels--;
 }
 /*********************************************************************/
 void PDB::write_pdb(std::string out_name){
+	std::ofstream pdb_file;
+	pdb_file.open( out_name.c_str() );
+	pdb_file << std::fixed;
+	pdb_file.precision(3);
+	pdb_file << "PDB file written by LQQCMMtools created by barden.igor@gmail.com" << endl;
+	pdb_file << models[0].title << endl;
+	pdb_file << models[0].remark << endl;
 	
+	unsigned int i,j,k,cont = 0;
+	for(k,k<nModels;k++){
+		for(i;i<models[k].nResidues;i++){
+			for(j;j<models[k].monomers[i].nAtoms;j++){
+				pdb_file<< std::setw(6) << std::left  << "ATOM" 
+						<< " "
+						<< std::setw(4) << std::right  << (cont+1) 
+						<< " "
+						<< std::setw(4) << models[k].monomers[i].r_atoms[j].atom_name; 
+						<< " "
+						<< std::left << std::setw(4) << models[k].monomers[i].res3n; 
+						<< " "
+						<< std::right << std::setw(4) << (i+1)
+						<< std::setw(5) << " "
+						<< std::setw(7) << models[k].monomers[i].r_atoms[j].xc; 
+						<< " "
+						<< std::setw(7) << models[k].monomers[i].r_atoms[j].yc;
+						<< " "
+						<< std::setw(7) << models[k].monomers[i].r_atoms[j].zc;
+						<< " "
+						<< std::setw(5)  << "1.00"
+						<< " "
+						<< std::setw(5) << models[k].monomers[i].r_atoms[j].b_factor;
+						<< "\n";
+						cont++;
+			}
+		}	
+		pdb_file << "ENDMDL" << endl;
+	}
+	pdb_file.close();
 }
 /*********************************************************************/
 void PDB::init_from_system(const system& molecule){
+	vector<pdbAtom> _atoms;
 	
+	for(int i=0;i<molecule.nAtoms;i++){
+		pdbAtom _atom;
+		_atom.atom_name = molecule[i].element;
+		_atom.xc		= molecule[i].xc;
+		_atom.yc		= molecule[i].yc;
+		_atom.zc		= molecule[i].zc;
+		_atom.b_factor	= 0.000;
+		_atom.chain_name= "X";
+		_atom.indx		= models[0].nAtoms + 1;
+		_atom.occupancy = 1.00;
+		_atom.res_indx	= models[0].nResidues + 1;
+		_atom.res_name	= molecule.name.substr(0,3);		
+		_atoms.emplace_back(_atom);
+	}
+	vector<residue> _res;
+	_res.emplace_back(_atoms);
+	models.emplace_back(_res);
 }
 /*********************************************************************/
 system PDB::get_system_from_model(unsigned int model){
-	
+	vector<atom> _atoms;
+	for(int i=0;i<models[model].nResidues;i++){
+		for(int j=0;j<models[model].monomers[i];j++){		
+			_atoms.emplace_back(models[model].monomers[i].r_atoms[j].element,
+								models[model].monomers[i].r_atoms[j].xc		,
+								models[model].monomers[i].r_atoms[j].yc		,
+								models[model].monomers[i].r_atoms[j].zc		);
+		}
+	}
+	system mol(_atoms,basename);
+	return mol;
 }
 /*********************************************************************/
-std::vector<system> PDB::get_systems(){
-	
+vector<system> PDB::get_systems(){
+	vector<system> systems;
+	for(int i=0;i<nModels;i++){
+		systems.emplace_back( get_system_from_model(i) );
+	}
+	return systems;
 }
 ///////////////////////////////////////////////////////////////////////
-MOL2::MOL2(){
-	
-}
+MOL2::MOL2(){}
 /*********************************************************************/
-MOL2::~MOL2(){
-	
-}
+MOL2::~MOL2(){}
 /*********************************************************************/
-MOL2::MOL2(const MOL2& rhs){
-	
-}
+MOL2::MOL2(const MOL2& rhs){}
 /*********************************************************************/
-MOL2& MOL2::operator=(const MOL2& rhs){
-	
-}
+MOL2& MOL2::operator=(const MOL2& rhs){}
 /*********************************************************************/
-MOL2::MOL2(MOL2&& rhs) noexcept{
-	
-}
+MOL2::MOL2(MOL2&& rhs) noexcept{}
 /*********************************************************************/
-MOL2& MOL2::operator=(MOL2&& rhs) noexcept{
-	
-}
+MOL2& MOL2::operator=(MOL2&& rhs) noexcept{}
 ///////////////////////////////////////////////////////////////////////
-geometry::geometry(){
-	
+geometry::geometry():
+	type(INVALID)	,
+	units(Ang)		{	
 }
 /*********************************************************************/
-geometry::~geometry(){
-	
+geometry::geometry(	const char* file_name,
+					GEO_file Typ		):
+	type(Typ)	,
+	cUnit(Ang)	{
+		
+	switch( type ){
+		case xyz_:
+			xyz = XYZ(file_name);
+			molecule = xyz.get_molecule();
+			break;
+		case pdb_:
+			pdb = PDB(file_name);
+			molecule = pdb.get_system_from_model(0);
+			break;
+	}
+		
 }
 /*********************************************************************/
-geometry::geometry(const geometry& rhs){
-	
+geometry::~geometry(){}
+/*********************************************************************/
+geometry::geometry(const geometry& rhs) :
+	type(rhs.type)						,
+	xyz(rhs.xyz)						,
+	pdb(rhs.pdb)						,
+	mol2(rhs.mol2)						,
+	molecule(rhs.molecule)				,
+	cUnit(rhs.cUnit)					{		
 }
 /*********************************************************************/
 geometry& geometry::operator=(const geometry& rhs){
-	
+	if ( this != &rhs ){
+		type	= rhs.type;
+		xyz		= rhs.xyz;
+		pdb		= rhs.pdb;
+		mol2	= rhs.mol2;
+		molecule= rhs.molecule;
+		cUnit	= rhs.cUnit;
+	}
+	return *this;
 }
 /*********************************************************************/
-geometry::geometry(geometry&& rhs) noexcept{
+geometry::geometry(geometry&& rhs) noexcept:
+	type(rhs.type)						,
+	xyz( move(rhs.xyz) )				,
+	pdb( move(rhs.pdb) )				,
+	mol2( move(rhs.mol2) )				,
+	molecule( move(rhs.molecule) )		,
+	cUnit( move(rhs.cUnit) )			{
 	
 }
 /*********************************************************************/
 geometry& geometry::operator=(geometry&& rhs) noexcept{
-	
-}
-/*********************************************************************/
-void geometry::init_from_file(const char* file_name, std:string Type){
-	
+	if ( this != &rhs ){
+		type	= rhs.type;
+		xyz		= move(rhs.xyz);
+		pdb		= move(rhs.pdb);
+		mol2	= move(rhs.mol2);
+		molecule= move(rhs.molecule);
+		cUnit	= move(rhs.cUnit);
+	}
+	return *this;	
 }
 /*********************************************************************/
 void geometry::read_QCPinput(const char* file_name, std:string program){
@@ -308,18 +429,55 @@ void geometry::read_QCPoutput(const char* file_name, std:string program,bool las
 }
 /*********************************************************************/
 void geometry::convert_to_ang(){
-	
+	const double bohrtoang = 0.52917726;
+	if ( cUnit == Bohr ){
+		for(int i=0;i<molecule.nAtoms;i++){
+			molecule.atoms[i].x *= bohrtoang;
+			molecule.atoms[i].y *= bohrtoang;
+			molecule.atoms[i].z *= bohrtoang;
+		}
+	}
+
 }
 /*********************************************************************/
 void geometry::convert_to_bohr(){
+	const double angtobohr = 1.0/0.52917726;
+	if ( cUnit == Ang ){
+		for(int i=0;i<molecule.nAtoms;i++){
+			molecule.atoms[i].x *= angtobohr;
+			molecule.atoms[i].y *= angtobohr;
+			molecule.atoms[i].z *= angtobohr;
+		}
+	}
 	
 }
 /*********************************************************************/
 void geometry::write_to_file(std::string out_name,std::string format){
-	
+	if ( format == "xyz" ){
+		if ( type == xyz_){
+			xyz.write_xyz(out_name);
+		}else{
+			xyz = XYZ(molecule);
+			xyz.write_xyz(out_name);
+		}		
+	}else if ( format == "pdb"){
+		if ( type == pdb_){
+			pdb.write_pdb(out_name);
+		}else{
+			pdb.init_from_system(molecule);
+			pdb.write_pdb(out_name);
+		}
+	}
 }
 /*********************************************************************/
 void geometry::center_coord(){
-	
+	double center_x = molecule.atoms[0].xc;
+	double center_y = molecule.atoms[0].yc;
+	double center_z = molecule.atoms[0].zc;
+	for(int i=0;i<molecule.nAtoms;i++){
+		molecule.atoms[i].x -= center_x;
+		molecule.atoms[i].y -= center_y;
+		molecule.atoms[i].z -= center_z;
+	}
 }
 ///////////////////////////////////////////////////////////////////////

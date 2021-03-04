@@ -25,41 +25,19 @@
 
 /*********************************************************************/
 enum GMS_Group{	
-	OTHER=0	,
-	CTRL	,
-	SYS   	,
-	SCF   	,
-	BASIS 	,
-	DFTB  	,
-	OPT   	,
-	PCM   	,
-	GUESS 	,
-	DATA  	,
-	VEC   	, 
-	ELSDEN	, 
-	GRID  	, 
-	ELSPOT	, 
-	
+	OTHER=0, CTRL, SYS, SCF, BASIS,	DFTB, OPT, PCM,
+	GUESS,	DATA, VEC, ELSDEN, GRID, ELSPOT, 	
 	NumOfGMSgroups
 };
 //----------------------------
 enum GMS_TheoryLevel { 	
-	HF	, 
-	DFT ,
-	DFTB2,
-	DFTB3,
-	FMO , 
-	P_HF,
-	Semi,
-						
+	HF, DFT, DFTB2, DFTB3,
+	FMO , P_HF, Semi,						
 	NumOfTheory
 };
 //----------------------------
 enum SCF_TYPE { 
-	Default, 
-	UHF	   ,
-	ROHF   ,
-				
+	Default, UHF, ROHF,				
 	NumOfSCFoptions
 };
 
@@ -75,15 +53,12 @@ enum GMS_Run_Type {
 	SurfaceRun		,
 	FMOEnergy		,
 	FMOoptimize		,
-	FMOdynamics		,
-					
+	FMOdynamics		,					
 	NumOfRunTypeOptions					
 };
 //----------------------------
 enum GMS_Conv_OPT { 
-	DIIS   , 
-	SOSCF  ,
-	MIXED  ,
+	DIIS  , SOSCF, MIXED ,
 	
 	NumOfConvOpt
 };
@@ -150,7 +125,7 @@ class gms_input{
 		int charge;		
 		std::string QM_method;
 		GMS_basis gbasis;
-		bool PCM;
+		std::string solvent ;
 		GMS_Run_Type RunType;
 		//control data
 		unsigned int nprint;
