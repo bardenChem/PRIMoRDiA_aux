@@ -57,6 +57,8 @@ class Line{
 		Line& operator=(const Line& rhs);
 		Line(Line&& rhs) noexcept;
 		Line& operator=(Line&& rhs) noexcept;
+		double get_double(int pos);
+		double get_int(int pos);
 };
 
 #endif

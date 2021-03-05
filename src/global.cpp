@@ -24,6 +24,7 @@
 #include <fstream>
 #include <cmath>
 #include <experimental/filesystem>
+#include <stdexcept>
 
 #include "../include/global.h"
 //=============================================================================
@@ -256,5 +257,35 @@ Line& Line::operator=(Line&& rhs) noexcept{
 		line_len = rhs.line_len;
 	}
 	return *this;
+}
+/*****************************************/
+double Line::get_double(int pos){
+	double value = 0.0000;
+	if ( pos > words.size() ){
+		std::cout << "Impossible to convert position beyond the size of line!" << std::endl;
+		return value;
+	}
+	std::sstream stream( words[pos] );
+	try{
+		stream >> value;
+	}catch( const std::invalid_argument& ){
+		std::cout << "Impossible to convert to double!" << std::endl;
+	}
+	return value;
+}
+/*****************************************/
+int Line::get_double(int pos){
+	int value = 0;
+	if ( pos > words.size() ){
+		std::cout << "Impossible to convert position beyond the size of line!" << std::endl;
+		return value;
+	}
+	std::sstream stream( words[pos] );
+	try{
+		stream >> value;
+	}catch( const std::invalid_argument& ){
+		std::cout << "Impossible to convert to double!" << std::endl;
+	}
+	return value;
 }
 ////////////////////////////////////////////

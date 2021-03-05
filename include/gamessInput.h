@@ -37,7 +37,7 @@ enum GMS_TheoryLevel {
 };
 //----------------------------
 enum SCF_TYPE { 
-	Default, UHF, ROHF,				
+	RHF, UHF, ROHF,				
 	NumOfSCFoptions
 };
 
@@ -80,8 +80,8 @@ class GMS_basis{
 		unsigned int ngauss;
 		unsigned int npfunc;
 		unsigned int ndfunc;
-		unsigned int ndiffuseS;
-		unsigned int ndiffuseP;
+		bool ndiffuseS;
+		bool ndiffuseP;
 		std::string gaussBasis;
 		std::string path_to_dftb;
 		GMS_basis();
@@ -115,6 +115,7 @@ class gms_input{
 		GMS_basis gbasis;
 		GMS_Run_Type RunType;
 		std::string QM_method;
+		std::string dfttyp;
 		//control data
 		unsigned short nprint;
 		unsigned int maxit;
@@ -124,9 +125,11 @@ class gms_input{
 		GMS_Conv_OPT copt;
 		GMS_Conv_OPT2 copt2;
 		GMS_TheoryLevel QMlevel;
+		SCF_TYPE scftyp;
 		std::string solvent;
 		std::string guess;
 		double opttol;
+		double swoff;
 		stD::string disp;
 		//data to write
 		std::vector<gms_group> groups;
@@ -137,9 +140,9 @@ class gms_input{
 		~gms_input();
 		gms_input(const gms_input& rhs) = delete;
 		gms_input& operator=(gms_input& rhs) = delete;
-		void init(int chg, unsigned int mpcty, std::string method, std::string basis);
-		void load_default_options(const char* path_dir);
-		void load_molecule_info( system& molecule );
+		void init(int chg, unsigned int mpcty, std::string rtype, std::string method, std::string basis);
+		bool load_default_options(const char* path_dir);
+		gms_group load_molecule_info( system& molecule );
 		void read_input(const char* file_name);
 		void restart_input(const char* inp_name, const char* vec_data);
 		void write_input(std::string out_name);

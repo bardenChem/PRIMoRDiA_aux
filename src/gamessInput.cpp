@@ -33,14 +33,15 @@ using std::endl;
 using std::move;
 namespace fs = std::experimental::filesystem;
 
+string gEnd = " $end\n";
 //==================================================
 GMS_basis::GMS_basis()	:
 	type(MINI)			,
 	ngauss(0)			,
 	npfunc(0)			,
 	ndfunc(0)			,
-	ndiffuseS(0)		,
-	ndiffuseP(0)		,
+	ndiffuseS(false)	,
+	ndiffuseP(false)	,
 	gaussBasis("mini")	,
 	path_to_dftb("/")	{
 	
@@ -51,8 +52,8 @@ GMS_basis::GMS_basis(GMS_BasisSet bs):
 	ngauss(0)						,
 	npfunc(0)						,
 	ndfunc(0)						,
-	ndiffuseS(0)					,
-	ndiffuseP(0)					,
+	ndiffuseS(false)					,
+	ndiffuseP(false)					,
 	gaussBasis("mini")				,
 	path_to_dftb("/")				{
 		
@@ -90,15 +91,15 @@ GMS_basis::GMS_basis(GMS_BasisSet bs):
 		ngauss		= 6;
 		ndfunc		= 1;
 		npfunc		= 1;
-		ndiffusep	= 1;
+		ndiffusep	= true;
 		break;
 		case x6311Gdp2D:
 		gaussBasis	= "N311";
 		ngauss		= 6;
 		ndfunc		= 1;
 		npfunc		= 1;
-		ndiffusep	= 1;
-		ndiffuseS	= 1;
+		ndiffusep	= true;
+		ndiffuseS	= true;
 		break;
 	}	
 }
@@ -132,14 +133,75 @@ GMS_basis::GMS_basis& operator=(const GMS_basis& rhs){
 //==================================================
 gms_group::gms_group():
 	group(OTHER)	,
-	inp_text(" ")	,
 	grpName("")		{
+	
+		
+	switch( group ){
+		case CTRL:
+			grpName	= "$contrl ";
+			inp_text.emplace_back(grpName);
+			inp_text.emplace_back("runtyp=");
+			inp_text.emplace_back("energy ");	// variable 2
+			inp_text.emplace_back("icharg=");
+			inp_text.emplace_back("0 ");		// variable 4
+			inp_text.emplace_back("multi=");
+			inp_text.emplace_back("1 ");		// variable 6
+			inp_text.emplace_back(gEnd);
+			inp_text.emplace_back(grpName);
+			inp_text.emplace_back("maxit=");
+			inp_text.emplace_back("150 ");		// variable 10 
+			inp_text.emplace_back("nprint=");
+			inp_text.emplace_back("7 ");		// variable 12 
+			inp_text.emplace_back("scftyp=");
+			inp_text.emplace_back("rhf ");		// variable 14
+			inp_text.emplace_back(gEnd);		
+			inp_text.emplace_back(grpName);
+			inp_text.emplace_back("swoff=");
+			inp_text.emplace_back("1e-03 ");	// variable 18
+			inp_text.emplace_back(gEnd);
+		break;
+		case SYS:
+			grpName = "$sys ";
+			inp_text +=grpName;
+		break;
+		case SCF:
+			grpName = "$scf ";
+			inp_text +=grpName;
+		break;
+		case BASIS:
+			grpName = "$basis ";
+			inp_text +=grpName;
+		break;
+		case DFTB:
+			grpName = "$dftb";
+			inp_text +=grpName;
+		break;
+		case OPT:
+			grpName = "$statpt ";
+			inp_text +=grpName;
+		break;
+		case PCM:
+			grpName = "$pcm ";
+			inp_text +=grpName;
+		break;
+		case GUESS:
+			grpName = "";
+			inp_text +=grpName;
+		break;
+		case DATA:
+			grpName = "";
+			inp_text +=grpName;
+		break;
+		case VEC:
+			grpName = "";
+			inp_text +=grpName;
+		break;
+	}
 	
 }
 /**************************************************/
 gms_group::gms_group( GMS_Group grp_type )	:
 	group(grp_type)							,
-	inp_text(" ")							,
 	grpName("")								{	
 }
 /**************************************************/
@@ -185,6 +247,7 @@ gms_input::gms_input()	:
 	gbasis(MINI)		,
 	RunType(Energy)		,
 	QM_method("HF")		,
+	dfttyp("b3lyp")		,
 	nprint(7)			,
 	maxit(150)			,
 	mwords(200)			,
@@ -193,6 +256,7 @@ gms_input::gms_input()	:
 	copt(SOSCF)			,
 	copt2(None)			,
 	QMlevel(DFT)		,
+	scftyp(RHF)			,
 	solvent("none")		,
 	guess("huckel")		,
 	opttol(0.0001)		,
@@ -203,25 +267,97 @@ gms_input::~gms_input(){}
 /**************************************************/
 void gms_input::init(	int chg				, 
 						unsigned int mpcty	,
-						std::string method	,
+						std::string rtype	,
+						std::string method	,		
 						std::string basis)	{
-							
+	
+	bool def = this->load_default_options("/home/igorchem/LQQCMMtools");
+	//creating the basic groups
+	if ( method == "DFT " || "B3LYP "){
+		QMlevel = GMS_TheoryLevel::DFT;
+	}
+	
+						
 
+	groups.emplace_back( GMS_Group::CTRL );
+	if ( def ){
+		groups[0].inp_text[2]	= rtype;
+		groups[0].inp_text[4]	= std::int_to_string(charge);
+		groups[0].inp_text[6]	= std::int_to_string(multi);
+		groups[0].inp_text[10]	= std::int_to_string(maxit);
+		groups[0].inp_text[12]	= std::int_to_string(nprint);
+		groups[0].inp_text[14]	= std::int_to_string(maxit);
+		groups[0].inp_text[18]	= std::int_to_string(swoff);		
+	}
+	
+	switch ( QMlevel ){
+		case DFT:
+			groups[0].inp_text.emplace_back( groups[0].grp_name );
+			groups[0].inp_text.emplace_back( " dfttyp=");
+			groups[0].inp_text.emplace_back( dfttyp );
+		break;
+		case MP2:
+			groups[0].inp_text.emplace_back( groups[0].grp_name );
+			groups[0].inp_text.emplace_back( " mplevl=" );
+			groups[0].inp_text.emplace_back( std::int_to_string(2) );
+	}
+	
 }	
 /**************************************************/		
-void gms_input::load_default_options(string path_dir){
+bool gms_input::load_default_options(string path_dir){
+	
+	bool ndef = false;
+	
+	if ( charge != 0 || multi != 1 || RunType != Energy) { ndef = true; } 
+	
+	//reading from user file
 	string file_p = path_dir + "/" + "gms_data";
 	int lin = 0;
+	char gms_l[50];
+	bool change_p = false;
 	std::ifstream gms_file(file_p.c_str());
 	if ( IF_file(file_p.c_str() ) ){
 		while( !gms_file.eof() ){
-			
+			gms_file.getline(gms_l,50);
+			Line line(gms_file);
+			if ( lin == 1 && line.words[2] == "TRUE" ){
+				change_p true;
+			}
+			if ( change_p ){
+				if ( lin == 2 )
+					nprint = line.get_double(2);
+				else if ( lin == 3 )
+					maxit	= line.get_int(2);
+				else if ( lin == 4 )
+					mwords	= line.get_int(2);
+				else if ( lin == 5 )
+					npunch	= line.get_int(2);
+				else if ( lin == 6 )
+					nsteps	= line.get_int(2);
+				else if ( lin == 7 )
+					opttol	= line.get_int(2);
+				else if ( lin == 8 )
+					disp	= line.words[2];
+				else if ( lin == 9 )
+					swoff	= line.get_double[2];
+				else if (lin == 10 )
+					dfttyp	= line.words[2];
+				else if (lin == 11 ){
+					if ( line.words[2] == "UHF") scftyp = UHF;
+					else if ( line.words[2] == "ROHF") scftyp = ROHF;
+				}
+			}
+			lin++;
 		}
 	}
+	if ( change_p || ndef )	
+		return true;
+	else 
+		return false;
 	
 }
 /**************************************************/
-void gms_input::load_molecule_info( system& molecule ){
+gms_group gms_input::load_molecule_info( system& molecule ){
 	
 }
 /**************************************************/
