@@ -58,22 +58,19 @@ enum GMS_Run_Type {
 };
 //----------------------------
 enum GMS_Conv_OPT { 
-	DIIS  , SOSCF, MIXED ,
-	
+	DIIS  , SOSCF, MIXED ,	
 	NumOfConvOpt
 };
 //----------------------------		
 enum GMS_Conv_OPT2{ 
-	None  ,
-	SHIFT ,
-	DAMP  ,
-	RSTRCT,
-	
+	None, SHIFT, DAMP, RSTRCT,	
 	NumOfConvOpt2
 };
 //----------------------------
 enum GMS_BasisSet {
-	
+	MINI, STO3G, x321G,
+	x631G, x631Gd, x6311Gd,
+	x6311Gdp, x6311GdpD,x6311Gdp2D
 };
 /*********************************************************************/
 class GMS_basis{
@@ -88,20 +85,12 @@ class GMS_basis{
 		std::string gaussBasis;
 		std::string path_to_dftb;
 		GMS_basis();
-		GMS_basis(int typ)
+		GMS_basis(GMS_BasisSet bs);
 		~GMS_basis();
 		GMS_basis(const GMS_basis& rhs);
 		GMS_basis& operator=(const GMS_basis& rhs);
-		void set_type( int typ );
 };
-/*********************************************************************/
-class FMO_fragment{
-	
-};
-/*********************************************************************/
-class FMO_options{
-	
-};
+
 /*********************************************************************/
 class gms_group{
 	public:
@@ -109,7 +98,7 @@ class gms_group{
 		std::vector<std::string> inp_text;
 		std::string grpName;
 		gms_group();
-		gms_group( int grp_type );
+		gms_group( GMS_Group grp_type );
 		~gms_group();
 		gms_group(const gms_group& rhs);
 		gms_group& operator=(const gms_group& rhs);
@@ -121,23 +110,24 @@ class gms_group{
 class gms_input{
 	public:
 		//basic data
-		unsigned int multi;
-		int charge;		
-		std::string QM_method;
+		unsigned short multi;
+		short charge;
 		GMS_basis gbasis;
-		std::string solvent ;
 		GMS_Run_Type RunType;
+		std::string QM_method;
 		//control data
-		unsigned int nprint;
+		unsigned short nprint;
 		unsigned int maxit;
 		unsigned int mwords;
-		unsigned int npunch;
-		unsigned int nsteps;
-		std::string solvent;
+		unsigned short npunch;
+		unsigned int nsteps;		
 		GMS_Conv_OPT copt;
 		GMS_Conv_OPT2 copt2;
 		GMS_TheoryLevel QMlevel;
-		std::vector<double> tolerances;
+		std::string solvent;
+		std::string guess;
+		double opttol;
+		stD::string disp;
 		//data to write
 		std::vector<gms_group> groups;
 		std::ostream fl_data;		
@@ -148,14 +138,21 @@ class gms_input{
 		gms_input(const gms_input& rhs) = delete;
 		gms_input& operator=(gms_input& rhs) = delete;
 		void init(int chg, unsigned int mpcty, std::string method, std::string basis);
-		void load_default_options();
+		void load_default_options(const char* path_dir);
 		void load_molecule_info( system& molecule );
 		void read_input(const char* file_name);
 		void restart_input(const char* inp_name, const char* vec_data);
 		void write_input(std::string out_name);
-		void clear_directory();
-
-		
+		void clear_directory();		
 };
+/*********************************************************************/
+class FMO_fragment{
+	
+};
+/*********************************************************************/
+class FMO_options{
+	
+};
+
 
 #endif
