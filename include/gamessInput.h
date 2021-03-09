@@ -59,7 +59,7 @@ enum GMS_Run_Type {
 //----------------------------
 enum GMS_Conv_OPT { 
 	DIIS  , SOSCF, MIXED ,	
-	NumOfConvOpt
+ 	NumOfConvOpt
 };
 //----------------------------		
 enum GMS_Conv_OPT2{ 
@@ -130,6 +130,10 @@ class gms_input{
 		std::string guess;
 		double opttol;
 		double swoff;
+		double swdiis;
+		double ethrsh;
+		double damph;
+		std::string alg;
 		stD::string disp;
 		//data to write
 		std::vector<gms_group> groups;
