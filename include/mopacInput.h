@@ -21,32 +21,27 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+
+#include "../include/global.h"
+#include "../include/system.h"
+
+class system;
 
 //===========================
 enum MopacMulti{
-	SINGLET		,
-	DOUBLET		,
-	TRIPLET		,
-	QUARTET		,
-	QUINTET		,
-	
+	SINGLET, DOUBLET, TRIPLET,
+	QUARTET, QUINTET,	
 	NumOFStates
 };
 /----------------------------
 enum Hamiltonian{
-	AM1,
-	RM1,
-	PM3,
-	PM6,
-	PM7,
-	
+	AM1, RM1, PM3, PM6,	PM7,	
 	NumOfHamiltonians
 };
 /----------------------------
 enum MopacRuntype{
-	SCF,
-	OPT,
-	
+	SCF, OPT,	
 	NumOfRtyps
 };
 
@@ -60,15 +55,16 @@ class mopac_input{
 		Hamiltonian method;
 		MopacRuntype rtype;
 		std::ostream out_file;
-		std::string keywords;
+		std::vector<std::string> keywords;
 		mopac_input();
 		~mopac_input();
 		mopac_input(const mopac_input& rhs) delete;
 		mopac_input& operator=(const mopac_input& rhs) delete;
-		void init(int chg, unsigned int mpcty, std::string method);
-		void load_molecule_data(system& molecule);
-		void write_file( std::string out_name );
+		void check_options();
+		void init(int chg, unsigned int mpcty, std::string solvent, std::string lmo, std::string Method );
+		void write_file( system& molecule,std::string out_name );
 		void read_from_input(const char* inp_file, std::string out_name);
 };
 //////////////////////////////////////////////////
+
 #endif

@@ -1,0 +1,20 @@
+#PARAMETERS FOR GAMESS INPUT
+CHANGE	= FALSE
+nprint	= 7
+maxit 	= 150
+mwords	= 200
+npunch	= 2
+nsteps	= 50
+opttol	= 0.0001
+disp	= "UFF"	
+swoff   = 0.001
+DFT     = b3lyp
+ethrsh	= 2.0
+swdiis	= 0.005
+guess	= huckel
+damph	= 4.2
+algor	= QA
+solvent = false
+conv	= SOSCF
+conv2	= SHIFT
+

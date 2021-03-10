@@ -608,7 +608,7 @@ void gms_input::restart_input(	const char* inp_name,
 void gms_input::write_input(std::string out_name){
 	fl_data.open( out_name.c_str() );
 	for( int i=0;i<groups.size();i++){
-		fl_data << groups[i]
+		fl_data << groups[i];
 	}
 	fl_data << endl;
 	fl_data.close();
