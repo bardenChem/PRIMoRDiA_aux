@@ -68,6 +68,7 @@ enum GMS_Conv_OPT2{
 };
 //----------------------------
 enum GMS_BasisSet {
+	smDFTB, smAM1, 
 	MINI, STO3G, x321G,
 	x631G, x631Gd, x6311Gd,
 	x6311Gdp, x6311GdpD,x6311Gdp2D
@@ -146,7 +147,8 @@ class gms_input{
 		gms_input& operator=(gms_input& rhs) = delete;
 		void init(int chg, unsigned int mpcty, std::string rtype, std::string method, std::string basis);
 		bool load_default_options(const char* path_dir);
-		gms_group load_molecule_info( system& molecule );
+		void load_molecule_info( system& molecule );
+		GMS_basis init_basis(std::string& bsis_nm);
 		void read_input(const char* file_name);
 		void restart_input(const char* inp_name, const char* vec_data);
 		void write_input(std::string out_name);

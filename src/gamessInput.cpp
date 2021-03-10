@@ -239,7 +239,7 @@ gms_group::gms_group():
 			inp_text.emplace_back("nstep=");
 			inp_text.emplace_back("150 ");		// variable 4 
 			inp_text.emplace_back("method=");
-			inp_text.emplace_back("QA");		// variable 6 
+			inp_text.emplace_back("QA ");		// variable 6 
 			inp_text.emplace_back(gEnd);					
 		break;
 		case PCM:
@@ -257,8 +257,10 @@ gms_group::gms_group():
 			inp_text.emplace_back(gEnd);			
 		break;
 		case DATA:
-			grpName = " $data ";
+			grpName = " $data\n";
 			inp_text.emplace_back(grpName);
+			inp_text.emplace_back("Molecule Specification\n");
+			inp_text.emplace_back("C1\n");
 		break;
 		case BASIS:
 			grpName = " $basis ";
@@ -364,10 +366,22 @@ void gms_input::init(	int chg				,
 	//creating the basic groups
 	if ( method == "DFT " || "B3LYP "){
 		QMlevel = GMS_TheoryLevel::DFT;
+	}else if ( method == "AM1" ){
+		QMlevel = GMS_TheoryLevel::Semi;
+	}else if ( method == "DFTB2" ){
+		QMlevel = GMS_TheoryLevel::DFTB2;
+		gbasis	= GMS_BasisSet::smDFTB;
+	}else if ( method == "DFTB3" ){
+		QMlevel = GMS_TheoryLevel::DFTB3;
+		gbasis	= GMS_BasisSet::smDFTB;
 	}
 						
-
+	// creating the basic groups
 	groups.emplace_back( GMS_Group::CTRL );
+	groups.emplace_back( GMS_Group::SYS  );
+	GMS_basis basis_set ( this->init_basis(basis) );
+	groups.emplace_back( GMS_Group::BASIS );
+	
 	if ( def ){
 		groups[0].inp_text[2]	= rtype;
 		groups[0].inp_text[4]	= std::int_to_string(charge);
@@ -378,8 +392,25 @@ void gms_input::init(	int chg				,
 		groups[0].inp_text[18]	= std::int_to_string(swoff);		
 	}
 	
-	GMS_BasisSet bsis()
-	groups.emplace_back( GMS_Group::BASIS );
+	
+	groups[2].inp_text.emplace_back("gbasis=");
+	groups[2].inp_text.emplace_back(basis_set.gaussBasis); 		
+	groups[2].inp_text.emplace_back(gEnd);
+	
+	
+	groups[2].inp_text.emplace_back(grpName);
+	groups[2].inp_text.emplace_back("ngauss=");
+	groups[2].inp_text.emplace_back("0 ");			
+	groups[2].inp_text.emplace_back("ndfunc=");
+	groups[2].inp_text.emplace_back("0 ");			
+	groups[2].inp_text.emplace_back("ndpunc=");
+	groups[2].inp_text.emplace_back("0 ");			
+	groups[2].inp_text.emplace_back("diffp=");
+	groups[2].inp_text.emplace_back(".f.");		
+	groups[2].inp_text.emplace_back("diffs");		
+	groups[2].inp_text.emplace_back(".f.");		
+	groups[2].inp_text.emplace_back(gEnd);		
+	
 	
 	switch ( QMlevel ){
 		case DFT:
@@ -391,6 +422,30 @@ void gms_input::init(	int chg				,
 			groups[0].inp_text.emplace_back( groups[0].grp_name );
 			groups[0].inp_text.emplace_back( " mplevl=" );
 			groups[0].inp_text.emplace_back( std::int_to_string(2) );
+		case DFTB2:
+		break;
+		case DFTB3:
+		break;
+	}
+	
+	switch ( QMlevel ){
+		case HF:
+		case MP2:
+		case DFT:
+			groups[2].inp_text.emplace_back(grpName);
+			groups[2].inp_text.emplace_back("ngauss=");
+			groups[2].inp_text.emplace_back( int_to_string(basis_set.ngauss) );
+			groups[2].inp_text.emplace_back("ndfunc=");
+			groups[2].inp_text.emplace_back("0 ");			
+			groups[2].inp_text.emplace_back("ndpunc=");
+			groups[2].inp_text.emplace_back("0 ");			
+			groups[2].inp_text.emplace_back("diffp=");
+			groups[2].inp_text.emplace_back(".f.");		
+			groups[2].inp_text.emplace_back("diffs");		
+			groups[2].inp_text.emplace_back(".f.");		
+			groups[2].inp_text.emplace_back(gEnd);
+		break;
+		
 	}
 	
 }	
@@ -460,8 +515,38 @@ bool gms_input::load_default_options(string path_dir){
 	
 }
 /**************************************************/
-gms_group gms_input::load_molecule_info( system& molecule ){
+void gms_input::load_molecule_info( system& molecule ){
+	gms_group data_group(GMS_Group::DATA);
+	for(int i=0;i<molecule.nAtoms;i++){
+		data_group.inp_text.emplace_back( molecule.atoms[i].element );
+		data_group.inp_text.emplace_back( " " );
+		data_group.inp_text.emplace_back( molecule.atoms[i].aNmb );
+		data_group.inp_text.emplace_back( " " );
+		data_group.inp_text.emplace_back( molecule.atoms[i].xc );
+		data_group.inp_text.emplace_back( " " );
+		data_group.inp_text.emplace_back( molecule.atoms[i].yc );
+		data_group.inp_text.emplace_back( " " );
+		data_group.inp_text.emplace_back( molecule.atoms[i].zc );
+		data_group.inp_text.emplace_back( " " );	
+	}
+	data_group.inp_text.emplace_back(gEnd);
+	groups.emplace_back( move (data_group ) );
 	
+}
+/**************************************************/
+GMS_basis gms_input::init_basis(std::string& bsis_nm){
+	if 		( bsis_nm == "MINI"   		) gbasis = MINI;
+	else if ( bsis_nm == "STO3G"  		) gbasis = STO3G;
+	else if ( bsis_nm == "321G"   		) gbasis = x321G;
+	else if ( bsis_nm == "631G"   		) gbasis = x631G;
+	else if ( bsis_nm == "631G*"  		) gbasis = x631Gd;
+	else if ( bsis_nm == "6311G*" 		) gbasis = x6311Gd;
+	else if ( bsis_nm == "6311G**"		) gbasis = x6311Gdp;
+	else if ( bsis_nm == "6311G(2d)+"	) gbasis = x6311GdpD;
+	else if ( bsis_nm == "6311G(2d)++"	) gbasis = x6311Gdp2D;
+	
+	GMS_basis basisset(gbasis);
+	return basisset;
 }
 /**************************************************/
 void gms_input::read_input(const char* file_name){
