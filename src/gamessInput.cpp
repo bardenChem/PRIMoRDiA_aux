@@ -21,10 +21,10 @@
 #include <sstream>
 #include <experimental/filesystem>
 
-#include <"../include/global.h"
-#include <"../include/system.h"
-#include <"../include/geometry.h"
-#include <"../include/gamessInput.h"
+#include "../include/global.h"
+#include "../include/system.h" 
+#include "../include/geometry.h"
+#include "../include/gamessInput.h"
 
 using std::string;
 using std::vector;
@@ -149,9 +149,9 @@ gms_group::gms_group():
 			inp_text.emplace_back(gEnd);
 			inp_text.emplace_back(grpName);
 			inp_text.emplace_back("maxit=");
-			inp_text.emplace_back("150 ");		// variable 10 
+			inp_text.emplace_back("150 ");		// variable 10
 			inp_text.emplace_back("nprint=");
-			inp_text.emplace_back("7 ");		// variable 12 
+			inp_text.emplace_back("7 ");		// variable 12
 			inp_text.emplace_back("scftyp=");
 			inp_text.emplace_back("rhf ");		// variable 14
 			inp_text.emplace_back(gEnd);		
@@ -180,10 +180,10 @@ gms_group::gms_group():
 			inp_text.emplace_back(gEnd);
 			inp_text.emplace_back(grpName);
 			inp_text.emplace_back("diis=");
-			inp_text.emplace_back(".t. ");		// variable 11
+			inp_text.emplace_back(".f. ");		// variable 11
 			inp_text.emplace_back("ethrsh=");
-			inp_text.emplace_back(".t. ");		// variable 13
-			inp_text.emplace_back(gEnd);
+			inp_text.emplace_back("2.0 ");		// variable 13
+			inp_text.emplace_back(gEnd); 
 			inp_text.emplace_back(grpName);
 			inp_text.emplace_back("shift=");
 			inp_text.emplace_back(".f. ");		// variable 19
@@ -325,7 +325,9 @@ gms_group& operator=(gms_group&& rhs) noexcept{
 }
 /**************************************************/
 friend std::ostream& gms_group::operator<<(std::ostream& out, gms_group& grp){
-	return out << inp_text << endl;
+	for ( int i=0;i<inp_text.size();i++){
+		return out << inp_text[i];	
+	}
 }
 //====================================================
 gms_input::gms_input()	:
@@ -375,56 +377,87 @@ void gms_input::init(	int chg				,
 		QMlevel = GMS_TheoryLevel::DFTB3;
 		gbasis	= GMS_BasisSet::smDFTB;
 	}
-						
+		
+	//----------------------------------------------			
 	// creating the basic groups
-	groups.emplace_back( GMS_Group::CTRL );
-	groups.emplace_back( GMS_Group::SYS  );
-	GMS_basis basis_set ( this->init_basis(basis) );
-	groups.emplace_back( GMS_Group::BASIS );
+	groups.emplace_back( GMS_Group::CTRL ); // 0
+	groups.emplace_back( GMS_Group::SYS  ); // 1
+	GMS_basis basis_set ( this->init_basis(basis) ); 
+	groups.emplace_back( GMS_Group::BASIS ); // 2
+	groups.emplace_back( GMS_Group::SCF );   // 3
+	groups.emplace_back( GMS_Group::GUESS ); // 4
+	if ( solvent != "none") { groups.emplace_back( GMS_Group::PCM ); } // 5 
+	if ( RunType == GMS_Run_Type::OptimizeRun ){ groups.emplace_back( GMS_Group::OPT ); }	// 6
+	
+	//----------------------------------------------
 	
 	if ( def ){
 		groups[0].inp_text[2]	= rtype;
-		groups[0].inp_text[4]	= std::int_to_string(charge);
-		groups[0].inp_text[6]	= std::int_to_string(multi);
-		groups[0].inp_text[10]	= std::int_to_string(maxit);
-		groups[0].inp_text[12]	= std::int_to_string(nprint);
-		groups[0].inp_text[14]	= std::int_to_string(maxit);
-		groups[0].inp_text[18]	= std::int_to_string(swoff);		
+		groups[0].inp_text[4]	= std::to_string(charge);
+		groups[0].inp_text[6]	= std::to_string(multi);
+		groups[0].inp_text[10]	= std::to_string(maxit);
+		groups[0].inp_text[12]	= std::to_string(nprint);
+		groups[0].inp_text[14]	= std::to_string(scftyp);
+		groups[0].inp_text[18]	= std::to_string(swoff);
+		groups[1].inp_text[2]	= std::to_string(mwords);
+		groups[3].inp_text[2]	= std::to_string(npunch);
+		groups[5].inp_text[2]	= solvent;
+		groups[6].inp_text[2]	= std::to_string(opttol);
+		groups[6].inp_text[4]	= std::to_string(nsteps);
+		groups[6].inp_text[6]	= alg;		
 	}
 	
+	// seting convergence 
+	switch( copt ){
+		case DIIS:
+			groups[3].inp_text[7]  = ".f.";
+			groups[3].inp_text[11] = ".t.";
+		break;
+		case MIXED:
+			groups[3].inp_text[11] = ".t.";
+			groups[3].inp_text.emplace_back( groups[3].grpName );
+			groups[3].inp_text.emplace_back( "swdiis=" );
+			groups[3].inp_text.emplace_back( std::to_string(swdiis) );
+			groups[3].inp_text.emplace_back( gEnd);			
+		break;		
+	}
+	
+	switch( copt2 ){
+		case RSTRCT:
+			groups[3].inp_text[19] = ".t.";
+		break;
+		case SHIFT:
+			groups[3].inp_text[21] = ".t.";
+		break;
+		case DAMP:
+			groups[3].inp_text[23] = ".t.";
+		break;		
+	}
 	
 	groups[2].inp_text.emplace_back("gbasis=");
 	groups[2].inp_text.emplace_back(basis_set.gaussBasis); 		
-	groups[2].inp_text.emplace_back(gEnd);
-	
-	
-	groups[2].inp_text.emplace_back(grpName);
-	groups[2].inp_text.emplace_back("ngauss=");
-	groups[2].inp_text.emplace_back("0 ");			
-	groups[2].inp_text.emplace_back("ndfunc=");
-	groups[2].inp_text.emplace_back("0 ");			
-	groups[2].inp_text.emplace_back("ndpunc=");
-	groups[2].inp_text.emplace_back("0 ");			
-	groups[2].inp_text.emplace_back("diffp=");
-	groups[2].inp_text.emplace_back(".f.");		
-	groups[2].inp_text.emplace_back("diffs");		
-	groups[2].inp_text.emplace_back(".f.");		
-	groups[2].inp_text.emplace_back(gEnd);		
-	
+	groups[2].inp_text.emplace_back(gEnd);	
 	
 	switch ( QMlevel ){
 		case DFT:
 			groups[0].inp_text.emplace_back( groups[0].grp_name );
 			groups[0].inp_text.emplace_back( " dfttyp=");
 			groups[0].inp_text.emplace_back( dfttyp );
+			groups[0].inp_text.emplace_back( "swoff=" );
+			groups[0].inp_text.emplace_back( std::to_string(swoff) );
+			groups[0].inp_text.emplace_back( gEnd );			
 		break;
 		case MP2:
 			groups[0].inp_text.emplace_back( groups[0].grp_name );
 			groups[0].inp_text.emplace_back( " mplevl=" );
 			groups[0].inp_text.emplace_back( std::int_to_string(2) );
+			groups[0].inp_text.emplace_back( gEnd );
 		case DFTB2:
+			groups.emplace_back( GMS_Group::DFTB );
 		break;
 		case DFTB3:
+			groups.emplace_back( GMS_Group::DFTB );
+			groups[ groups.size()-1 ].input_text[3] = "3"
 		break;
 	}
 	
@@ -436,16 +469,19 @@ void gms_input::init(	int chg				,
 			groups[2].inp_text.emplace_back("ngauss=");
 			groups[2].inp_text.emplace_back( int_to_string(basis_set.ngauss) );
 			groups[2].inp_text.emplace_back("ndfunc=");
-			groups[2].inp_text.emplace_back("0 ");			
+			groups[2].inp_text.emplace_back( int_to_string(basis_set.ndfunc) );
 			groups[2].inp_text.emplace_back("ndpunc=");
-			groups[2].inp_text.emplace_back("0 ");			
-			groups[2].inp_text.emplace_back("diffp=");
-			groups[2].inp_text.emplace_back(".f.");		
-			groups[2].inp_text.emplace_back("diffs");		
-			groups[2].inp_text.emplace_back(".f.");		
+			groups[2].inp_text.emplace_back( int_to_string(basis_set.npfunc) );
+			if ( basis_set.ndiffuseP ) 	{
+				groups[2].inp_text.emplace_back("diffp=");
+				groups[2].inp_text.emplace_back(".t.");
+			}
+			if ( basis_set.ndiffuseS ) 	{
+				groups[2].inp_text.emplace_back("diffs=");
+				groups[2].inp_text.emplace_back(".t.");
+			}	
 			groups[2].inp_text.emplace_back(gEnd);
-		break;
-		
+		break;		
 	}
 	
 }	
@@ -503,7 +539,18 @@ bool gms_input::load_default_options(string path_dir){
 				else if ( lin == 16 )
 					alg    = line.words[2];
 				else if ( lin == 17 )
-					solvent= line.words[2];				
+					solvent= line.words[2];
+				else if ( lin == 18 ){
+					if 		( line.words[2] == "SOSCF")	copt = GMS_Conv_OPT::SOSCF;
+					else if ( line.words[2] == "DIIS" )	copt = GMS_Conv_OPT::DIIS;
+					else if ( line.words[2] == "MIXED" )copt = GMS_Conv_OPT::MIXED;
+				}
+				else if ( lin == 19 ){
+					if		( line.words[2] == "SHIFT" ) copt2 = GMS_Conv_OPT2::SHIFT;
+					else if	( line.words[2] == "DAMP" ) copt2 = GMS_Conv_OPT2::DAMP;
+					else if	( line.words[2] == "RSTRCT" ) copt2 = GMS_Conv_OPT2::RSTRCT;
+				}
+					
 			}
 			lin++;
 		}
@@ -559,6 +606,12 @@ void gms_input::restart_input(	const char* inp_name,
 }
 /**************************************************/
 void gms_input::write_input(std::string out_name){
+	fl_data.open( out_name.c_str() );
+	for( int i=0;i<groups.size();i++){
+		fl_data << groups[i]
+	}
+	fl_data << endl;
+	fl_data.close();
 	
 }
 /**************************************************/
