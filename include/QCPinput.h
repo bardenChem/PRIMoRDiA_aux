@@ -28,13 +28,18 @@ enum package{
 	NumOfPackages
 }
 
+/****************************************/
+
 class QCPinput{
 	public:
 		package program;
 		unsigned int base_multi;
 		int base_charge;
 		std::string QMmethod;
+		std::string base_basis;
+		std::string geo_ext;
 		QCPinput();
+		QCPinput(std::string _folder, std::string _geo_ext, std::string _basis, std::string _method)
 		~QCPinput();
 		QCPinput(const QCPinput& rhs) delete;
 		QCPinput& operator=(const QCPinput& rhs) delete;

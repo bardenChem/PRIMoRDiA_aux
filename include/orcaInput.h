@@ -20,22 +20,31 @@
 #define ORCA_INP
 
 #include <string>
+#include "../include/global.h"
 
+class system;
+
+//=======================================
 enum OrcaRunType{
 	SP,
-	OPT,
-	
+	OPT,	
 	NUmOfopts
 };
-
 /********************************************************************/
 class orcaInput{
 	public:
 		unsigned int multi;
 		int charge;
+		unsigned int nprocs;
 		std::string qm_method;
-		orcaInput();
+		std::string rtyp;
+		std::ostream out_fl;
+		std::string basis;
+		orcaInput();	
 		~orcaInput();
+		orcaInput(const orcaInput& rhs) = delete;
+		orcaInput& operator=(const orcaInput& rhs) = delete;
+		void init(const system& molecule,int chg, int mlt, std::string& mth, std::string& _rtyp, int _nprocs,std::string _basis);
 		void write_input_file(std::string out_file);
 };
 
