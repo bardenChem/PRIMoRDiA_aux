@@ -97,7 +97,7 @@ class geometry{
 		system molecule;
 		units cUnit;
 		geometry()
-		geometry(const char* file_name, int Typ);
+		geometry(const char* file_name);
 		~geometry();
 		geometry(const geometry& rhs);
 		geometry& operator=(const geometry& rhs);

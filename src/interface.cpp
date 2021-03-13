@@ -48,7 +48,7 @@ void interface::run(){
 	/********************************/
 	//Trajectory analysis with mdtraj
 	if ( m_argv[1] == "-traj_geo"){
-		traj Trajectory( m_argv[2] );
+		traj_an Trajectory( m_argv[2] );
 		Trajectory.mdtraj_geo();
 	}
 	/********************************/
@@ -58,14 +58,14 @@ void interface::run(){
 		for(int i=3;i<m_argc;i++){
 			ats.push_back( std::stoi(m_argv[i]) );
 		}
-		traj Trajectory(m_argv[2],ats);
+		traj_an Trajectory(m_argv[2],ats);
 		Trajectory.calc_distances( m_argv[2].c_str() );
 	}
 	/********************************/
 	//Extract frame from a trajectory
 	else if ( m_argv[1] == "-extract_frame" ){
 		int arg3 = stoi(m_argv[3]);
-		traj Trajectory;
+		traj_an Trajectory;
 		Trajectory.extract_frame(m_argv[2].c_str(),arg3);
 	}
 	/********************************/
@@ -73,7 +73,7 @@ void interface::run(){
 	else if ( m_argv[1] == "-extract_frames" ){
 		int arg3 = stoi(m_argv[3]);
 		int arg4 = stoi(m_argv[4]);
-		traj Trajectory;
+		traj_an Trajectory;
 		Trajectory.extract_frames(m_argv[2].c_str(),arg3,arg4);
 	}
 	/********************************/

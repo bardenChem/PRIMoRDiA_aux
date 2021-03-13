@@ -200,9 +200,9 @@ void traj_an::calc_distances(const char* pdb_file){
 	dist.resize( atoms_pairs.size()/2 );
 	for(int i=0;i<dist.size();i++){
 		for (int j=0;j<atoms_coords[0].size();j++){
-			tmp_distX = atoms_coords[i][j].xcrd - atoms_coords[i+1][j].xcrd;
-			tmp_distY = atoms_coords[i][j].ycrd - atoms_coords[i+1][j].ycrd;
-			tmp_distZ = atoms_coords[i][j].zcrd - atoms_coords[i+1][j].zcrd;
+			tmp_distX = atoms_coords[i][j].xc - atoms_coords[i+1][j].xc;
+			tmp_distY = atoms_coords[i][j].yc - atoms_coords[i+1][j].yc;
+			tmp_distZ = atoms_coords[i][j].zc - atoms_coords[i+1][j].zc;
 			tmp_dist  = sqrt(tmp_distX*tmp_distX + tmp_distY*tmp_distY + tmp_distZ*tmp_distZ );
 			dist[i].push_back(tmp_dist);			
 		}

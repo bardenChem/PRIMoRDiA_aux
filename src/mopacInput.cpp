@@ -94,6 +94,8 @@ void mopac_input::init( int chg				,
 /*************************************************************/
 void mopac_input::write_file(system& molecule, std::string out_name ){
 	
+	out_name +=".mop";
+	
 	out_file.open( out_name.c_str() );
 	
 	for (int i=0;i<keywords.size();i++){

@@ -20,9 +20,9 @@
 #include <fstream>
 #include <sstream>
 
-#include <"../include/global.h"
-#include <"../include/system.h"
-#include <"../include/geometry.h"
+#include "../include/global.h"
+#include "../include/system.h"
+#include "../include/geometry.h"
 
 using std::string;
 using std::vector;
@@ -357,11 +357,15 @@ geometry::geometry():
 	units(Ang)		{	
 }
 /*********************************************************************/
-geometry::geometry(	const char* file_name,
-					GEO_file Typ		):
-	type(Typ)	,
-	cUnit(Ang)	{
-		
+geometry::geometry(	const char* file_name)	:
+	type(INVALID)							,
+	cUnit(Ang)								{	
+	
+	if ( check_file_ext(".xyz",file_name ) ){
+		type = xyz_;
+	}else if ( check_file_ext(".pdb",file_name ) ){
+		type = pdb_;
+	}
 	switch( type ){
 		case xyz_:
 			xyz = XYZ(file_name);
