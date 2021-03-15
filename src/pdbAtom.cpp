@@ -18,6 +18,7 @@
 #include "../include/pdbAtom.h"
 
 #include <string>
+using std::string;
 
 /******************************************************************/
 pdbAtom::pdbAtom()		:
@@ -74,8 +75,8 @@ pdbAtom::pdbAtom(pdbAtom&& rhs) noexcept:
 	res_indx( rhs.res_indx )			,
 	chain_name( move(rhs.chain_name) )  ,
 	occupancy(rhs.occupancy)			,
-	b_factor(rhs.b_factor)				,
-	sideC( move(rhs.sideC) )			,
+	b_factor(rhs.b_factor)  			,
+	sideC(rhs.sideC) 					,
 	xc(rhs.xc)							,
 	yc(rhs.yc)							,
 	zc(rhs.zc)							{
@@ -91,7 +92,7 @@ pdbAtom& pdbAtom::operator=(pdbAtom&& rhs) noexcept{
 		chain_name	= move(rhs.chain_name);
 		occupancy	= rhs.occupancy;
 		b_factor	= rhs.b_factor;
-		sideC		= move(rhs.sideC);
+		sideC		= rhs.sideC;
 		xc			= rhs.xc;
 		yc			= rhs.yc;					
 		zc			= rhs.zc;
@@ -119,9 +120,14 @@ pdbAtom::pdbAtom(std::string& pdb_line)	:
 }
 /*********************************************************/
 bool pdbAtom::is_hydrogen(){
-	if ( atom_name[0] == "H" ) return true;
-	else if ( atom_name.substr( atom_name.begin(),2 ) == "1H" ) return true;
-	else if ( atom_name.substr( atom_name.begin(),2 ) == "2H" ) return true;
-	else if ( atom_name.substr( atom_name.begin(),2 ) == "3H" ) return true;
-	else false;
+	
+	string tmp1(atom_name,0,2);
+	
+	if 		( tmp1 == " H" ) return true;
+	else if ( tmp1 == "1H" ) return true;
+	else if ( tmp1 == "2H" ) return true;
+	else if ( tmp1 == "3H" ) return true;
+	else return false;
+	
 }
+////////////////////////////////////////////////////////////

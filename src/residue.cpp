@@ -22,6 +22,15 @@
 #include "../include/pdbAtom.h"
 #include "../include/residue.h"
 
+using std::string;
+using std::vector;
+
+/*********************************************************/
+AAres get_AAtype(int i){
+	AAres res = static_cast<AAres>(i);
+	return res;
+}
+///////////////////////////////////////////////////////////
 residue::residue()	:
 	res1n("n")		,
 	res3n("UNK")	,
@@ -37,24 +46,22 @@ residue::residue()	:
 }
 /*********************************************************/
 residue::residue( vector<pdbAtom> resAtoms	,
-				int resType					,
+				res_type resType			,
 				int resMon 					):
 				
-	r_atoms(resAtoms)	,
-	type(resType)		,
-	AAname(OTH)			,
-	ligand(false)		,
-	terminal(false)		,
-	first(false)        ,
-	pdb_index			,
-	fCharge(0)			{
+	r_atoms(resAtoms)						,
+	type(resType)							,
+	ligand(false)							,
+	terminal(false)							,
+	first(false)        					,
+	pdb_index(0)							,
+	fCharge(0.0)							{
 		
 	res1n 	= get_res1n(resMon);
 	res3n 	= get_res3n(resMon);
-	AAname 	= resMon;
+	AAname 	= get_AAtype(resMon);
 	
-	
-	for(int=0;i<resAtoms.size();i++){
+	for(int i=0;i<resAtoms.size();i++){
 		if ( resAtoms[i].is_hydrogen() ) nHydrogens++;
 	}
 	 
@@ -105,7 +112,7 @@ residue::residue( residue&& rhs) noexcept:
 	pdb_index(rhs.pdb_index )			,
 	nHydrogens(rhs.nHydrogens)			,
 	fCharge(rhs.fCharge)				,
-	nAtoms( move(rhs.nAtoms) )			,
+	nAtoms( rhs.nAtoms) 				,
 	r_atoms( move(rhs.r_atoms) )		{
 	
 }
@@ -155,7 +162,7 @@ void residue::set_charge(){
 					fCharge = nHydrogens - base_HN  -1;
 				} 
 			break;
-			/-------
+			//-------
 			case ARG:
 			case LYS:
 				if ( first || terminal ) {
@@ -165,7 +172,7 @@ void residue::set_charge(){
 					fCharge = nHydrogens - base_HN +1;
 				}
 			break;
-			/-------
+			//-------
 			case HIS:
 				if ( first || terminal ) {
 					fCharge = nHydrogens - base_HN;
@@ -174,18 +181,19 @@ void residue::set_charge(){
 					fCharge = nHydrogens - base_HN +1;
 				}
 			break;
-			/-------
+			//-------
 			case CYS:
 				fCharge = nHydrogens - base_HN - 1;
 			break;
-			/-------
-			case default:
+			//-------
+			default:
 				if ( first || terminal ){
 					fCharge = nHydrogens - base_HN -1;
 				}
-				else fCharge = 0;
-			break;
-			
+				else {
+					fCharge = 0;
+				}
+			break;			
 		}		
 	}
 	else if ( type == ION ){
@@ -203,3 +211,4 @@ void residue::set_charge(){
 		
 	}	
 }
+////////////////////////////////////////////////////////////////////

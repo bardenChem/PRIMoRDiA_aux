@@ -16,10 +16,9 @@
  
 /*********************************************************************/
 
-#ifndef GLOBAL
-#define GLOBAL
+#ifndef GLOBAL_H
+#define GLOBAL_H
 
-#include <iostream>
 #include <string>
 #include <vector> 
 #include <experimental/filesystem>
@@ -44,6 +43,7 @@ int get_atomic_number(std::string sym);
 std::vector<double> scale_dvec(std::vector<double>& vec);
 std::string get_res1n( int i );
 std::string get_res3n( int i );
+int get_AAnHy(int i);
 //------------------------------------------------------------
 class Line{
 	public:

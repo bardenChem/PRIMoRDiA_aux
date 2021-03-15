@@ -17,6 +17,7 @@
 
 #include <vector>
 #include <string>
+#include <cmath>
 
 #include "../include/global.h"
 #include "../include/atom.h"
@@ -117,3 +118,4 @@ double atom::get_distance(const atom& a2){
 void atom::set_pCharge(double chg){
 	pCharge = chg;
 }
+///////////////////////////////////////////////////////////

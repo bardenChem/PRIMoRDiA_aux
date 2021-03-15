@@ -14,30 +14,23 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 /*********************************************************************/
 
-#ifndef MD_PREP
-#define MD_PREP
+#ifndef MD_PREP_H
+#define MD_PREP_H
 
 #include <string>
 #include <vector>
 
-class pdbModel
+class pdbModel;
+
 //-----------------
 enum mdPKG{
-	undef,
-	AMBER,
-	GROMACS,
-	
-	NumOfPKGs
+	undef, AMBER,
+	GROMACS, NumOfPKGs
 }
 //-----------------
 enum mdTask{
-	undefined,
-	parametrization,
-	topology,
-	minimization,
-	equilibration, 
-	production,
-	
+	undefined, parametrization,	topology,
+	minimization, equilibration, production,
 	NumofTasks
 }
 /****************************************/

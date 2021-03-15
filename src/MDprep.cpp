@@ -19,9 +19,10 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "../include/global.h"
-#include "../include/system.h"
+#include "../include/molecule.h"
 #include "../include/geometry.h"
 #include "../include/MDprep.h"
 
@@ -65,6 +66,7 @@ MDprep::MDprep(std::string bs_name	,
 		case default:
 			top_file = "_";
 			crd_file = "_";
+		break;
 	}
 }
 /******************************************************/

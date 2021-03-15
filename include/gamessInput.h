@@ -15,13 +15,14 @@
  
 /*********************************************************************/
 
-#ifndef GAMESS_INPUT
-#define GAMESS_INPUT
+#ifndef GAMESS_INPUT_H
+#define GAMESS_INPUT_H
 
 #include <vector>
 #include <string>
 #include <iostream>
 
+class system;
 
 /*********************************************************************/
 enum GMS_Group{	
@@ -40,7 +41,6 @@ enum SCF_TYPE {
 	RHF, UHF, ROHF,				
 	NumOfSCFoptions
 };
-
 //----------------------------
 enum GMS_Run_Type { 
 	InvalidRunType	,
@@ -154,14 +154,13 @@ class gms_input{
 		void write_input(std::string out_name);
 		void clear_directory();		
 };
-/*********************************************************************/
+/*********************************************************************
 class FMO_fragment{
 	
 };
-/*********************************************************************/
+/*********************************************************************
 class FMO_options{
 	
 };
-
-
+*/
 #endif

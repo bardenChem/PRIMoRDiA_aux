@@ -26,6 +26,7 @@
 
 #include "../include/traj_analysis.h"
 #include "../include/global.h"
+#include "../include/pdbAtom.h"
 #include <experimental/filesystem>
 
 using std::string;

@@ -15,14 +15,12 @@
  
 /*********************************************************************/
 
-#ifndef TRAJ_S
-#define TRAJ_S
+#ifndef TRAJ_S_H
+#define TRAJ_S_H
 
-#include <iostream>
 #include <vector>
 #include <string>
 #include <fstream>
-
 
 class traj_an{
 	public:

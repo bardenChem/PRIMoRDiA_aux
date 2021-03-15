@@ -15,8 +15,8 @@
  
 /*********************************************************************/
 
-#ifndef ATOM_H
-#define ATOM_H
+#ifndef PDB_ATOM_H
+#define PDB_ATOM_H
 
 #include <string>
 

@@ -18,11 +18,19 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
+#include <sstream>
 
-#include "global.h"
-#include "pdbAtom.h"
-#include "residue.h"
-#include "pdbModel.h"
+
+#include "../include/global.h"
+#include "../include/pdbAtom.h"
+#include "../include/residue.h"
+#include "../include/pdbModel.h"
+
+using std::string;
+using std::vector;
+using std::move;
 
 //=========================================================
 
@@ -47,9 +55,9 @@ pdbModel::pdbModel(std::vector<residue> residues):
 	monomers(residues)			{
 }
 /*********************************************************/
-pdbModel::pdbModel(const char* pdb_file, int& mdl){
-	if ( !check_file_ext(".pdb",pdb_name) )	{
-		cout << "Warning! The file has wrong extension name!" << endl;
+pdbModel::pdbModel(const char* pdb_file, int mdl){
+	if ( !check_file_ext(".pdb",pdb_file) )	{
+		std::cout << "Warning! The file has wrong extension name!" << std::endl;
 	}
 	
 	vector<pdbAtom> tmp_atoms;
@@ -57,18 +65,18 @@ pdbModel::pdbModel(const char* pdb_file, int& mdl){
 	char pdb_line[100];
 	int line = 0;
 	string old_res = "0";
-	string curr_res = "_";
-	string pdb_line = "";
+	string curr_res = "_";	
+	string pdb_lineS;
 	
-	
-	if ( IF_file( pdb_name ) ){
+	if ( IF_file( pdb_file ) ){
 		std::ifstream buf(pdb_file);
 		while( !buf.eof() ){
-			if line >= mdl{
+			if ( line >= mdl ) {
 				buf.getline(pdb_line,100);
 				string word(pdb_line,0,6);
-				if ( word == "ATOM  " || word == "HETATM" ) {					
-					pdbAtom _atom(pdb_line);					
+				if ( word == "ATOM  " || word == "HETATM" ) {
+					pdb_lineS = pdb_line;
+					pdbAtom _atom(pdb_lineS);					
 					if ( old_res == "0" ) { old_res = _atom.res_name; }
 					curr_res = _atom.res_name;
 					tmp_atoms.emplace_back( move(_atom) );

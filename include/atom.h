@@ -42,5 +42,4 @@ class atom{
 		void set_pCharge(double chg);
 };
 
-
 #endif

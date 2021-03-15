@@ -23,7 +23,7 @@
 #include <experimental/filesystem>
 
 #include "../include/global.h"
-#include "../include/system.h" 
+#include "../include/molecule.h" 
 #include "../include/geometry.h"
 #include "../include/gamessInput.h"
 #include "../include/orcaInput.h"

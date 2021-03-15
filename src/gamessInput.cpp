@@ -22,8 +22,7 @@
 #include <experimental/filesystem>
 
 #include "../include/global.h"
-#include "../include/system.h" 
-#include "../include/geometry.h"
+#include "../include/molecule.h" 
 #include "../include/gamessInput.h"
 
 using std::string;
@@ -33,7 +32,7 @@ using std::endl;
 using std::move;
 namespace fs = std::experimental::filesystem;
 
-string gEnd = " $end\n";
+const string gEnd = " $end\n";
 //==================================================
 GMS_basis::GMS_basis()	:
 	type(MINI)			,
@@ -134,8 +133,7 @@ GMS_basis::GMS_basis& operator=(const GMS_basis& rhs){
 gms_group::gms_group():
 	group(OTHER)	,
 	grpName("")		{
-	
-		
+			
 	switch( group ){
 		case CTRL:
 			grpName	= " $contrl ";
@@ -283,8 +281,7 @@ gms_group::gms_group():
 			inp_text.emplace_back(".f.");		// varible 16
 			inp_text.emplace_back(gEnd);			
 		break;
-	}
-	
+	}	
 }
 /**************************************************/
 gms_group::gms_group( GMS_Group grp_type )	:

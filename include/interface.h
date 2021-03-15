@@ -15,8 +15,8 @@
  
 /*********************************************************************/
 
-#ifndef INTERFACE
-#define INTERFACE
+#ifndef INTERFACE_H
+#define INTERFACE_H
 
 #include <string>
 #include <vector>
@@ -34,6 +34,5 @@ class interface{
 		void print_options();
 		void help();
 };
-
 
 #endif

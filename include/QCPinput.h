@@ -15,21 +15,16 @@
  
 /*********************************************************************/
 
-#ifndef QCP_INPUT
-#define QCP_INPUT
+#ifndef QCP_INPUT_H
+#define QCP_INPUT_H
 
 #include <string>
 
 enum package{
-	MOPAC,
-	GAMESS,
-	ORCA,
-	
+	MOPAC, GAMESS, ORCA,	
 	NumOfPackages
 }
-
 /****************************************/
-
 class QCPinput{
 	public:
 		package program;
@@ -48,6 +43,5 @@ class QCPinput{
 		// for finite differences calculations
 		void make_input_from_folder_FD(int QCP,unsigned int bs_mlt,int bs_chg,int chg_diff); 		
 };
-
 
 #endif 

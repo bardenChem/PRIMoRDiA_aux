@@ -15,16 +15,12 @@
  
 /*********************************************************************/
 
-#ifndef MOPAC_INPUT
-#define MOPAC_INPUT
+#ifndef MOPAC_INPUT_H
+#define MOPAC_INPUT_H
 
 #include <vector>
 #include <string>
-#include <iostream>
 #include <fstream>
-
-#include "../include/global.h"
-#include "../include/system.h"
 
 class system;
 

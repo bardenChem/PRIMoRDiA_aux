@@ -16,11 +16,11 @@
  
 /*********************************************************************/
 
-#ifndef ORCA_INP
-#define ORCA_INP
+#ifndef ORCA_INP_H
+#define ORCA_INP_H
 
 #include <string>
-#include "../include/global.h"
+#include <fstream>
 
 class system;
 
