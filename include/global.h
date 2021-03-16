@@ -23,8 +23,8 @@
 #include <vector> 
 #include <experimental/filesystem>
 
-
 //========================================================
+// FILE OPERATIONS
 bool IF_file(const char* name); 
 bool IF_file(std::experimental::filesystem::path& name); 
 bool check_file_ext(std::string ext,const char* file_name);
@@ -32,33 +32,17 @@ std::string remove_extension(const char* file_name);
 std::string change_extension(const char* file_name,std::string new_ext);
 void rename_file(const char* file_name,std::string new_file_name);
 std::string get_file_name(const char* path_name);
-std::string str_array(std::string& line, int in, int fin);
+// VECTO MATH/STAT OPERATIONS
 double mean_dvec(std::vector<double>& vec);
 double max_dvec(std::vector<double>& vec);
 double min_dvec(std::vector<double>& vec);
 double sum_dvec(std::vector<double>& vec);
 double sd_dvec(std::vector<double>& vec);
-float get_atom_mass(std::string sym);
-int get_atomic_number(std::string sym);
 std::vector<double> scale_dvec(std::vector<double>& vec);
 std::string get_res1n( int i );
 std::string get_res3n( int i );
-int get_AAnHy(int i);
-//------------------------------------------------------------
-class Line{
-	public:
-		std::vector<std::string> words;
-		unsigned int line_len;
-		Line();
-		~Line();
-		Line(std::string line);
-		Line(const char* line);
-		Line(const Line& rhs);
-		Line& operator=(const Line& rhs);
-		Line(Line&& rhs) noexcept;
-		Line& operator=(Line&& rhs) noexcept;
-		double get_double(int pos);
-		int get_int(int pos);
-};
+
+float get_atom_mass(std::string sym);
+int get_atomic_number(std::string sym);
 
 #endif

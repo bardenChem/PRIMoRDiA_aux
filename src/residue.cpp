@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include "../include/global.h"
 #include "../include/pdbAtom.h"
@@ -25,15 +26,34 @@
 using std::string;
 using std::vector;
 
-/*********************************************************/
-AAres get_AAtype(int i){
-	AAres res = static_cast<AAres>(i);
-	return res;
+////////////////////////////////////////////////////////////////////////////
+std::map<string, int> AAnHydrogens = {
+	{"ALA", 5}, {"ARG",13}, {"ASN", 6}, {"ASP", 4}, 
+	{"CYS", 5}, {"GLN", 8},	{"GLU", 6}, {"GLY", 3}, 
+	{"HIS", 8}, {"ILE",11}, {"LEU",11},	{"LYS",13},
+	{"MET", 9}, {"PHE", 9}, {"PRO", 7}, {"SER", 5}, 
+	{"THR", 7}, {"TRP",10}, {"TYR", 9}, {"VAL", 9}
 }
+/*********************************************************/
+std::map<string, AAres> R3name = {
+	{"ALA", ALA}, {"ARG",ARG}, {"ASN", ASN}, {"ASP", ASP}, 
+	{"CYS", CYS}, {"GLN",GLN}, {"GLU", GLU}, {"GLY", GLY}, 
+	{"HIS", HIS}, {"ILE",ILE}, {"LEU", LEU}, {"LYS", LYS},
+	{"MET", MET}, {"PHE",PHE}, {"PRO", PRO}, {"SER", SER}, 
+	{"THR", THR}, {"TRP",TRP}, {"TYR", TYR}, {"VAL", VAL},
+	{"HID", HIS}, {"HIE",HIS}, {"HIP", HIS}
+}
+/*********************************************************/
+std::map<char, AAres>  R1name = {
+	{'A', ALA}, {'R',ARG}, {'N', ASN}, {'D', ASP}, 
+	{'C', CYS}, {'Q',GLN}, {'E', GLU}, {'G', GLY}, 
+	{'H', HIS}, {'I',ILE}, {'L', LEU}, {'K', LYS},
+	{'M', MET}, {'F',PHE}, {'P', PRO}, {'S', SER}, 
+	{'T', THR}, {'W',TRP}, {'Y', TYR}, {'V', VAL}
+}
+
 ///////////////////////////////////////////////////////////
 residue::residue()	:
-	res1n("n")		,
-	res3n("UNK")	,
 	type(UNK)		,
 	AAname(OTH)     ,
 	ligand(false)	,
@@ -45,10 +65,7 @@ residue::residue()	:
 	nAtoms(0)		{
 }
 /*********************************************************/
-residue::residue( vector<pdbAtom> resAtoms	,
-				res_type resType			,
-				int resMon 					):
-				
+residue::residue( vector<pdbAtom> resAtoms ):				
 	r_atoms(resAtoms)						,
 	type(resType)							,
 	ligand(false)							,
@@ -57,10 +74,7 @@ residue::residue( vector<pdbAtom> resAtoms	,
 	pdb_index(0)							,
 	fCharge(0.0)							{
 		
-	res1n 	= get_res1n(resMon);
-	res3n 	= get_res3n(resMon);
-	AAname 	= get_AAtype(resMon);
-	
+
 	for(int i=0;i<resAtoms.size();i++){
 		if ( resAtoms[i].is_hydrogen() ) nHydrogens++;
 	}
@@ -70,8 +84,6 @@ residue::residue( vector<pdbAtom> resAtoms	,
 residue::~residue(){}
 /*********************************************************/
 residue::residue(const residue& rhs):
-	res1n(rhs.res1n)				,
-	res3n(rhs.res3n)				,
 	type(rhs.type)					,
 	AAname(rhs.AAname)				,
 	ligand(rhs.ligand)				,
@@ -102,8 +114,6 @@ residue& residue::operator=(const residue& rhs){
 }
 /*********************************************************/
 residue::residue( residue&& rhs) noexcept:
-	res1n( move(rhs.res1n) )			,
-	res3n( move(rhs.res3n) )			,
 	type( rhs.type )					,
 	AAname(rhs.AAname)					,
 	ligand(rhs.ligand)					,
@@ -119,8 +129,6 @@ residue::residue( residue&& rhs) noexcept:
 /*********************************************************/
 residue& residue::operator=( residue&& rhs) noexcept{
 	if ( this != &rhs ){
-		res1n 		= move(rhs.res1n);				
-		res3n 		= move(rhs.res3n);			
 		type 		= rhs.type;
 		AAname		= rhs.AAname;
 		ligand		= rhs.ligand;				

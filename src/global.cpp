@@ -25,15 +25,16 @@
 #include <cmath>
 #include <experimental/filesystem>
 #include <stdexcept>
+#include <map>
 
 #include "../include/global.h"
 //=============================================================================
 using std::string;
 using std::vector;
 using std::move;
+using std::map;
 
 namespace fs = std::experimental::filesystem;
-
 
 //============================================================================================
 string atomType[] = {
@@ -62,22 +63,19 @@ double atomMass[] = {
 							227,231.0359,232.0381,237,238.0289,243,244,247,247,251,252,257,258,259,261,262
 					};	
 /************************************************************************************************************/
-int AAnHydrogens[] = {5,13,6,4,5,8,6,3,8,11,11,13,9,9,7,5,7,10,9,9};
-/************************************************************************************************************/
-std::string residue_3Lname[] = {"ALA","ARG","ASN","ASP","CYS","GLN","GLU","GLY","HIS","ILE","LEU","LYS","MET",
-"PHE","PRO","SER","THR","TRP","TYR","VAL"};
-/************************************************************************************************************/
-std::string residue_1Lname[] = {"A","R","N","D","C","Q","E","G","H","I","L","K","M","F","P","S","T","W","Y","V"};
-/*********************************************************************************/
+///////////////////////////////////////////////
+// FILE HANDLING UTILITIES :
+
+/***************************************************************************/
 bool IF_file(const char* name){
 	fs::path file_name(name);
 	return fs::exists(file_name);
 }
-/*********************************************************************************/
+/***************************************************************************/
 bool IF_file(fs::path& name){
 	return fs::exists(name);
 }
-/*********************************************************************************/
+/***************************************************************************/
 bool check_file_ext(string ext				,
 					const char* file_name){
 
@@ -85,13 +83,13 @@ bool check_file_ext(string ext				,
 	if ( f_name.extension() == ext ) return true;
 	else return false;
 }
-/*********************************************************************************/
+/***************************************************************************/
 string get_file_name(const char* path_name){
 	fs::path f_name(path_name);
 	string resultS( f_name.filename() );
 	return resultS;
 }
-/*********************************************************************************/
+/**************************************************************************/
 string remove_extension(const char* file_name){
 	string file_name_string  = file_name;
 	int point = 0;
@@ -103,7 +101,7 @@ string remove_extension(const char* file_name){
 	int pos = file_name_string.size()-point;
 	return file_name_string.substr(0,file_name_string.size()-pos);
 }
-/*********************************************************************************/
+/***************************************************************************/
 string change_extension(const char* file_name,
 						string new_ext		){
 							
@@ -111,7 +109,7 @@ string change_extension(const char* file_name,
 	name_wth_ext += new_ext;
 	return name_wth_ext;
 }
-/*********************************************************************************/
+/***************************************************************************/
 void rename_file(const char* file_name,
 				string new_file_name){
 					
@@ -119,19 +117,10 @@ void rename_file(const char* file_name,
 	fs::path nf_name( fs::current_path() / new_file_name );
 	fs::rename(f_name,nf_name);
 }
-/*********************************************************************************/
-string str_array(string& line,
-				int in		 , 
-				int fin)	 {
-					
-	string result = "";
-	result.resize(fin-in+2);
-	int cnt = 0;
-	for(int i=in;i<fin;i++){ 
-		result[cnt++] = line[i];
-	}
-	return result;
-}
+
+////////////////////////////////////////////////////////
+// VECTOR MATH/STAT MANIPULATION
+
 /*********************************************************************************/
 double mean_dvec(vector<double>& vec){
 	double result = 0.0;

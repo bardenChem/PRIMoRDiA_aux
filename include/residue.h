@@ -22,25 +22,31 @@
 #include <string>
 #include <vector>
 
+///////////////////////////////////////////////////////////////////////
 enum AAres{
 	OTH=-1,
 	ALA, ARG, ASN, ASP, CYS, GLN, GLU, GLY, HIS, ILE, LEU, LYS, MET, PHE,
 	PRO, SER, THR, TRP, TYR, VAL	
 };
 /*********************************************************************/
-enum res_type {
-	UNK, WAT, HOH, ION, AA, DNA 
+enum DNAres{
+	DC, DG, DT, DA
 };
-
-AAres get_AAtype(int i);
+/*********************************************************************/
+enum IONres{
+	K+,Ca+,Cl-,Mg+,SO4-
+};
+/*********************************************************************/
+enum res_type {
+	UNK, WAT, HOH, ION, AA, DNA, RNA
+};
+/*********************************************************************/
 
 //------------------------------------------------
 class pdbAtom; // foward declaration
 
 class residue{
 	public:
-		std::string res3n;
-		std::string res1n;
 		res_type type;
 		AAres AAname;
 		bool ligand;
@@ -52,7 +58,7 @@ class residue{
 		unsigned int nAtoms;
 		std::vector<pdbAtom> r_atoms;		
 		residue();
-		residue(std::vector<pdbAtom> resAtoms, res_type resTyp, int resMon);
+		residue(std::vector<pdbAtom> resAtoms);
 		~residue();
 		residue(const residue& rhs);
 		residue& operator=(const residue& rhs);
