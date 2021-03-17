@@ -22,9 +22,12 @@
 #include <iostream>
 
 #include "../include/global.h"
+#include "../include/atom.h"
 #include "../include/molecule.h"
 #include "../include/XYZ.h"
+#include "../include/PDB.h"
 #include "../include/geometry.h"
+
 
 using std::string;
 using std::vector;
@@ -48,7 +51,7 @@ MOL2& MOL2::operator=(MOL2&& rhs) noexcept{}
 ///////////////////////////////////////////////////////////////////////
 geometry::geometry():
 	type(INVALID)	,
-	units(Ang)		{	
+	cUnit(Ang)		{	
 }
 /*********************************************************************/
 geometry::geometry(	const char* file_name)	:
@@ -67,7 +70,7 @@ geometry::geometry(	const char* file_name)	:
 			break;
 		case pdb_:
 			pdb = PDB(file_name);
-			Molecule = pdb.get_molecule_from_model(0);
+			Molecule = pdb.get_system_from_model(0);
 			break;
 	}
 		
@@ -118,21 +121,21 @@ geometry& geometry::operator=(geometry&& rhs) noexcept{
 	return *this;	
 }
 /*********************************************************************/
-void geometry::read_QCPinput(const char* file_name, std:string program){
+void geometry::read_QCPinput(const char* file_name, std::string program){
 	
 }
 /*********************************************************************/
-void geometry::read_QCPoutput(const char* file_name, std:string program,bool last){
+void geometry::read_QCPoutput(const char* file_name, std::string program,bool last){
 	
 }
 /*********************************************************************/
 void geometry::convert_to_ang(){
 	const double bohrtoang = 0.52917726;
 	if ( cUnit == Bohr ){
-		for(int i=0;i<Molecule.nAtoms;i++){
-			Molecule.atoms[i].x *= bohrtoang;
-			Molecule.atoms[i].y *= bohrtoang;
-			Molecule.atoms[i].z *= bohrtoang;
+		for(unsigned int i=0;i<Molecule.nAtoms;i++){
+			Molecule.atoms[i].xc *= bohrtoang;
+			Molecule.atoms[i].yc *= bohrtoang;
+			Molecule.atoms[i].zc *= bohrtoang;
 		}
 	}
 
@@ -141,10 +144,10 @@ void geometry::convert_to_ang(){
 void geometry::convert_to_bohr(){
 	const double angtobohr = 1.0/0.52917726;
 	if ( cUnit == Ang ){
-		for(int i=0;i<Molecule.nAtoms;i++){
-			Molecule.atoms[i].x *= angtobohr;
-			Molecule.atoms[i].y *= angtobohr;
-			Molecule.atoms[i].z *= angtobohr;
+		for(unsigned int i=0;i<Molecule.nAtoms;i++){
+			Molecule.atoms[i].xc *= angtobohr;
+			Molecule.atoms[i].yc *= angtobohr;
+			Molecule.atoms[i].zc *= angtobohr;
 		}
 	}
 	
@@ -162,7 +165,7 @@ void geometry::write_to_file(std::string out_name,std::string format){
 		if ( type == pdb_){
 			pdb.write_pdb(out_name);
 		}else{
-			pdb.init_from_molecule(Molecule);
+			pdb.init_from_system(Molecule);
 			pdb.write_pdb(out_name);
 		}
 	}
@@ -173,9 +176,9 @@ void geometry::center_coord(){
 	double center_y = Molecule.atoms[0].yc;
 	double center_z = Molecule.atoms[0].zc;
 	for(int i=0;i<Molecule.nAtoms;i++){
-		Molecule.atoms[i].x -= center_x;
-		Molecule.atoms[i].y -= center_y;
-		Molecule.atoms[i].z -= center_z;
+		Molecule.atoms[i].xc -= center_x;
+		Molecule.atoms[i].yc -= center_y;
+		Molecule.atoms[i].zc -= center_z;
 	}
 }
 ///////////////////////////////////////////////////////////////////////

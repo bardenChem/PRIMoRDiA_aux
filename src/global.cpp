@@ -185,9 +185,4 @@ int get_atomic_number(std::string sym){
 	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) atomic_num = i+1;
 	return atomic_num;
 }
-std::string get_res1n( int i ){	return residue_1Lname[i]; }
-/******************************************************************************/
-std::string get_res3n( int i ){ return residue_3Lname[i]; }
-/******************************************************************************/
-int get_AAnHy(int i){ return AAnHydrogens[i]; }
 ////////////////////////////////////////////////////////////////////////////////

@@ -22,7 +22,7 @@
 #include <string>
 
 class pdbModel;
-class system;
+class molecule;
 
 class PDB{
 	public:
@@ -43,9 +43,9 @@ class PDB{
 		void cat_pdbs(std::vector<std::string> file_list);
 		void remove_model(unsigned int model);
 		void write_pdb(std::string out_name);
-		void init_from_system(const system& molecule);
-		system get_system_from_model(unsigned int model);
-		std::vector<system> get_systems();
+		void init_from_system(const molecule& mol);
+		molecule get_system_from_model(unsigned int model);
+		std::vector<molecule> get_systems();
 		
 };
 

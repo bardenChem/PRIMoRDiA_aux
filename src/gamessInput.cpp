@@ -21,7 +21,9 @@
 #include <sstream>
 #include <experimental/filesystem>
 
+#include "../include/Line.h"
 #include "../include/global.h"
+#include "../include/atom.h"
 #include "../include/molecule.h" 
 #include "../include/gamessInput.h"
 
@@ -32,6 +34,7 @@ using std::endl;
 using std::move;
 namespace fs = std::experimental::filesystem;
 
+string path_to_dftb_;
 const string gEnd = " $end\n";
 //==================================================
 GMS_basis::GMS_basis()	:
@@ -58,47 +61,47 @@ GMS_basis::GMS_basis(GMS_BasisSet bs):
 		
 	switch( type ){
 		case STO3G:
-		gaussBasis	= "STO";
-		ngauss		= 3;
+			gaussBasis	= "STO";
+			ngauss		= 3;
 		break;
 		case x321G:
-		gaussBasis	= "N21";
-		ngauss		= 3;
+			gaussBasis	= "N21";
+			ngauss		= 3;
 		break;
-		case x631G;
-		gaussBasis	= "N31";
-		ngauss		= 6;
+		case x631G:
+			gaussBasis	= "N31";
+			ngauss		= 6;
 		break;
 		case x631Gd:
-		gaussBasis	= "N31";
-		ngauss		= 6;
-		ndfunc		= 1;
+			gaussBasis	= "N31";
+			ngauss		= 6;
+			ndfunc		= 1;
 		break;
 		case x6311Gd:
-		gaussBasis	= "N311";
-		ngauss		= 6;
-		ndfunc		= 1;
+			gaussBasis	= "N311";
+			ngauss		= 6;
+			ndfunc		= 1;
 		break;
 		case x6311Gdp:
-		gaussBasis	= "N311";
-		ngauss		= 6;
-		ndfunc		= 1;
-		npfunc		= 1;
+			gaussBasis	= "N311";
+			ngauss		= 6;
+			ndfunc		= 1;
+			npfunc		= 1;
 		break;
 		case x6311GdpD:
-		gaussBasis	= "N311";
-		ngauss		= 6;
-		ndfunc		= 1;
-		npfunc		= 1;
-		ndiffusep	= true;
+			gaussBasis	= "N311";
+			ngauss		= 6;
+			ndfunc		= 1;
+			npfunc		= 1;
+			ndiffuseP	= true;
 		break;
 		case x6311Gdp2D:
-		gaussBasis	= "N311";
-		ngauss		= 6;
-		ndfunc		= 1;
-		npfunc		= 1;
-		ndiffusep	= true;
-		ndiffuseS	= true;
+			gaussBasis	= "N311";
+			ngauss		= 6;
+			ndfunc		= 1;
+			npfunc		= 1;
+			ndiffuseP	= true;
+			ndiffuseS	= true;
 		break;
 	}	
 }
@@ -116,7 +119,7 @@ GMS_basis::GMS_basis(const GMS_basis& rhs)	:
 	path_to_dftb(rhs.path_to_dftb)			{
 }
 /**************************************************/
-GMS_basis::GMS_basis& operator=(const GMS_basis& rhs){
+GMS_basis& GMS_basis::operator=(const GMS_basis& rhs){
 	if( this != &rhs ){
 		type 		=rhs.type;
 		ngauss		=rhs.ngauss;
@@ -203,31 +206,31 @@ gms_group::gms_group():
 			inp_text.emplace_back("itypmx=");
 			inp_text.emplace_back("-1");		// variable 8 
 			inp_text.emplace_back(" $dftbsk \n");
-			inp_text.emplace_back( "   C H "+ path_to_dftb +"/C-H.skf\n");
-			inp_text.emplace_back( "   C O "+ path_to_dftb +"/C-O.skf\n");
-			inp_text.emplace_back( "   C N "+ path_to_dftb +"/C-N.skf\n");
-			inp_text.emplace_back( "   H C "+ path_to_dftb +"/H-C.skf\n");
-			inp_text.emplace_back( "   H H "+ path_to_dftb +"/H-H.skf\n");
-			inp_text.emplace_back( "   H O "+ path_to_dftb +"/H-O.skf\n");
-			inp_text.emplace_back( "   H N "+ path_to_dftb +"/H-N.skf\n");
-			inp_text.emplace_back( "   O C "+ path_to_dftb +"/O-C.skf\n");
-			inp_text.emplace_back( "   O H "+ path_to_dftb +"/O-H.skf\n");
-			inp_text.emplace_back( "   O N "+ path_to_dftb +"/O-N.skf\n");
-			inp_text.emplace_back( "   O O "+ path_to_dftb +"/O-O.skf\n");
-			inp_text.emplace_back( "   N C "+ path_to_dftb +"/N-C.skf\n");
-			inp_text.emplace_back( "   N H "+ path_to_dftb +"/N-H.skf\n");
-			inp_text.emplace_back( "   N O "+ path_to_dftb +"/N-O.skf\n");
-			inp_text.emplace_back( "   N N "+ path_to_dftb +"/N-N.skf\n");
-			inp_text.emplace_back( "   S S "+ path_to_dftb +"/S-S.skf\n");
-			inp_text.emplace_back( "   S H "+ path_to_dftb +"/S-H.skf\n");
-			inp_text.emplace_back( "   S C "+ path_to_dftb +"/S-C.skf\n");
-			inp_text.emplace_back( "   S O "+ path_to_dftb +"/S-O.skf\n");
-			inp_text.emplace_back( "   S N "+ path_to_dftb +"/S-N.skf\n");
-			inp_text.emplace_back( "   N S "+ path_to_dftb +"/N-S.skf\n");
-			inp_text.emplace_back( "   O S "+ path_to_dftb +"/O-S.skf\n");
-			inp_text.emplace_back( "   H S "+ path_to_dftb +"/H-S.skf\n");
-			inp_text.emplace_back( "   C S "+ path_to_dftb +"/C-S.skf\n");
-			inp_text.emplace_back(gEnd)
+			inp_text.emplace_back( "   C H "+ path_to_dftb_ +"/C-H.skf\n");
+			inp_text.emplace_back( "   C O "+ path_to_dftb_ +"/C-O.skf\n");
+			inp_text.emplace_back( "   C N "+ path_to_dftb_ +"/C-N.skf\n");
+			inp_text.emplace_back( "   H C "+ path_to_dftb_ +"/H-C.skf\n");
+			inp_text.emplace_back( "   H H "+ path_to_dftb_ +"/H-H.skf\n");
+			inp_text.emplace_back( "   H O "+ path_to_dftb_ +"/H-O.skf\n");
+			inp_text.emplace_back( "   H N "+ path_to_dftb_ +"/H-N.skf\n");
+			inp_text.emplace_back( "   O C "+ path_to_dftb_ +"/O-C.skf\n");
+			inp_text.emplace_back( "   O H "+ path_to_dftb_ +"/O-H.skf\n");
+			inp_text.emplace_back( "   O N "+ path_to_dftb_ +"/O-N.skf\n");
+			inp_text.emplace_back( "   O O "+ path_to_dftb_ +"/O-O.skf\n");
+			inp_text.emplace_back( "   N C "+ path_to_dftb_ +"/N-C.skf\n");
+			inp_text.emplace_back( "   N H "+ path_to_dftb_ +"/N-H.skf\n");
+			inp_text.emplace_back( "   N O "+ path_to_dftb_ +"/N-O.skf\n");
+			inp_text.emplace_back( "   N N "+ path_to_dftb_ +"/N-N.skf\n");
+			inp_text.emplace_back( "   S S "+ path_to_dftb_ +"/S-S.skf\n");
+			inp_text.emplace_back( "   S H "+ path_to_dftb_ +"/S-H.skf\n");
+			inp_text.emplace_back( "   S C "+ path_to_dftb_ +"/S-C.skf\n");
+			inp_text.emplace_back( "   S O "+ path_to_dftb_ +"/S-O.skf\n");
+			inp_text.emplace_back( "   S N "+ path_to_dftb_ +"/S-N.skf\n");
+			inp_text.emplace_back( "   N S "+ path_to_dftb_ +"/N-S.skf\n");
+			inp_text.emplace_back( "   O S "+ path_to_dftb_ +"/O-S.skf\n");
+			inp_text.emplace_back( "   H S "+ path_to_dftb_ +"/H-S.skf\n");
+			inp_text.emplace_back( "   C S "+ path_to_dftb_ +"/C-S.skf\n");
+			inp_text.emplace_back(gEnd);
 		break;
 		case OPT:
 			grpName = " $statpt ";
@@ -243,9 +246,9 @@ gms_group::gms_group():
 		case PCM:
 			grpName = " $pcm ";
 			inp_text.emplace_back(grpName);
-			inp_text.emplace_bacl(" solvnt=");
-			inp_text.emplace_bacl("h2o "); 		// variable 2
-			inp_text.emplace_bacl(gEnd);
+			inp_text.emplace_back(" solvnt=");
+			inp_text.emplace_back("h2o "); 		// variable 2
+			inp_text.emplace_back(gEnd);
 		break;
 		case GUESS:
 			grpName = " $guess ";
@@ -312,7 +315,7 @@ gms_group::gms_group(gms_group&& rhs) noexcept	:
 	grpName( move(rhs.grpName) )				{	
 }
 /**************************************************/
-gms_group& operator=(gms_group&& rhs) noexcept{
+gms_group& gms_group::operator=(gms_group&& rhs) noexcept{
 	if( this != &rhs ){
 		group	= move(rhs.group);						
 		inp_text= move(rhs.inp_text);					
@@ -321,9 +324,9 @@ gms_group& operator=(gms_group&& rhs) noexcept{
 	return *this;
 }
 /**************************************************/
-friend std::ostream& gms_group::operator<<(std::ostream& out, gms_group& grp){
-	for ( int i=0;i<inp_text.size();i++){
-		return out << inp_text[i];	
+std::ostream& operator<<(std::ostream& out, gms_group& grp){
+	for ( int i=0;i<grp.inp_text.size();i++){
+		return out << grp.inp_text[i];	
 	}
 }
 //====================================================
@@ -437,7 +440,7 @@ void gms_input::init(	int chg				,
 	
 	switch ( QMlevel ){
 		case DFT:
-			groups[0].inp_text.emplace_back( groups[0].grp_name );
+			groups[0].inp_text.emplace_back( groups[0].grpName );
 			groups[0].inp_text.emplace_back( " dfttyp=");
 			groups[0].inp_text.emplace_back( dfttyp );
 			groups[0].inp_text.emplace_back( "swoff=" );
@@ -445,16 +448,16 @@ void gms_input::init(	int chg				,
 			groups[0].inp_text.emplace_back( gEnd );			
 		break;
 		case MP2:
-			groups[0].inp_text.emplace_back( groups[0].grp_name );
+			groups[0].inp_text.emplace_back( groups[0].grpName );
 			groups[0].inp_text.emplace_back( " mplevl=" );
-			groups[0].inp_text.emplace_back( std::int_to_string(2) );
+			groups[0].inp_text.emplace_back( std::to_string(2) );
 			groups[0].inp_text.emplace_back( gEnd );
 		case DFTB2:
 			groups.emplace_back( GMS_Group::DFTB );
 		break;
 		case DFTB3:
 			groups.emplace_back( GMS_Group::DFTB );
-			groups[ groups.size()-1 ].input_text[3] = "3"
+			groups[ groups.size()-1 ].inp_text[3] = "3";
 		break;
 	}
 	
@@ -462,13 +465,13 @@ void gms_input::init(	int chg				,
 		case HF:
 		case MP2:
 		case DFT:
-			groups[2].inp_text.emplace_back(grpName);
+			groups[2].inp_text.emplace_back(groups[2].grpName);
 			groups[2].inp_text.emplace_back("ngauss=");
-			groups[2].inp_text.emplace_back( int_to_string(basis_set.ngauss) );
+			groups[2].inp_text.emplace_back( std::to_string(basis_set.ngauss) );
 			groups[2].inp_text.emplace_back("ndfunc=");
-			groups[2].inp_text.emplace_back( int_to_string(basis_set.ndfunc) );
+			groups[2].inp_text.emplace_back( std::to_string(basis_set.ndfunc) );
 			groups[2].inp_text.emplace_back("ndpunc=");
-			groups[2].inp_text.emplace_back( int_to_string(basis_set.npfunc) );
+			groups[2].inp_text.emplace_back( std::to_string(basis_set.npfunc) );
 			if ( basis_set.ndiffuseP ) 	{
 				groups[2].inp_text.emplace_back("diffp=");
 				groups[2].inp_text.emplace_back(".t.");
@@ -498,9 +501,9 @@ bool gms_input::load_default_options(string path_dir){
 	if ( IF_file(file_p.c_str() ) ){
 		while( !gms_file.eof() ){
 			gms_file.getline(gms_l,50);
-			Line line(gms_file);
+			Line line(gms_l);
 			if ( lin == 1 && line.words[2] == "TRUE" ){
-				change_p true;
+				change_p = true;
 			}
 			if ( change_p ){
 				if ( lin == 2 )
@@ -518,7 +521,7 @@ bool gms_input::load_default_options(string path_dir){
 				else if ( lin == 8 )
 					disp	= line.words[2];
 				else if ( lin == 9 )
-					swoff	= line.get_double[2];
+					swoff	= line.get_double(2);
 				else if ( lin == 10 )
 					dfttyp	= line.words[2];
 				else if ( lin == 11 ){
@@ -526,13 +529,13 @@ bool gms_input::load_default_options(string path_dir){
 					else if ( line.words[2] == "ROHF") scftyp = ROHF;
 				}
 				else if ( lin == 12 )
-					ethrsh = line.get_double[2];
+					ethrsh = line.get_double(2);
 				else if ( lin == 13 )
-					swdiis = line.get_double[2];
+					swdiis = line.get_double(2);
 				else if ( lin == 14 )
 					guess  = line.words[2];
 				else if ( lin == 15 )
-					damph  = line.get_double[2];
+					damph  = line.get_double(2);
 				else if ( lin == 16 )
 					alg    = line.words[2];
 				else if ( lin == 17 )
@@ -559,18 +562,18 @@ bool gms_input::load_default_options(string path_dir){
 	
 }
 /**************************************************/
-void gms_input::load_molecule_info( system& molecule ){
+void gms_input::load_molecule_info( molecule& mol ){
 	gms_group data_group(GMS_Group::DATA);
-	for(int i=0;i<molecule.nAtoms;i++){
-		data_group.inp_text.emplace_back( molecule.atoms[i].element );
+	for(int i=0;i<mol.nAtoms;i++){
+		data_group.inp_text.emplace_back( mol.atoms[i].element );
 		data_group.inp_text.emplace_back( " " );
-		data_group.inp_text.emplace_back( molecule.atoms[i].aNmb );
+		data_group.inp_text.emplace_back( std::to_string(mol.atoms[i].aNmb) );
 		data_group.inp_text.emplace_back( " " );
-		data_group.inp_text.emplace_back( molecule.atoms[i].xc );
+		data_group.inp_text.emplace_back( std::to_string(mol.atoms[i].xc) );
 		data_group.inp_text.emplace_back( " " );
-		data_group.inp_text.emplace_back( molecule.atoms[i].yc );
+		data_group.inp_text.emplace_back( std::to_string(mol.atoms[i].yc) );
 		data_group.inp_text.emplace_back( " " );
-		data_group.inp_text.emplace_back( molecule.atoms[i].zc );
+		data_group.inp_text.emplace_back( std::to_string(mol.atoms[i].zc) );
 		data_group.inp_text.emplace_back( " " );	
 	}
 	data_group.inp_text.emplace_back(gEnd);
@@ -605,7 +608,7 @@ void gms_input::restart_input(	const char* inp_name,
 void gms_input::write_input(std::string out_name){
 	out_name += ".inp";
 	fl_data.open( out_name.c_str() );
-	for( int i=0;i<groups.size();i++){
+	for(unsigned int i=0;i<groups.size();i++){
 		fl_data << groups[i];
 	}
 	fl_data << endl;

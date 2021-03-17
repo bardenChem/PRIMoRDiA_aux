@@ -22,7 +22,7 @@
 #include <string>
 #include <iostream>
 
-class system;
+class molecule;
 
 /*********************************************************************/
 enum GMS_Group{	
@@ -33,7 +33,7 @@ enum GMS_Group{
 //----------------------------
 enum GMS_TheoryLevel { 	
 	HF, DFT, DFTB2, DFTB3,
-	FMO , P_HF, Semi,						
+	FMO , P_HF, Semi,MP2,						
 	NumOfTheory
 };
 //----------------------------
@@ -105,8 +105,8 @@ class gms_group{
 		gms_group& operator=(const gms_group& rhs);
 		gms_group(gms_group&& rhs) noexcept;
 		gms_group& operator=(gms_group&& rhs) noexcept;
-		friend std::ostream& operator<<(std::ostream& out, gms_group& grp);
 };
+std::ostream& operator<<(std::ostream& out, gms_group& grp);
 /*********************************************************************/
 class gms_input{
 	public:
@@ -135,10 +135,10 @@ class gms_input{
 		double ethrsh;
 		double damph;
 		std::string alg;
-		stD::string disp;
+		std::string disp;
 		//data to write
 		std::vector<gms_group> groups;
-		std::ostream fl_data;		
+		std::ofstream fl_data;		
 		
 		//constructors and methods
 		gms_input();
@@ -146,8 +146,8 @@ class gms_input{
 		gms_input(const gms_input& rhs) = delete;
 		gms_input& operator=(gms_input& rhs) = delete;
 		void init(int chg, unsigned int mpcty, std::string rtype, std::string method, std::string basis);
-		bool load_default_options(const char* path_dir);
-		void load_molecule_info( system& molecule );
+		bool load_default_options(std::string path_dir);
+		void load_molecule_info( molecule& mol );
 		GMS_basis init_basis(std::string& bsis_nm);
 		void read_input(const char* file_name);
 		void restart_input(const char* inp_name, const char* vec_data);

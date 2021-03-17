@@ -17,16 +17,21 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <iostream>
 
+
+#include "../include/global.h"
 #include "../include/atom.h"
 #include "../include/molecule.h"
 #include "../include/XYZ.h"
 
 using std::string;
 using std::vector;
-using std::cout;
-using std::endl;
 using std::move;
+using std::endl;
 
 /*********************************************************************/
 XYZ::XYZ()									:
@@ -45,10 +50,10 @@ XYZ::XYZ(const char* xyz_file)			:
 	string tmp_str;
 
 	if ( IF_file( xyz_file ) ){
-		std::ifstream buf(_file);
+		std::ifstream buf(xyz_file);
 		while( !buf.eof() ){
 			buf.getline(tmp_line,30);
-			std::sstream _stream(tmp_line);
+			std::stringstream _stream(tmp_line);
 			if ( line == 0 ){
 				_stream >> nAtoms;
 			}else if ( line == 1 ){
@@ -107,20 +112,20 @@ void XYZ::write_xyz(std::string out_name){
 	std::ofstream out_file;
 	out_file.open( out_name.c_str() );
 	out_file << std::fixed; 
-	out_file << std::precision(4);
+	out_file.precision(4);
 	
 	out_file << nAtoms << endl;
 	out_file << commentary << endl;
-	for(int i=0;i<nAtoms;i++){
+	for(unsigned int i=0;i<nAtoms;i++){
 		out_file << atoms[i].element	<< " "
 				 << atoms[i].xc			<< " "
 				 << atoms[i].yc 		<< " "
-				 << atoms[i].zc 		<< "\n"
+				 << atoms[i].zc 		<< "\n";
 	}
 }
 /*********************************************************************/
 molecule XYZ::get_molecule(){
-	molecule mol(atoms);
+	molecule mol(atoms,name);
 	return mol;
 }
 //////////////////////////////////////////////////////////////////////

@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
+#include <cmath>
 
 
 #include "../include/global.h"
@@ -31,6 +33,7 @@
 using std::string;
 using std::vector;
 using std::move;
+using std::endl;
 
 //=========================================================
 
@@ -159,28 +162,28 @@ void pdbModel::write_model(std::string out_name){
 	pdb_file << title << endl;
 	pdb_file << remark << endl;
 	
-	unsigned int i,j,cont = 0;
-	for(i;i<nResidues;i++){
-		for(j;j<monomers[i].nAtoms;j++){
+	unsigned int i,j,cont;
+	for(i=0;i<nResidues;i++){
+		for(j=0;j<monomers[i].nAtoms;j++){
 			pdb_file<< std::setw(6) << std::left  << "ATOM" 
 					<< " "
 					<< std::setw(4) << std::right  << (cont+1) 
 					<< " "
-					<< std::setw(4) << monomers[i].r_atoms[j].atom_name; 
+					<< std::setw(4) << monomers[i].r_atoms[j].atom_name
 					<< " "
-					<< std::left << std::setw(4) << monomers[i].res3n; 
+					<< std::left << std::setw(4) << monomers[i].r_atoms[0].res_name
 					<< " "
 					<< std::right << std::setw(4) << (i+1)
 					<< std::setw(5) << " "
-					<< std::setw(7) << monomers[i].r_atoms[j].xc; 
+					<< std::setw(7) << monomers[i].r_atoms[j].xc
 					<< " "
-					<< std::setw(7) << monomers[i].r_atoms[j].yc;
+					<< std::setw(7) << monomers[i].r_atoms[j].yc
 					<< " "
-					<< std::setw(7) << monomers[i].r_atoms[j].zc;
+					<< std::setw(7) << monomers[i].r_atoms[j].zc
 					<< " "
 					<< std::setw(5)  << "1.00"
 					<< " "
-					<< std::setw(5) << monomers[i].r_atoms[j].b_factor;
+					<< std::setw(5) << monomers[i].r_atoms[j].b_factor
 					<< "\n";
 					cont++;
 		}
@@ -191,7 +194,7 @@ void pdbModel::write_model(std::string out_name){
 /*********************************************************/
 void pdbModel::remove_atom(unsigned int res, unsigned int at){	
 	
-	monomers[res].r_atoms.erase( monomers[res].r_atoms.begin(), at);
+	monomers[res].r_atoms.erase( monomers[res].r_atoms.begin()+at);
 	monomers[res].nAtoms--;
 	nAtoms--;
 	
@@ -199,35 +202,35 @@ void pdbModel::remove_atom(unsigned int res, unsigned int at){
 /*********************************************************/
 void pdbModel::remove_residue(unsigned int i){
 	nAtoms -= monomers[i].nAtoms;
-	monomers.erase( monomers.begin(), i);
+	monomers.erase( monomers.begin() +i);
 	nResidues--;
 }
 /*********************************************************/
 void pdbModel::prune_atoms(){
-	unsigned int i,j = 0;	
-	for(i;i<nResidues;i++){
-		for(j;j<monomers[i].nAtoms;j++){
-			if ( monomers[i].r_atoms[j].res_name[0] == "B" ) 
+	unsigned int i,j;	
+	for(i=0;i<nResidues;i++){
+		for(j=0;j<monomers[i].nAtoms;j++){
+			if ( monomers[i].r_atoms[j].res_name.substr(0,1) == "B" ) 
 				this->remove_atom( i, j ); 	
 		}
 	}
 }
 /*********************************************************/
 void pdbModel::remove_waters(){
-	unsigned int i = 0;
-	for(i;i<nResidues;i++){
+	unsigned int i;
+	for(i=0;i<nResidues;i++){
 		if ( monomers[i].type == WAT ) this->remove_residue(i);
 	}
 }
 /*********************************************************/
 void pdbModel::remove_waters(double radius, unsigned int res){
-	unsigned int i = 0;
+	unsigned int i;
 	double refXC, refYC, refZC, distTemp = 0.000;
 	refXC = monomers[res].r_atoms[0].xc;
 	refYC = monomers[res].r_atoms[0].yc;
 	refZC = monomers[res].r_atoms[0].zc;
 	
-	for(i;i<nResidues;i++){
+	for(i=0;i<nResidues;i++){
 		if ( monomers[i].type == WAT ) {
 			distTemp =  (monomers[i].r_atoms[0].xc - refXC)*(monomers[i].r_atoms[0].xc - refXC);
 			distTemp += (monomers[i].r_atoms[0].yc - refYC)*(monomers[i].r_atoms[0].yc - refYC);
@@ -242,13 +245,14 @@ void pdbModel::remove_waters(double radius, unsigned int res){
 void pdbModel::remove_ions(){
 	unsigned int i = 0;
 	for(i;i<nResidues;i++){
-		if ( monomers[i].type == ION ) this->remove_residue(i)
+		if ( monomers[i].type == ION ) this->remove_residue(i);
+	}
 }
 /*********************************************************/
 void pdbModel::split_complex(std::string mol){
-	unsigned int i = nResidues-1;
-	for(i;i>0;i--){
-		if ( mol == monomers[i].res3n ) {
+	unsigned int i;
+	for(i=nResidues-1 ;i>0;i--){
+		if ( mol == monomers[i].r_atoms[0].res_name ) {
 			pdbModel ligand;
 			ligand.monomers.emplace_back(monomers[i]);
 			ligand.title  = "Ligand " + mol;
@@ -261,7 +265,7 @@ void pdbModel::split_complex(std::string mol){
 /*********************************************************/
 void pdbModel::built_complex(const char* pdb_mol){
 	pdbModel temp(pdb_mol,0);
-	monomers.emplace_black( temp.monomers[0] );
+	monomers.emplace_back( temp.monomers[0] );
 	nResidues++;
 	nAtoms += temp.monomers[0].nAtoms;
 }

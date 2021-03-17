@@ -32,15 +32,14 @@ std::string remove_extension(const char* file_name);
 std::string change_extension(const char* file_name,std::string new_ext);
 void rename_file(const char* file_name,std::string new_file_name);
 std::string get_file_name(const char* path_name);
-// VECTO MATH/STAT OPERATIONS
+// VECTOR MATH/STAT OPERATIONS
 double mean_dvec(std::vector<double>& vec);
 double max_dvec(std::vector<double>& vec);
 double min_dvec(std::vector<double>& vec);
 double sum_dvec(std::vector<double>& vec);
 double sd_dvec(std::vector<double>& vec);
 std::vector<double> scale_dvec(std::vector<double>& vec);
-std::string get_res1n( int i );
-std::string get_res3n( int i );
+
 
 float get_atom_mass(std::string sym);
 int get_atomic_number(std::string sym);

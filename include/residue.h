@@ -30,15 +30,17 @@ enum AAres{
 };
 /*********************************************************************/
 enum DNAres{
+	OTHd=-1,
 	DC, DG, DT, DA
 };
 /*********************************************************************/
 enum IONres{
-	K+,Ca+,Cl-,Mg+,SO4-
+	OTHi=-1,
+	K,Ca,Cl,Mg,SO4
 };
 /*********************************************************************/
 enum res_type {
-	UNK, WAT, HOH, ION, AA, DNA, RNA
+	UNK, WAT, ION, AA, DNA, RNA, LIG
 };
 /*********************************************************************/
 
@@ -49,6 +51,8 @@ class residue{
 	public:
 		res_type type;
 		AAres AAname;
+		IONres IONname;
+		DNAres DNAname;
 		bool ligand;
 		bool terminal;
 		bool first;
@@ -64,8 +68,8 @@ class residue{
 		residue& operator=(const residue& rhs);
 		residue( residue&& rhs) noexcept;
 		residue& operator=( residue&& rhs) noexcept;
+		res_type get_type();
 		void set_charge();
-		bool is_ion();
 };
 
 #endif

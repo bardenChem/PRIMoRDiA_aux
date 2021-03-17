@@ -22,12 +22,12 @@
 #include <string>
 #include <fstream>
 
-class system;
+class molecule;
 
 //=======================================
 enum OrcaRunType{
-	SP,
-	OPT,	
+	SP			,
+	OPT			,	
 	NUmOfopts
 };
 /********************************************************************/
@@ -38,13 +38,13 @@ class orcaInput{
 		unsigned int nprocs;
 		std::string qm_method;
 		std::string rtyp;
-		std::ostream out_fl;
 		std::string basis;
+		std::ofstream out_fl;
 		orcaInput();	
 		~orcaInput();
 		orcaInput(const orcaInput& rhs) = delete;
 		orcaInput& operator=(const orcaInput& rhs) = delete;
-		void init(const system& molecule,int chg, int mlt, std::string& mth, std::string& _rtyp, int _nprocs,std::string _basis);
+		void init(const molecule& mol,int chg, int mlt, std::string& mth, std::string& _rtyp, int _nprocs,std::string _basis);
 		void write_input_file(std::string out_file);
 };
 

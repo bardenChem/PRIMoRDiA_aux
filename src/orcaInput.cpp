@@ -24,26 +24,24 @@
 #include "../include/global.h"
 #include "../include/molecule.h" 
 #include "../include/geometry.h"
-#include "../include/mopacInput.h"
+#include "../include/orcaInput.h"
 
 using std::string;
 using std::vector;
 
 /***************************************/
-orcaInput::orcaInput():
-	multi(1),
-	charge(0),
-	nprocs(4),
-	rtyp("SinglePoint"),
-	basis("3-21G"){
-	
+orcaInput::orcaInput()	:
+	multi(1)			,
+	charge(0)			,
+	nprocs(4)			,
+	qm_method("HF")		,
+	rtyp("SinglePoint")	,
+	basis("3-21G")		{
 }	
 /*****************************************************/
-orcaInput::~orcaInput(){
-	
-}
+orcaInput::~orcaInput(){}
 /*****************************************************/
-void orcaInput::init(	const system& molecule	,
+void orcaInput::init(	const molecule& mol		,
 						int chg					, 
 						int mlt					,	 
 						std::string& mth		,
@@ -51,18 +49,18 @@ void orcaInput::init(	const system& molecule	,
 						int _nprocs				,
 						std::string _basis)		{
 	
-	multi	= mlt;
-	charge	= chg;
-	method	= mth;
-	rtyp	= _rtyp;
-	nprocs	= _nprocs;
-	basis	= _basis;
+	multi		= mlt;
+	charge		= chg;
+	qm_method	= mth;
+	rtyp		= _rtyp;
+	nprocs		= _nprocs;
+	basis		= _basis;
 						
 	vector<string> keywords;
 	keywords.emplace_back("!PAL");
 	keywords.emplace_back( std::to_string(_nprocs) );
 	keywords.emplace_back("\n");
-	keywords.emplace_back("!"+method);
+	keywords.emplace_back("!"+qm_method);
 	keywords.emplace_back(" "+rtyp);
 	keywords.emplace_back(" "+basis);
 	keywords.emplace_back("\n");	

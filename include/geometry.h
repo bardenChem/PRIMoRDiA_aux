@@ -21,9 +21,10 @@
 #include <vector>
 #include <string>
 
+#include "../include/PDB.h"
+#include "../include/XYZ.h"
+
 class molecule;
-class PDB;
-class XYZ;
 
 //===============================================
 enum units	{ Ang, Bohr };

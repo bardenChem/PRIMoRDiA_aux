@@ -27,13 +27,13 @@ using std::string;
 using std::vector;
 
 ////////////////////////////////////////////////////////////////////////////
-std::map<string, int> AAnHydrogens = {
-	{"ALA", 5}, {"ARG",13}, {"ASN", 6}, {"ASP", 4}, 
-	{"CYS", 5}, {"GLN", 8},	{"GLU", 6}, {"GLY", 3}, 
-	{"HIS", 8}, {"ILE",11}, {"LEU",11},	{"LYS",13},
-	{"MET", 9}, {"PHE", 9}, {"PRO", 7}, {"SER", 5}, 
-	{"THR", 7}, {"TRP",10}, {"TYR", 9}, {"VAL", 9}
-}
+std::map<AAres, int> AAnHydrogens = {
+	{ALA, 5}, {ARG,13}, {ASN, 6}, {ASP, 4}, 
+	{CYS, 5}, {GLN, 8},	{GLU, 6}, {GLY, 3}, 
+	{HIS, 8}, {ILE,11}, {LEU,11}, {LYS,13},
+	{MET, 9}, {PHE, 9}, {PRO, 7}, {SER, 5}, 
+	{THR, 7}, {TRP,10}, {TYR, 9}, {VAL, 9}
+};
 /*********************************************************/
 std::map<string, AAres> R3name = {
 	{"ALA", ALA}, {"ARG",ARG}, {"ASN", ASN}, {"ASP", ASP}, 
@@ -42,7 +42,7 @@ std::map<string, AAres> R3name = {
 	{"MET", MET}, {"PHE",PHE}, {"PRO", PRO}, {"SER", SER}, 
 	{"THR", THR}, {"TRP",TRP}, {"TYR", TYR}, {"VAL", VAL},
 	{"HID", HIS}, {"HIE",HIS}, {"HIP", HIS}
-}
+};
 /*********************************************************/
 std::map<char, AAres>  R1name = {
 	{'A', ALA}, {'R',ARG}, {'N', ASN}, {'D', ASP}, 
@@ -50,12 +50,39 @@ std::map<char, AAres>  R1name = {
 	{'H', HIS}, {'I',ILE}, {'L', LEU}, {'K', LYS},
 	{'M', MET}, {'F',PHE}, {'P', PRO}, {'S', SER}, 
 	{'T', THR}, {'W',TRP}, {'Y', TYR}, {'V', VAL}
-}
-
+};
+/*********************************************************/
+std::map<string, IONres> ions_t = {
+	{"Cl-", IONres::Cl}, {"K+", IONres::K}, {"Ca+",IONres::Ca},
+	{"Mg+", IONres::Mg}, {"SO4-",IONres::SO4}
+};
+/*********************************************************/
+std::map<IONres, int> ions_chg = {
+	{IONres::Cl, -1}, {IONres::K, 1}, {IONres::Ca, 2},
+	{IONres::Mg,  2}, {IONres::SO4, -2}
+};
+/*********************************************************/
+std::map<string, DNAres> DNA_t = {
+	{"DC", DNAres::DC}, {"DA", DNAres::DA}, 
+	{"DT", DNAres::DT},	{"DG", DNAres::DG}
+};
+/*********************************************************/
+std::map<string, res_type> solvent_t = {
+	{"HOH", res_type::WAT}, 
+	{"WAT", res_type::WAT},
+	{"SOL", res_type::WAT}
+};
+/*********************************************************/
+std::map<string, res_type> lig_t = {
+	{"MOL", res_type::LIG}, 
+	{"LIG", res_type::LIG}
+};
 ///////////////////////////////////////////////////////////
 residue::residue()	:
 	type(UNK)		,
 	AAname(OTH)     ,
+	DNAname(OTHd)	,
+	IONname(OTHi)	,
 	ligand(false)	,
 	terminal(false)	,
 	first(false)    ,
@@ -65,9 +92,11 @@ residue::residue()	:
 	nAtoms(0)		{
 }
 /*********************************************************/
-residue::residue( vector<pdbAtom> resAtoms ):				
+residue::residue( vector<pdbAtom> resAtoms ):
+	AAname(OTH)								,
+	DNAname(OTHd)							,
+	IONname(OTHi)							,
 	r_atoms(resAtoms)						,
-	type(resType)							,
 	ligand(false)							,
 	terminal(false)							,
 	first(false)        					,
@@ -75,6 +104,12 @@ residue::residue( vector<pdbAtom> resAtoms ):
 	fCharge(0.0)							{
 		
 
+	type = get_type();
+	if 		( type == res_type::AA  ) AAname = R3name[r_atoms[0].res_name];
+	else if ( type == res_type::DNA ) DNAname= DNA_t[r_atoms[0].res_name];
+	else if ( type == res_type::ION ) IONname= ions_t[r_atoms[0].res_name];
+	else if ( type == res_type::LIG ) ligand = true;
+		
 	for(int i=0;i<resAtoms.size();i++){
 		if ( resAtoms[i].is_hydrogen() ) nHydrogens++;
 	}
@@ -97,8 +132,6 @@ residue::residue(const residue& rhs):
 /*********************************************************/
 residue& residue::operator=(const residue& rhs){
 	if ( this != &rhs ){
-		res1n 		= rhs.res1n;				
-		res3n 		= rhs.res3n;			
 		type 		= rhs.type;
 		AAname		= rhs.AAname;
 		ligand		= rhs.ligand;				
@@ -143,22 +176,26 @@ residue& residue::operator=( residue&& rhs) noexcept{
 	return *this;	
 }
 /*********************************************************/
-bool residue::is_ion(){
-	if ( r_atoms[0].res_name == "Cl-" ||
-		 r_atoms[0].res_name == "Na+" ||
-		 r_atoms[0].res_name == "K+"  ||
-		 r_atoms[0].res_name == "Mg+" ||
-		 r_atoms[0].res_name == "Zn+" ||
-		 r_atoms[0].res_name == "SO4" ) {
+res_type residue::get_type(){
+	res_type rt = res_type::UNK;
+	if ( R3name.find(r_atoms[0].res_name) == R3name.end() ){
+		if ( ions_t.find(r_atoms[0].res_name) == ions_t.end() ){
+			if ( DNA_t.find(r_atoms[0].res_name) == DNA_t.end() ){
+				if ( solvent_t.find(r_atoms[0].res_name) == solvent_t.end() ){
+					if ( lig_t.find(r_atoms[0].res_name) == lig_t.end() ){
+						return rt;
+					}else rt = res_type::LIG;
+				}else rt = res_type::WAT;
+			}else rt= res_type::DNA;			
+		}else rt = res_type::ION;		
+	}else rt = res_type::AA;
 	
-		type = ION;
-		return true;
-	}
+	return rt;
 }
 /*********************************************************/
 void residue::set_charge(){
 	
-	int base_HN = get_AAnHy(AAname);
+	int base_HN = AAnHydrogens[AAname];
 	
 	if ( type == AA ){
 		switch ( AAname ){
