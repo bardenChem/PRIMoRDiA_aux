@@ -20,19 +20,20 @@
 #include <string>
 #include <vector>
 
-class pdbModel;
+#include "../include/pdbModel.h"
+
 
 //-----------------
 enum mdPKG{
 	undef, AMBER,
 	GROMACS, NumOfPKGs
-}
+};
 //-----------------
 enum mdTask{
 	undefined, parametrization,	topology,
 	minimization, equilibration, production,
 	NumofTasks
-}
+};
 /****************************************/
 class MDprep{
 	public:
@@ -60,7 +61,7 @@ class MDprep{
 		void prepare_equilibration();
 		void prepare_production();
 		void organize_dir_files();
-}
+};
 /////////////////////////////////////////
 
 #endif

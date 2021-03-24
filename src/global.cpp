@@ -80,7 +80,10 @@ bool check_file_ext(string ext				,
 					const char* file_name){
 
 	fs::path f_name(file_name);
-	if ( f_name.extension() == ext ) return true;
+	//string filename_ext = f_name.extension();
+	if ( f_name.extension() == ext ){
+		return true;
+	}
 	else return false;
 }
 /***************************************************************************/

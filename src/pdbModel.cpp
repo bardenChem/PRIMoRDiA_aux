@@ -269,4 +269,41 @@ void pdbModel::built_complex(const char* pdb_mol){
 	nResidues++;
 	nAtoms += temp.monomers[0].nAtoms;
 }
+/*********************************************************/
+double pdbModel::get_distance(int a1, int a2){
+	int count_a1	= 0;
+	int count_a2	= 0;
+	int resnmb_a1	= 0;
+	int resnmb_a2	= 0;
+	pdbAtom atom1;
+	pdbAtom atom2;
+	
+	for( int i=0;i<monomers.size();i++){
+		if ( count_a1 < a1 ){
+			count_a1 += monomers[i].nAtoms;		
+		}else{
+			resnmb_a1 = i;
+		}
+		if ( count_a2 < a2 ){
+			count_a2 += monomers[i].nAtoms;		
+		}else{
+			resnmb_a2 = i;
+		}
+	}
+	
+	for(int j=0;j<monomers[resnmb_a1].nAtoms;j++){
+		if ( monomers[resnmb_a1].r_atoms[j].indx == a1 ){
+			atom1 = monomers[resnmb_a1].r_atoms[j];
+		}
+	}
+	
+	for(int j=0;j<monomers[resnmb_a2].nAtoms;j++){
+		if ( monomers[resnmb_a2].r_atoms[j].indx == a2 ){
+			atom2 = monomers[resnmb_a2].r_atoms[j];
+		}
+	}
+	
+	return atom1.get_distance(atom2);
+	
+}
 //////////////////////////////////////////////////////////

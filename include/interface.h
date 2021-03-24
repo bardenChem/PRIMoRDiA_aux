@@ -29,10 +29,12 @@ class interface{
 		~interface();
 		interface(int argc, char* argv[]);
 		interface(const interface& rhs) = delete;
-		interface& operator=(const interface& rhs) = delete;		
+		interface& operator=(const interface& rhs) = delete;	
 		void run();
+		void input_gamess();
 		void print_options();
 		void help();
+		void test();
 };
 
 #endif

@@ -51,5 +51,6 @@ class pdbModel{
 		void remove_residue(unsigned int i);
 		void split_complex(std::string mol);
 		void built_complex(const char* pdb_mol);
+		double get_distance(int a1, int a2);
 };
 #endif 

@@ -34,8 +34,8 @@ using std::move;
 
 //=================================
 MDprep::MDprep()		:
-	mdPKG(undef)		,
-	mdTask(undefined)	,
+	program(undef)		,
+	job(undefined)		,
 	net_chg(0)			,
 	ref_temp(310.15)	,
 	prod_time(10)		,
@@ -47,8 +47,8 @@ MDprep::MDprep()		:
 MDprep::MDprep(std::string bs_name	,
 				mdPKG pkg			,
 				mdTask Job			):
-	mdPKG(pkg)						,
-	mdTask(Job)						,
+	program(pkg)					,
+	job(Job)						,
 	net_chg(0)						,
 	ref_temp(310.15)				,
 	prod_time(10)					,
@@ -63,7 +63,7 @@ MDprep::MDprep(std::string bs_name	,
 			top_file = change_extension( sys_basename.c_str(), ".top" );
 			crd_file = change_extension( sys_basename.c_str(), ".gro" );
 		break;
-		case default:
+		default:
 			top_file = "_";
 			crd_file = "_";
 		break;

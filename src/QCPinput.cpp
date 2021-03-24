@@ -28,7 +28,7 @@
 #include "../include/gamessInput.h"
 #include "../include/orcaInput.h"
 #include "../include/mopacInput.h"
-#include "../include/QCinput.h"
+#include "../include/QCPinput.h"
 
 using std::string;
 using std::vector;
@@ -38,14 +38,14 @@ using std::move;
 namespace fs = std::experimental::filesystem;
 
 /************************************************************/
-QCPinput::QCPinput()	:
-	program(0)			,
-	base_multi(1)		,
-	base_charge(0)		,
-	QMmethod("HF")		,
-	base_basis("3-21G")	,
-	runtype("Energy")	,
-	geo_ext("xyz")		{
+QCPinput::QCPinput()		:
+	program(package::MOPAC)	,
+	base_multi(1)			,
+	base_charge(0)			,
+	QMmethod("HF")			,
+	base_basis("3-21G")		,
+	runtype("Energy")		,
+	geo_ext("xyz")			{
 		
 }
 /************************************************************/
@@ -53,7 +53,7 @@ QCPinput::QCPinput(	string _geo_ext	  ,
 					string _runtype	  ,
 					string _basis	  ,
 					string _method   ):
-	program(0)							,
+	program(package::MOPAC)				,
 	base_basis(_basis)					,
 	base_charge(0)						,
 	base_multi(1)						,
@@ -64,7 +64,7 @@ QCPinput::QCPinput(	string _geo_ext	  ,
 /************************************************************/
 QCPinput::~QCPinput(){}
 /************************************************************/
-void QCPinput::make_input_from_folder(	int QCP				,
+void QCPinput::make_input_from_folder(	package QCP			,
 										unsigned int bs_mlt	,
 										int bs_chg)			{
 											
@@ -90,26 +90,33 @@ void QCPinput::make_input_from_folder(	int QCP				,
 		string oname = remove_extension( fnames[i].c_str() );
 		switch( program ){
 			case package::GAMESS:
-				gms_input g_input();
+			{
+				gms_input g_input;
 				g_input.init(base_charge,base_multi,runtype,QMmethod, base_basis);
-				g_input.load_molecule_info(geo_file.molecule);
+				g_input.load_molecule_info(geo_file.Molecule);
 				g_input.write_input(oname);
-			break;
+				break;			
+			}
 			case package::MOPAC:
-				mopac_input mpc_input();
+			{
+				mopac_input mpc_input;
 				mpc_input.init(base_charge,base_multi,runtype,QMmethod,base_basis);
-				mpc_input.write_file(geo_file.molecule,oname);
-			break;
+				mpc_input.write_file(geo_file.Molecule,oname);
+				break;
+			}
 			case package::ORCA:
-				orcaInput orc_input();
-				orc_input.init(geo_file.molecule,base_charge,base_multi,QMmethod,runtype,1,base_basis);
+			{
+				orcaInput orc_input;
+				orc_input.init(geo_file.Molecule,base_charge,base_multi,QMmethod,runtype,1,base_basis);
 				orc_input.write_input_file(oname);
+
+			}
 			break;
 		}
 	}
 }
 /************************************************************/								
-void QCPinput::make_input_from_folder_FD(int QCP			,
+void QCPinput::make_input_from_folder_FD(package QCP			,
 										 unsigned int bs_mlt,
 										 int bs_chg			,
 										 int chg_diff		){
@@ -142,43 +149,51 @@ void QCPinput::make_input_from_folder_FD(int QCP			,
 	for(unsigned int i=0;i<fnames.size();i++){
 		geometry geo_file( fnames[i].c_str() );
 		string oname = remove_extension( fnames[i].c_str() );
+		string oname_cat = oname + "_cat";
+		string oname_an = oname + "_an";		
 		switch( program ){
 			case package::GAMESS:
-				gms_input g_input_neu();
-				gms_input g_input_cat();
-				gms_input g_input_an();
+			{
+				gms_input g_input_neu;
+				gms_input g_input_cat;
+				gms_input g_input_an;
 				g_input_neu.init(base_charge,base_multi,runtype,QMmethod, base_basis);
-				g_input_neu.load_molecule_info(geo_file.molecule);
+				g_input_neu.load_molecule_info(geo_file.Molecule);
 				g_input_neu.write_input(oname);
 				g_input_cat.init(cat_charge,ion_multi,runtype,QMmethod, base_basis);
-				g_input_cat.load_molecule_info(geo_file.molecule);
-				g_input_cat.write_input(oname);
+				g_input_cat.load_molecule_info(geo_file.Molecule);
+				g_input_cat.write_input(oname_cat);
 				g_input_an.init(an_charge,ion_multi,runtype,QMmethod, base_basis);
-				g_input_an.load_molecule_info(geo_file.molecule);
-				g_input_an.write_input(oname);			
-			break;
+				g_input_an.load_molecule_info(geo_file.Molecule);
+				g_input_an.write_input(oname_an);			
+				break;			
+			}
 			case package::MOPAC:
-				mopac_input mpc_input_neu();
-				mopac_input mpc_input_cat();
-				mopac_input mpc_input_an();
+			{
+				mopac_input mpc_input_neu;
+				mopac_input mpc_input_cat;
+				mopac_input mpc_input_an;
 				mpc_input_neu.init(base_charge,base_multi,runtype,QMmethod,base_basis);
-				mpc_input_neu.write_file(geo_file.molecule,oname);
+				mpc_input_neu.write_file(geo_file.Molecule,oname);
 				mpc_input_cat.init(cat_charge,ion_multi,runtype,QMmethod,base_basis);
-				mpc_input_cat.write_file(geo_file.molecule,oname);
+				mpc_input_cat.write_file(geo_file.Molecule,oname);
 				mpc_input_an.init(an_charge,ion_multi,runtype,QMmethod,base_basis);
-				mpc_input_an.write_file(geo_file.molecule,oname);				
-			break;
+				mpc_input_an.write_file(geo_file.Molecule,oname);				
+				break;				
+			}
 			case package::ORCA:
-				orcaInput orc_input();
-				orcaInput orc_input_cat();
-				orcaInput orc_input_an();
-				orc_input.init(geo_file.molecule,base_charge,base_multi,QMmethod,runtype,1,base_basis);
+			{
+				orcaInput orc_input;
+				orcaInput orc_input_cat;
+				orcaInput orc_input_an;
+				orc_input.init(geo_file.Molecule,base_charge,base_multi,QMmethod,runtype,1,base_basis);
 				orc_input.write_input_file(oname);
-				orc_input.init(geo_file.molecule,cat_charge,ion_multi,QMmethod,runtype,1,base_basis);
+				orc_input.init(geo_file.Molecule,cat_charge,ion_multi,QMmethod,runtype,1,base_basis);
 				orc_input.write_input_file(oname);
-				orc_input.init(geo_file.molecule,an_charge,ion_multi,QMmethod,runtype,1,base_basis);
+				orc_input.init(geo_file.Molecule,an_charge,ion_multi,QMmethod,runtype,1,base_basis);
 				orc_input.write_input_file(oname);
-			break;
+				break;
+			}
 		}
 	}										 
 }

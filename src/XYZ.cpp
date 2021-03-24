@@ -42,7 +42,7 @@ XYZ::XYZ()									:
 /*********************************************************************/
 XYZ::XYZ(const char* xyz_file)			:
 	name( remove_extension(xyz_file) )	{
-	char tmp_line[30];
+	char tmp_line[100];
 	int line = 0;
 	double tmp_crdx	= 0.0;
 	double tmp_crdy	= 0.0;
@@ -52,20 +52,22 @@ XYZ::XYZ(const char* xyz_file)			:
 	if ( IF_file( xyz_file ) ){
 		std::ifstream buf(xyz_file);
 		while( !buf.eof() ){
-			buf.getline(tmp_line,30);
+			buf.getline(tmp_line,100);
 			std::stringstream _stream(tmp_line);
 			if ( line == 0 ){
 				_stream >> nAtoms;
 			}else if ( line == 1 ){
 				_stream >> commentary;
-			}else{
+			}else if ( line > 1 && line < (nAtoms+2) ){
 				_stream >> tmp_str;
 				_stream >> tmp_crdx;
 				_stream >> tmp_crdy;
 				_stream >> tmp_crdz;
 				atoms.emplace_back(tmp_crdx,tmp_crdy,tmp_crdz,tmp_str);
 			}			
+			line++;
 		}
+		buf.close();
 	}
 }
 /*********************************************************************/

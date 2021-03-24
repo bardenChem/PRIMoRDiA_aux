@@ -22,11 +22,14 @@
 #include "../include/global.h"
 #include "../include/interface.h"
 #include "../include/traj_analysis.h"
+#include "../include/QCPinput.h"
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
+using std::to_string;
+using std::stoi;
 
 /**********************************************************************/
 interface::interface(){}
@@ -34,7 +37,7 @@ interface::interface(){}
 interface::~interface(){}
 /**********************************************************************/
 interface::interface(int argc, char* argv[]):
-	m_argc(argc)						{
+	m_argc(argc)							{
 	
 	for(int i =0;i<m_argc;i++){
 		m_argv.emplace_back(argv[i]);
@@ -79,12 +82,13 @@ void interface::run(){
 	/********************************/
 	//Check if is ok the output from QCP 
 	else if ( m_argv[1] == "-check_QCP_outs" ){
-		
 	}
 	/********************************/
 	//creat input from QCP calculations
 	else if ( m_argv[1] == "-built_QCP_inp" ){
-		
+		if ( m_argv[2] == "gamess"){
+			this->input_gamess();
+		}
 	}
 	/********************************/
 	else if ( m_argv[1] == "-MDprep" ){
@@ -92,11 +96,70 @@ void interface::run(){
 	}
 }
 /**********************************************************************/
-void interface::print_options(){
+void interface::input_gamess(){
+	// Always required options
+	// - geometry extension
+	// - QM method
+	// - Basis Set
+	//Default options 
+	package prog 	= package::GAMESS;
+	string geo_ext	= ".xyz";
+	string QM_		= "am1";
+	string basis_	= "am1";
+	string mode		= "Normal"; // or FD
+	int bcharge		= 0;
+	int bmulti		= 1;
+	string rtype	= "Energy";
+	int charge_diff	= 1;
 	
+	for(int i =0;i<m_argc;i++){
+		if ( m_argv[i] == "-gExt" ){
+			geo_ext = m_argv[i+1];
+		}
+		else if ( m_argv[i] == "-QMm" ){
+			QM_ = m_argv[i+1];
+		}
+		else if ( m_argv[i] == "-basis" ){
+			basis_ = m_argv[i+1];
+		}
+		else if ( m_argv[i] == "-FDcalc" ){
+			mode = "FD";
+		}
+		else if ( m_argv[i] == "-bchg" ){
+			bcharge = stoi(m_argv[i+1]);
+		}
+		else if ( m_argv[i] == "-bmulti" ){
+			bmulti = stoi(m_argv[i+1] );
+		}
+		else if ( m_argv[i] == "-runOP" ){
+			rtype = m_argv[i+1];
+		}
+		else if ( m_argv[i] == "-chgDiff"){
+			charge_diff = stoi(m_argv[i+1]);
+		}
+	}
+	
+	QCPinput run_gms(geo_ext,rtype,basis_,QM_);
+	if ( mode == "FD" ){
+		run_gms.make_input_from_folder_FD(prog,bmulti,bcharge,charge_diff);
+	}else{
+		run_gms.make_input_from_folder(prog,bmulti,bcharge);
+	}
+	
+}
+/**********************************************************************/
+void interface::print_options(){
+	for(unsigned int i=0;i<m_argc;i++){
+		cout << "#" << to_string(i+1) << " " << m_argv[i] << endl;
+	}
 }
 /**********************************************************************/
 void interface::help(){
 	
+}
+/**********************************************************************/
+void interface::test(){
+	QCPinput inpsFromFolder(".xyz","optimize","3-21G","B3LYP");
+	inpsFromFolder.make_input_from_folder_FD(package::GAMESS,1,0,1);
 }
 ////////////////////////////////////////////////////////////////////////

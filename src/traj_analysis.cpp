@@ -1,4 +1,4 @@
-//traj.cpp
+//traj_an.cpp
 
 /*********************************************************************/
 /* This source code file is part of LQQCMMtools software project created 
@@ -26,8 +26,12 @@
 
 #include "../include/traj_analysis.h"
 #include "../include/global.h"
+#include "../include/Line.h"
 #include "../include/pdbAtom.h"
+#include "../include/pdbModel.h"
+#include "../include/PDB.h"
 #include <experimental/filesystem>
+
 
 using std::string;
 using std::vector;
@@ -167,48 +171,24 @@ void traj_an::mdtraj_geo(){
 }
 /***********************************************************************/
 void traj_an::calc_distances(const char* pdb_file){
-	std::ifstream pdb_traj;
-	pdb_traj.open( pdb_file );
-		
+	
 	char tmp_line[80];
 	double tmp_doub;
 	int line = 0;
 	
-	vector< vector <pdbAtom> > atoms_coords;
-	atoms_coords.resize( atoms_pairs.size() );
 	
-	if ( IF_file( pdb_file ) ){
-		while( !pdb_traj.eof() ){
-			pdb_traj.getline(tmp_line,80);
-			Iline Line(tmp_line);			
-			for (int i=0;i<atoms_pairs.size();i++){
-				if ( Line.words.size() > 2){
-					if ( Line.words[1] == std::to_string(atoms_pairs[i]) ){
-						int index = Line.words.size();
-						pdbAtom atomc( Line.get_double(index-6),Line.get_double(index-5),Line.get_double(index-4) );
-						atoms_coords[i].push_back(atomc);
-					}
-				}
-			}
-		}
-	}
-	
-	double tmp_distX = 0.0;
-	double tmp_distY = 0.0;
-	double tmp_distZ = 0.0;
-	double tmp_dist  = 0.0;
+	PDB traj_pdb(pdb_file);
+		
 	vector<vector <double> > dist;
 	dist.resize( atoms_pairs.size()/2 );
-	for(int i=0;i<dist.size();i++){
-		for (int j=0;j<atoms_coords[0].size();j++){
-			tmp_distX = atoms_coords[i][j].xc - atoms_coords[i+1][j].xc;
-			tmp_distY = atoms_coords[i][j].yc - atoms_coords[i+1][j].yc;
-			tmp_distZ = atoms_coords[i][j].zc - atoms_coords[i+1][j].zc;
-			tmp_dist  = sqrt(tmp_distX*tmp_distX + tmp_distY*tmp_distY + tmp_distZ*tmp_distZ );
-			dist[i].push_back(tmp_dist);			
+	
+	for(int i=0;i<traj_pdb.nModels;i++){
+		for ( int j=0;j<dist.size();j++){
+			dist[j].emplace_back( traj_pdb.models[i].get_distance( atoms_pairs[j], atoms_pairs[j+1] ) );
 		}
 	}
 	
+
 	string frame_name = remove_extension(pdb_file);
 
 	frame_name += "_dists";
@@ -259,41 +239,15 @@ void traj_an::calc_distances(const char* pdb_file){
 /***********************************************************************/
 void traj_an::extract_frame(const char* pdb_file, int frames){
 	
+	
+	PDB traj_pdb(pdb_file);
 	string frame = std::to_string(frames);
 	string frame_name = remove_extension(pdb_file);
+	frame_name += "_#";
 	frame_name += frame;
-	frame_name += "_frames.pdb";
-	std::ofstream pdb_frame;
-	std::ifstream pdb_traj;
+	frame_name += ".pdb";
 	
-	pdb_traj.open( pdb_file );
-	pdb_frame.open( frame_name.c_str() );
-	
-	char tmp_line[80];
-	double tmp_doub;
-	int line = 0;
-	bool fill_fl = false;
-	bool stop = false;
-	
-	
-	if ( IF_file( pdb_file ) ){
-		while( !stop ){
-			pdb_traj.getline(tmp_line,80);
-			Iline Line(tmp_line);
-			if ( Line.words[0] == "MODEL" ){
-				if ( Line.words[1] == frame ){
-					fill_fl = true;
-				}			
-			}
-			if ( fill_fl ){
-				pdb_frame << tmp_line << endl;
-				if ( Line.words[0] == "TER")
-					stop = true;
-			}
-		}
-	}
-	
-	pdb_frame.close();
+	traj_pdb.models[frames].write_model(frame_name);	
 }
 /***********************************************************************/
 void traj_an::extract_frames(const char* pdb_file, int interval,int fr_sz){

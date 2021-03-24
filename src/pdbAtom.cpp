@@ -18,6 +18,7 @@
 #include "../include/pdbAtom.h"
 
 #include <string>
+#include <cmath>
 using std::string;
 
 /******************************************************************/
@@ -130,4 +131,10 @@ bool pdbAtom::is_hydrogen(){
 	else return false;
 	
 }
-////////////////////////////////////////////////////////////
+double pdbAtom::get_distance(const pdbAtom& a2){
+	double dist = 0.0;
+	dist = (xc - a2.xc)*(xc - a2.xc);
+	dist+= (yc - a2.yc)*(yc - a2.yc);
+	dist+= (zc - a2.zc)*(zc - a2.zc);
+	return sqrt(dist);
+}////////////////////////////////////////////////////////////

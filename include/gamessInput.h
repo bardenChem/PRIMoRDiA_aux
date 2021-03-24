@@ -71,7 +71,8 @@ enum GMS_BasisSet {
 	smDFTB, smAM1, 
 	MINI, STO3G, x321G,
 	x631G, x631Gd, x6311Gd,
-	x6311Gdp, x6311GdpD,x6311Gdp2D
+	x6311Gdp, x6311GdpD,x6311Gdp2D,
+	TZV
 };
 /*********************************************************************/
 class GMS_basis{

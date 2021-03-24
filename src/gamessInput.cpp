@@ -103,6 +103,9 @@ GMS_basis::GMS_basis(GMS_BasisSet bs):
 			ndiffuseP	= true;
 			ndiffuseS	= true;
 		break;
+		case TZV:
+			gaussBasis = "TZV";
+		break;
 	}	
 }
 /**************************************************/
@@ -136,30 +139,36 @@ GMS_basis& GMS_basis::operator=(const GMS_basis& rhs){
 gms_group::gms_group():
 	group(OTHER)	,
 	grpName("")		{
-			
+					
+}
+/**************************************************/
+gms_group::gms_group( GMS_Group grp_type )	:
+	group(grp_type)							,
+	grpName("")								{
+
 	switch( group ){
 		case CTRL:
 			grpName	= " $contrl ";
 			inp_text.emplace_back(grpName);
-			inp_text.emplace_back("runtyp=");
+			inp_text.emplace_back(" runtyp=");
 			inp_text.emplace_back("energy ");	// variable 2
-			inp_text.emplace_back("icharg=");
+			inp_text.emplace_back(" icharg=");
 			inp_text.emplace_back("0 ");		// variable 4
-			inp_text.emplace_back("multi=");
+			inp_text.emplace_back(" mult=");
 			inp_text.emplace_back("1 ");		// variable 6
 			inp_text.emplace_back(gEnd);
 			inp_text.emplace_back(grpName);
-			inp_text.emplace_back("maxit=");
+			inp_text.emplace_back(" maxit=");
 			inp_text.emplace_back("150 ");		// variable 10
-			inp_text.emplace_back("nprint=");
+			inp_text.emplace_back(" nprint=");
 			inp_text.emplace_back("7 ");		// variable 12
-			inp_text.emplace_back("scftyp=");
-			inp_text.emplace_back("rhf ");		// variable 14
-			inp_text.emplace_back(gEnd);		
+			inp_text.emplace_back(" scftyp=");
+			inp_text.emplace_back(" rhf ");		// variable 14
+			inp_text.emplace_back(gEnd);/*		
 			inp_text.emplace_back(grpName);
-			inp_text.emplace_back("swoff=");
+			inp_text.emplace_back(" swoff=");
 			inp_text.emplace_back("1e-03 ");	// variable 18
-			inp_text.emplace_back(gEnd);
+			inp_text.emplace_back(gEnd);*/
 		break;
 		case SYS:
 			grpName = " $sys ";
@@ -172,7 +181,7 @@ gms_group::gms_group():
 			grpName = " $scf ";
 			inp_text.emplace_back(grpName);
 			inp_text.emplace_back("dirscf=.t.");
-			inp_text.emplace_back("npunch="); 
+			inp_text.emplace_back(" npunch="); 
 			inp_text.emplace_back("2 ");		// variable 3 
 			inp_text.emplace_back(gEnd);
 			inp_text.emplace_back(grpName);
@@ -235,11 +244,11 @@ gms_group::gms_group():
 		case OPT:
 			grpName = " $statpt ";
 			inp_text.emplace_back(grpName);
-			inp_text.emplace_back("opttol=");
+			inp_text.emplace_back(" opttol=");
 			inp_text.emplace_back("0.0001 ");	// variable 2
-			inp_text.emplace_back("nstep=");
+			inp_text.emplace_back(" nstep=");
 			inp_text.emplace_back("150 ");		// variable 4 
-			inp_text.emplace_back("method=");
+			inp_text.emplace_back(" method=");
 			inp_text.emplace_back("QA ");		// variable 6 
 			inp_text.emplace_back(gEnd);					
 		break;
@@ -269,8 +278,9 @@ gms_group::gms_group():
 			inp_text.emplace_back("gbasis=");
 			inp_text.emplace_back("sto"); 			// variable 2 
 			inp_text.emplace_back(" polar=");
-			inp_text.emplace_back("");			// varible 4 		
+			inp_text.emplace_back("none");			// varible 4 		
 			inp_text.emplace_back(gEnd);
+			/*
 			inp_text.emplace_back(grpName);
 			inp_text.emplace_back("ngauss=");
 			inp_text.emplace_back("0 ");			// varible 8
@@ -282,14 +292,10 @@ gms_group::gms_group():
 			inp_text.emplace_back(".f.");		// varible 14
 			inp_text.emplace_back("diffs");		
 			inp_text.emplace_back(".f.");		// varible 16
-			inp_text.emplace_back(gEnd);			
+			inp_text.emplace_back(gEnd);
+			*/
 		break;
-	}	
-}
-/**************************************************/
-gms_group::gms_group( GMS_Group grp_type )	:
-	group(grp_type)							,
-	grpName("")								{	
+	}
 }
 /**************************************************/
 gms_group::~gms_group(){}
@@ -326,8 +332,9 @@ gms_group& gms_group::operator=(gms_group&& rhs) noexcept{
 /**************************************************/
 std::ostream& operator<<(std::ostream& out, gms_group& grp){
 	for ( int i=0;i<grp.inp_text.size();i++){
-		return out << grp.inp_text[i];	
+		out << grp.inp_text[i];	
 	}
+	return out;
 }
 //====================================================
 gms_input::gms_input()	:
@@ -364,6 +371,14 @@ void gms_input::init(	int chg				,
 						std::string method	,		
 						std::string basis)	{
 	
+	charge		= chg;
+	multi		= mpcty;
+	QM_method	= method;
+	
+	if ( rtype == "optimize" ){
+		RunType = OptimizeRun;
+	}						
+	//path_to_dftb_ = path_to_dftb;
 	bool def = this->load_default_options("/home/igorchem/LQQCMMtools");
 	//creating the basic groups
 	if ( method == "DFT " || "B3LYP "){
@@ -378,6 +393,8 @@ void gms_input::init(	int chg				,
 		gbasis	= GMS_BasisSet::smDFTB;
 	}
 		
+	
+	
 	//----------------------------------------------			
 	// creating the basic groups
 	groups.emplace_back( GMS_Group::CTRL ); // 0
@@ -386,10 +403,14 @@ void gms_input::init(	int chg				,
 	groups.emplace_back( GMS_Group::BASIS ); // 2
 	groups.emplace_back( GMS_Group::SCF );   // 3
 	groups.emplace_back( GMS_Group::GUESS ); // 4
+	if ( RunType == GMS_Run_Type::OptimizeRun ){ groups.emplace_back( GMS_Group::OPT ); }	// 5
 	if ( solvent != "none") { groups.emplace_back( GMS_Group::PCM ); } // 5 
-	if ( RunType == GMS_Run_Type::OptimizeRun ){ groups.emplace_back( GMS_Group::OPT ); }	// 6
 	
 	//----------------------------------------------
+	
+	string SCFtyp = "rhf";
+	if ( scftyp == ROHF ) SCFtyp = "rohf";
+	if ( scftyp == UHF ) SCFtyp ="uhf";
 	
 	if ( def ){
 		groups[0].inp_text[2]	= rtype;
@@ -397,14 +418,18 @@ void gms_input::init(	int chg				,
 		groups[0].inp_text[6]	= std::to_string(multi);
 		groups[0].inp_text[10]	= std::to_string(maxit);
 		groups[0].inp_text[12]	= std::to_string(nprint);
-		groups[0].inp_text[14]	= std::to_string(scftyp);
-		groups[0].inp_text[18]	= std::to_string(swoff);
+		groups[0].inp_text[14]	= SCFtyp;
+		//groups[0].inp_text[18]	= std::to_string(swoff);
 		groups[1].inp_text[2]	= std::to_string(mwords);
-		groups[3].inp_text[2]	= std::to_string(npunch);
-		groups[5].inp_text[2]	= solvent;
-		groups[6].inp_text[2]	= std::to_string(opttol);
-		groups[6].inp_text[4]	= std::to_string(nsteps);
-		groups[6].inp_text[6]	= alg;		
+		groups[3].inp_text[3]	= std::to_string(npunch);
+		if ( RunType == OptimizeRun ){
+				groups[5].inp_text[2]	= std::to_string(opttol);
+				groups[5].inp_text[4]	= std::to_string(nsteps);
+				groups[5].inp_text[6]	= alg;	
+		}
+		if ( solvent != "none" ) {
+			groups[ groups.size() -1 ].inp_text[2]	= solvent;
+		}				
 	}
 	
 	// seting convergence 
@@ -433,18 +458,14 @@ void gms_input::init(	int chg				,
 			groups[3].inp_text[23] = ".t.";
 		break;		
 	}
-	
-	groups[2].inp_text.emplace_back("gbasis=");
-	groups[2].inp_text.emplace_back(basis_set.gaussBasis); 		
-	groups[2].inp_text.emplace_back(gEnd);	
-	
+		
 	switch ( QMlevel ){
 		case DFT:
 			groups[0].inp_text.emplace_back( groups[0].grpName );
 			groups[0].inp_text.emplace_back( " dfttyp=");
 			groups[0].inp_text.emplace_back( dfttyp );
-			groups[0].inp_text.emplace_back( "swoff=" );
-			groups[0].inp_text.emplace_back( std::to_string(swoff) );
+			//groups[0].inp_text.emplace_back( " swoff=" );
+			//groups[0].inp_text.emplace_back( std::to_string(swoff) );
 			groups[0].inp_text.emplace_back( gEnd );			
 		break;
 		case MP2:
@@ -465,19 +486,20 @@ void gms_input::init(	int chg				,
 		case HF:
 		case MP2:
 		case DFT:
+			groups[2].inp_text[2] = basis_set.gaussBasis;
 			groups[2].inp_text.emplace_back(groups[2].grpName);
-			groups[2].inp_text.emplace_back("ngauss=");
+			groups[2].inp_text.emplace_back(" ngauss=");
 			groups[2].inp_text.emplace_back( std::to_string(basis_set.ngauss) );
-			groups[2].inp_text.emplace_back("ndfunc=");
+			groups[2].inp_text.emplace_back(" ndfunc=");
 			groups[2].inp_text.emplace_back( std::to_string(basis_set.ndfunc) );
-			groups[2].inp_text.emplace_back("ndpunc=");
+			groups[2].inp_text.emplace_back(" npfunc=");
 			groups[2].inp_text.emplace_back( std::to_string(basis_set.npfunc) );
 			if ( basis_set.ndiffuseP ) 	{
-				groups[2].inp_text.emplace_back("diffp=");
+				groups[2].inp_text.emplace_back(" diffp=");
 				groups[2].inp_text.emplace_back(".t.");
 			}
 			if ( basis_set.ndiffuseS ) 	{
-				groups[2].inp_text.emplace_back("diffs=");
+				groups[2].inp_text.emplace_back(" diffs=");
 				groups[2].inp_text.emplace_back(".t.");
 			}	
 			groups[2].inp_text.emplace_back(gEnd);
@@ -574,7 +596,7 @@ void gms_input::load_molecule_info( molecule& mol ){
 		data_group.inp_text.emplace_back( std::to_string(mol.atoms[i].yc) );
 		data_group.inp_text.emplace_back( " " );
 		data_group.inp_text.emplace_back( std::to_string(mol.atoms[i].zc) );
-		data_group.inp_text.emplace_back( " " );	
+		data_group.inp_text.emplace_back( "\n" );	
 	}
 	data_group.inp_text.emplace_back(gEnd);
 	groups.emplace_back( move (data_group ) );
@@ -583,14 +605,14 @@ void gms_input::load_molecule_info( molecule& mol ){
 /**************************************************/
 GMS_basis gms_input::init_basis(std::string& bsis_nm){
 	if 		( bsis_nm == "MINI"   		) gbasis = MINI;
-	else if ( bsis_nm == "STO3G"  		) gbasis = STO3G;
-	else if ( bsis_nm == "321G"   		) gbasis = x321G;
-	else if ( bsis_nm == "631G"   		) gbasis = x631G;
-	else if ( bsis_nm == "631G*"  		) gbasis = x631Gd;
-	else if ( bsis_nm == "6311G*" 		) gbasis = x6311Gd;
-	else if ( bsis_nm == "6311G**"		) gbasis = x6311Gdp;
-	else if ( bsis_nm == "6311G(2d)+"	) gbasis = x6311GdpD;
-	else if ( bsis_nm == "6311G(2d)++"	) gbasis = x6311Gdp2D;
+	else if ( bsis_nm == "STO-3G"  		) gbasis = STO3G;
+	else if ( bsis_nm == "3-21G"   		) gbasis = x321G;
+	else if ( bsis_nm == "6-31G"   		) gbasis = x631G;
+	else if ( bsis_nm == "6-31G*"  		) gbasis = x631Gd;
+	else if ( bsis_nm == "6-311G*" 		) gbasis = x6311Gd;
+	else if ( bsis_nm == "6-311G**"		) gbasis = x6311Gdp;
+	else if ( bsis_nm == "6-311G(2d)+"	) gbasis = x6311GdpD;
+	else if ( bsis_nm == "6-311G(2d)++"	) gbasis = x6311Gdp2D;
 	
 	GMS_basis basisset(gbasis);
 	return basisset;

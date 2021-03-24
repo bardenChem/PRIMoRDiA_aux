@@ -19,9 +19,11 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <experimental/filesystem>
 
 #include "../include/global.h"
+#include "../include/atom.h"
 #include "../include/molecule.h" 
 #include "../include/geometry.h"
 #include "../include/mopacInput.h"
@@ -31,6 +33,7 @@ using std::vector;
 using std::cout;
 using std::endl;
 using std::move;
+
 namespace fs = std::experimental::filesystem;
 
 /*************************************************************/
@@ -40,7 +43,7 @@ mopac_input::mopac_input()	:
 	MOZYME(false)			,
 	multiplicity(SINGLET)	,
 	method(AM1)				,
-	rtype(Energy)			{
+	rtype(mSCF)				{
 }
 /*************************************************************/
 mopac_input::~mopac_input(){}
@@ -50,12 +53,13 @@ void mopac_input::init( int chg				,
 						string solvent		,
 						string lmo			,
 						string Method)		{
-	if ( solvent == "h2o" ) COSMO  = true;
-	if ( lmo == "mozyme"  ) MOZYME = true;
+							
+	if ( solvent== "h2o"	) COSMO  = true;
+	if ( lmo 	== "mozyme"	) MOZYME = true;
 	
 	
 	keywords.emplace_back(Method);
-	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE")
+	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE");
 	keywords.emplace_back(" charge=");
 	keywords.emplace_back( std::to_string(charge) );
 	
@@ -92,7 +96,7 @@ void mopac_input::init( int chg				,
 	out_file << endl;
 }
 /*************************************************************/
-void mopac_input::write_file(system& molecule, std::string out_name ){
+void mopac_input::write_file(molecule& mol, std::string out_name ){
 	
 	out_name +=".mop";
 	
@@ -104,13 +108,13 @@ void mopac_input::write_file(system& molecule, std::string out_name ){
 	out_file << endl;
 	out_file << endl;
 	
-	for(int i=0;i<molecule.nAtoms;i++){
-		out_file << molecule.atoms[i].element 				 
-				 << molecule.atoms[i].xc
+	for(int i=0;i<mol.nAtoms;i++){
+		out_file << mol.atoms[i].element 				 
+				 << mol.atoms[i].xc
 				 << " 1 "
-				 << molecule.atoms[i].zc
+				 << mol.atoms[i].zc
 				 << " 1 "
-				 << molecule.atoms[i].zc
+				 << mol.atoms[i].zc
 				 << "\n";
 	}
 	
@@ -121,3 +125,4 @@ void mopac_input::read_from_input(	const char* inp_file,
 									std::string out_name){
 	
 }
+////////////////////////////////////////////////////////////////

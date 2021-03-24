@@ -42,7 +42,9 @@ class pdbAtom{
 		pdbAtom(std::string& pdb_line);
 		bool operator==(const pdbAtom& rhs);
 		bool is_hydrogen();
-		
+		double get_distance(const pdbAtom& a2);
 };
+
+
 
 #endif 
