@@ -41,9 +41,9 @@ interface::interface(int argc, char* argv[]):
 	
 	for(int i =0;i<m_argc;i++){
 		m_argv.emplace_back(argv[i]);
-	}
+	}	
+	cout << "Starting interface++ ! "	<< endl;
 	
-	cout << "Starting interface++ ! "	<< endl;	
 }
 /**********************************************************************/
 void interface::run(){
@@ -85,7 +85,7 @@ void interface::run(){
 	}
 	/********************************/
 	//creat input from QCP calculations
-	else if ( m_argv[1] == "-built_QCP_inp" ){
+	else if ( m_argv[1] == "-QCP_inp" ){
 		if ( m_argv[2] == "gamess"){
 			this->input_gamess();
 		}
@@ -138,7 +138,7 @@ void interface::input_gamess(){
 			charge_diff = stoi(m_argv[i+1]);
 		}
 	}
-	
+	//this->print_options();
 	QCPinput run_gms(geo_ext,rtype,basis_,QM_);
 	if ( mode == "FD" ){
 		run_gms.make_input_from_folder_FD(prog,bmulti,bcharge,charge_diff);
@@ -159,7 +159,7 @@ void interface::help(){
 }
 /**********************************************************************/
 void interface::test(){
-	QCPinput inpsFromFolder(".xyz","optimize","3-21G","B3LYP");
+	QCPinput inpsFromFolder(".xyz","optimize","TZV","MP2");
 	inpsFromFolder.make_input_from_folder_FD(package::GAMESS,1,0,1);
 }
 ////////////////////////////////////////////////////////////////////////

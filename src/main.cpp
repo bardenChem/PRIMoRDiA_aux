@@ -21,8 +21,8 @@
 /***********************************/
 int main(int argc, char** argv){
 	interface program(argc,argv);
-	program.test();
-	//program.run();
+	//program.test();
+	program.run();
 	return 0;	
 }
 //======================================= 

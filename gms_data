@@ -1,6 +1,6 @@
 #PARAMETERS FOR GAMESS INPUT
 CHANGE	= FALSE
-nprint	= 7
+nprint	= 3
 maxit 	= 150
 mwords	= 200
 npunch	= 2
@@ -15,6 +15,6 @@ guess	= huckel
 damph	= 4.2
 algor	= QA
 solvent = false
-conv	= SOSCF
+conv	= MIXED
 conv2	= SHIFT
 

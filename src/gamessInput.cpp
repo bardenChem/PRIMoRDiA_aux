@@ -104,7 +104,8 @@ GMS_basis::GMS_basis(GMS_BasisSet bs):
 			ndiffuseS	= true;
 		break;
 		case TZV:
-			gaussBasis = "TZV";
+			gaussBasis	= "TZV";
+			ngauss		=  0;
 		break;
 	}	
 }
@@ -161,7 +162,7 @@ gms_group::gms_group( GMS_Group grp_type )	:
 			inp_text.emplace_back(" maxit=");
 			inp_text.emplace_back("150 ");		// variable 10
 			inp_text.emplace_back(" nprint=");
-			inp_text.emplace_back("7 ");		// variable 12
+			inp_text.emplace_back("3 ");		// variable 12
 			inp_text.emplace_back(" scftyp=");
 			inp_text.emplace_back(" rhf ");		// variable 14
 			inp_text.emplace_back(gEnd);/*		
@@ -344,14 +345,14 @@ gms_input::gms_input()	:
 	RunType(Energy)		,
 	QM_method("HF")		,
 	dfttyp("b3lyp")		,
-	nprint(7)			,
+	nprint(3)			,
 	maxit(150)			,
 	mwords(200)			,
 	npunch(2)			,
 	nsteps(10)			,
 	copt(SOSCF)			,
 	copt2(None)			,
-	QMlevel(DFT)		,
+	QMlevel(HF)		,
 	scftyp(RHF)			,
 	solvent("none")		,
 	guess("huckel")		,
@@ -375,25 +376,26 @@ void gms_input::init(	int chg				,
 	multi		= mpcty;
 	QM_method	= method;
 	
+	
 	if ( rtype == "optimize" ){
 		RunType = OptimizeRun;
 	}						
 	//path_to_dftb_ = path_to_dftb;
 	bool def = this->load_default_options("/home/igorchem/LQQCMMtools");
 	//creating the basic groups
-	if ( method == "DFT " || "B3LYP "){
+	if ( QM_method == "DFT" || QM_method == "B3LYP" ){
 		QMlevel = GMS_TheoryLevel::DFT;
-	}else if ( method == "AM1" ){
+	}else if ( QM_method == "AM1" ){
 		QMlevel = GMS_TheoryLevel::Semi;
-	}else if ( method == "DFTB2" ){
+	}else if ( QM_method == "DFTB2" ){
 		QMlevel = GMS_TheoryLevel::DFTB2;
 		gbasis	= GMS_BasisSet::smDFTB;
-	}else if ( method == "DFTB3" ){
+	}else if ( QM_method == "DFTB3" ){
 		QMlevel = GMS_TheoryLevel::DFTB3;
 		gbasis	= GMS_BasisSet::smDFTB;
-	}
-		
-	
+	}else if ( QM_method == "MP2" || QM_method == "mp2" ){
+		QMlevel = GMS_TheoryLevel::MP2;
+	}	
 	
 	//----------------------------------------------			
 	// creating the basic groups
@@ -409,8 +411,8 @@ void gms_input::init(	int chg				,
 	//----------------------------------------------
 	
 	string SCFtyp = "rhf";
-	if ( scftyp == ROHF ) SCFtyp = "rohf";
-	if ( scftyp == UHF ) SCFtyp ="uhf";
+	if ( scftyp == ROHF ) SCFtyp 	= "rohf";
+	if ( scftyp == UHF ) SCFtyp		= "uhf";
 	
 	if ( def ){
 		groups[0].inp_text[2]	= rtype;
@@ -466,13 +468,14 @@ void gms_input::init(	int chg				,
 			groups[0].inp_text.emplace_back( dfttyp );
 			//groups[0].inp_text.emplace_back( " swoff=" );
 			//groups[0].inp_text.emplace_back( std::to_string(swoff) );
-			groups[0].inp_text.emplace_back( gEnd );			
+			groups[0].inp_text.emplace_back( gEnd );	
 		break;
 		case MP2:
 			groups[0].inp_text.emplace_back( groups[0].grpName );
 			groups[0].inp_text.emplace_back( " mplevl=" );
 			groups[0].inp_text.emplace_back( std::to_string(2) );
 			groups[0].inp_text.emplace_back( gEnd );
+		break;
 		case DFTB2:
 			groups.emplace_back( GMS_Group::DFTB );
 		break;
@@ -605,6 +608,7 @@ void gms_input::load_molecule_info( molecule& mol ){
 /**************************************************/
 GMS_basis gms_input::init_basis(std::string& bsis_nm){
 	if 		( bsis_nm == "MINI"   		) gbasis = MINI;
+	else if	( bsis_nm == "TZV"   		) gbasis = TZV;
 	else if ( bsis_nm == "STO-3G"  		) gbasis = STO3G;
 	else if ( bsis_nm == "3-21G"   		) gbasis = x321G;
 	else if ( bsis_nm == "6-31G"   		) gbasis = x631G;
