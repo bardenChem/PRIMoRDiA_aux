@@ -42,10 +42,10 @@ class orcaInput{
 		std::ofstream out_fl;
 		orcaInput();	
 		~orcaInput();
+		orcaInput(int chg, int mlt,int _nprocs,std::string _rtyp);
 		orcaInput(const orcaInput& rhs) = delete;
 		orcaInput& operator=(const orcaInput& rhs) = delete;
-		void init(const molecule& mol,int chg, int mlt, std::string& mth, std::string& _rtyp, int _nprocs,std::string _basis);
-		void write_input_file(std::string out_file);
+		void write_inp(const molecule& mol, std::string mth,std::string _basis,std::string out_file);
 };
 
 ///////////////////////////////////////////////////////////////////////

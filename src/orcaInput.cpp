@@ -22,6 +22,7 @@
 #include <experimental/filesystem>
 
 #include "../include/global.h"
+#include "../include/atom.h"
 #include "../include/molecule.h" 
 #include "../include/geometry.h"
 #include "../include/orcaInput.h"
@@ -41,33 +42,63 @@ orcaInput::orcaInput()	:
 /*****************************************************/
 orcaInput::~orcaInput(){}
 /*****************************************************/
-void orcaInput::init(	const molecule& mol		,
-						int chg					, 
-						int mlt					,	 
-						std::string& mth		,
-						std::string& _rtyp		,
-						int _nprocs				,
-						std::string _basis)		{
-	
-	multi		= mlt;
-	charge		= chg;
-	qm_method	= mth;
-	rtyp		= _rtyp;
-	nprocs		= _nprocs;
-	basis		= _basis;
-						
-	vector<string> keywords;
-	keywords.emplace_back("!PAL");
-	keywords.emplace_back( std::to_string(_nprocs) );
-	keywords.emplace_back("\n");
-	keywords.emplace_back("!"+qm_method);
-	keywords.emplace_back(" "+rtyp);
-	keywords.emplace_back(" "+basis);
-	keywords.emplace_back("\n");	
+orcaInput::orcaInput(int chg			,
+					int mlt				,
+					int _nprocs			,
+					std::string _rtyp)	:
+					multi(mlt)			,
+					charge(chg)			,
+					nprocs(_nprocs)		,
+					qm_method("HF")		,
+					rtyp(_rtyp)			,
+					basis("3-21G")		{
 	
 }
-/******************************************************/
-void orcaInput::write_input_file(std::string out_file){
+/*****************************************************/
+void orcaInput::write_inp(	const molecule& mol		,
+							std::string mth			,
+							std::string _basis		,
+							std::string out_file)	{
 	
+	qm_method	= mth;
+	basis		= _basis;
+	
+	if ( rtyp == "SinglePoint" ){ rtyp = ""; }
+	
+	out_fl.open( out_file.c_str() );
+	out_fl	<< "!PAL"
+			<< nprocs
+			<< "\n"
+			<< "! " 
+			<< qm_method
+			<< " "
+			<< rtyp
+			<< "\n"
+			<< "! PrintBasis "	
+			<< basis
+			<< "\n"
+			<< "%output \n"
+			<< "print[p_mos] 1\n"
+			<< "print[p_overlap] 5\n"
+			<< "end #output\n"
+			<< "* xyz "
+			<< charge 
+			<< " "
+			<< multi
+			<< " ";
+			
+	
+	for(int i=0;i<mol.nAtoms;i++){
+		out_fl	<< mol.atoms[i].element
+				<< " "
+				<< mol.atoms[i].xc
+				<< " "
+				<< mol.atoms[i].yc
+				<< " "
+				<< mol.atoms[i].zc
+				<< std::endl;
+	}
+	out_fl << "*";
+	out_fl.close();
 }
 ///////////////////////////////////////////////////////

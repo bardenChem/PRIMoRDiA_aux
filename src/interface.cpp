@@ -31,6 +31,8 @@ using std::vector;
 using std::to_string;
 using std::stoi;
 
+unsigned int m_NumOfProcess = 1;
+
 /**********************************************************************/
 interface::interface(){}
 /**********************************************************************/
@@ -161,5 +163,13 @@ void interface::help(){
 void interface::test(){
 	QCPinput inpsFromFolder(".xyz","optimize","TZV","MP2");
 	inpsFromFolder.make_input_from_folder_FD(package::GAMESS,1,0,1);
+}
+/**********************************************************************/
+void interface::set_nprocs(){
+	for(unsigned int i=0;i<m_argc;i++){
+		if ( m_argv[i] == "-NP" ){
+			m_NumOfProcess = stoi(m_argv[i+1]);
+		}
+	}
 }
 ////////////////////////////////////////////////////////////////////////

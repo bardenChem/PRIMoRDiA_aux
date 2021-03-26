@@ -20,7 +20,7 @@
 
 #include <string>
 #include <vector>
-
+extern unsigned int m_NumOfProcess;
 class interface{
 	public:
 		int m_argc;
@@ -35,6 +35,7 @@ class interface{
 		void print_options();
 		void help();
 		void test();
+		void set_nprocs();
 };
 
 #endif

@@ -106,10 +106,8 @@ void QCPinput::make_input_from_folder(	package QCP			,
 			}
 			case package::ORCA:
 			{
-				orcaInput orc_input;
-				orc_input.init(geo_file.Molecule,base_charge,base_multi,QMmethod,runtype,1,base_basis);
-				orc_input.write_input_file(oname);
-
+				orcaInput orc_input(base_charge,base_multi,m_NumOfProcess);
+				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);
 			}
 			break;
 		}
@@ -183,15 +181,12 @@ void QCPinput::make_input_from_folder_FD(package QCP			,
 			}
 			case package::ORCA:
 			{
-				orcaInput orc_input;
-				orcaInput orc_input_cat;
-				orcaInput orc_input_an;
-				orc_input.init(geo_file.Molecule,base_charge,base_multi,QMmethod,runtype,1,base_basis);
-				orc_input.write_input_file(oname);
-				orc_input.init(geo_file.Molecule,cat_charge,ion_multi,QMmethod,runtype,1,base_basis);
-				orc_input.write_input_file(oname);
-				orc_input.init(geo_file.Molecule,an_charge,ion_multi,QMmethod,runtype,1,base_basis);
-				orc_input.write_input_file(oname);
+				orcaInput orc_input(base_charge,base_multi,m_NumOfProcess);
+				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);
+				orcaInput orc_input_cat(base_charge,base_multi,m_NumOfProcess);
+				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);
+				orcaInput orc_input_an(,base_multi,m_NumOfProcess);
+				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);	
 				break;
 			}
 		}
