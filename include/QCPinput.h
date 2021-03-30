@@ -41,7 +41,8 @@ class QCPinput{
 		QCPinput& operator=(const QCPinput& rhs) = delete;
 		void make_input_from_folder(package QCP,unsigned int bs_mlt,int bs_chg);
 		// for finite differences calculations
-		void make_input_from_folder_FD(package QCP,unsigned int bs_mlt,int bs_chg,int chg_diff); 		
+		void make_input_from_folder_FD(package QCP,unsigned int bs_mlt,int bs_chg,int chg_diff); 
+		void make_sh(std::vector<std::string> _fnames);
 };
 /////////////////////////////////////////////////////////////////////
 #endif 

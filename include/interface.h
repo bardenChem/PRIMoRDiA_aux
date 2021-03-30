@@ -20,7 +20,6 @@
 
 #include <string>
 #include <vector>
-extern unsigned int m_NumOfProcess;
 class interface{
 	public:
 		int m_argc;
@@ -31,7 +30,7 @@ class interface{
 		interface(const interface& rhs) = delete;
 		interface& operator=(const interface& rhs) = delete;	
 		void run();
-		void input_gamess();
+		void input_QM();
 		void print_options();
 		void help();
 		void test();

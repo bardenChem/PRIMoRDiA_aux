@@ -35,7 +35,7 @@ using std::move;
 using std::map;
 
 namespace fs = std::experimental::filesystem;
-
+unsigned int m_NumOfProcess = 1;
 //============================================================================================
 string atomType[] = {
 					 "H",																			      "He",

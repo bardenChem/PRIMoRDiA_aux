@@ -53,6 +53,7 @@ orcaInput::orcaInput(int chg			,
 					rtyp(_rtyp)			,
 					basis("3-21G")		{
 	
+	
 }
 /*****************************************************/
 void orcaInput::write_inp(	const molecule& mol		,
@@ -62,19 +63,40 @@ void orcaInput::write_inp(	const molecule& mol		,
 	
 	qm_method	= mth;
 	basis		= _basis;
+	out_file	+= ".inp";
+	string PAL	= "!PAL";
+	PAL			+= std::to_string(nprocs);
+	PAL			+= "\n";
+
+	if (nprocs == 1) {
+		PAL = "";
+	}
+	
+	
+	if ( mol.nElectrons % 2 != 0 && std::abs(charge) %2 == 0 ){
+		multi = 2;		
+	}else if ( mol.nElectrons % 2 != 0 && std::abs(charge) %2 != 0 ){
+		multi = 1;
+	}
 	
 	if ( rtyp == "SinglePoint" ){ rtyp = ""; }
 	
+	bool zora = false;
+	for(int i=0;i<mol.nAtoms;i++){
+		if ( mol.atoms[i].aNmb > 36 && !zora ){
+			basis +=" ZORA"; 
+			zora = true;
+		}
+	}
+	
+	
 	out_fl.open( out_file.c_str() );
-	out_fl	<< "!PAL"
-			<< nprocs
-			<< "\n"
+	out_fl	<< PAL
 			<< "! " 
 			<< qm_method
 			<< " "
 			<< rtyp
-			<< "\n"
-			<< "! PrintBasis "	
+			<< " "
 			<< basis
 			<< "\n"
 			<< "%output \n"
@@ -85,7 +107,7 @@ void orcaInput::write_inp(	const molecule& mol		,
 			<< charge 
 			<< " "
 			<< multi
-			<< " ";
+			<< " \n";
 			
 	
 	for(int i=0;i<mol.nAtoms;i++){

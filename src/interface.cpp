@@ -31,9 +31,7 @@ using std::vector;
 using std::to_string;
 using std::stoi;
 
-unsigned int m_NumOfProcess = 1;
-
-/**********************************************************************/
+//=====================================================================
 interface::interface(){}
 /**********************************************************************/
 interface::~interface(){}
@@ -84,27 +82,34 @@ void interface::run(){
 	/********************************/
 	//Check if is ok the output from QCP 
 	else if ( m_argv[1] == "-check_QCP_outs" ){
+		
 	}
 	/********************************/
 	//creat input from QCP calculations
 	else if ( m_argv[1] == "-QCP_inp" ){
-		if ( m_argv[2] == "gamess"){
-			this->input_gamess();
-		}
+		this->input_QM();	
+	
 	}
 	/********************************/
 	else if ( m_argv[1] == "-MDprep" ){
 		
 	}
 }
+//======================================================================
+//SETTING QM INPUT 
 /**********************************************************************/
-void interface::input_gamess(){
-	// Always required options
-	// - geometry extension
-	// - QM method
-	// - Basis Set
-	//Default options 
-	package prog 	= package::GAMESS;
+void interface::input_QM(){
+	
+	package prog;
+	if		( m_argv[2] == "gamess" ){
+		prog = package::GAMESS;	
+	}else if( m_argv[2] == "orca" ){
+		prog = package::ORCA;
+		this->set_nprocs();
+	}else if( m_argv[2] == "mopac" ){
+		prog = package::MOPAC;
+	}
+	
 	string geo_ext	= ".xyz";
 	string QM_		= "am1";
 	string basis_	= "am1";
@@ -149,6 +154,8 @@ void interface::input_gamess(){
 	}
 	
 }
+//======================================================================
+// AUXILIARY INTERFACE FUNCTIONS
 /**********************************************************************/
 void interface::print_options(){
 	for(unsigned int i=0;i<m_argc;i++){
@@ -161,8 +168,7 @@ void interface::help(){
 }
 /**********************************************************************/
 void interface::test(){
-	QCPinput inpsFromFolder(".xyz","optimize","TZV","MP2");
-	inpsFromFolder.make_input_from_folder_FD(package::GAMESS,1,0,1);
+	
 }
 /**********************************************************************/
 void interface::set_nprocs(){

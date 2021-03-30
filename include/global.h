@@ -22,7 +22,7 @@
 #include <string>
 #include <vector> 
 #include <experimental/filesystem>
-
+extern unsigned int m_NumOfProcess;
 //========================================================
 // FILE OPERATIONS
 bool IF_file(const char* name); 

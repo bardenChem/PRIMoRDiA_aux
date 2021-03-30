@@ -106,7 +106,7 @@ void QCPinput::make_input_from_folder(	package QCP			,
 			}
 			case package::ORCA:
 			{
-				orcaInput orc_input(base_charge,base_multi,m_NumOfProcess);
+				orcaInput orc_input(base_charge,base_multi,m_NumOfProcess,runtype);
 				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);
 			}
 			break;
@@ -181,15 +181,75 @@ void QCPinput::make_input_from_folder_FD(package QCP			,
 			}
 			case package::ORCA:
 			{
-				orcaInput orc_input(base_charge,base_multi,m_NumOfProcess);
+				//cout << an_charge << " " << cat_charge <<  " " << ion_multi << endl;
+				orcaInput orc_input(base_charge,base_multi,m_NumOfProcess,runtype);
 				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);
-				orcaInput orc_input_cat(base_charge,base_multi,m_NumOfProcess);
-				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);
-				orcaInput orc_input_an(,base_multi,m_NumOfProcess);
-				orc_input.write_inp(geo_file.Molecule,QMmethod,base_basis,oname);	
+				orcaInput orc_input_cat(cat_charge,ion_multi,m_NumOfProcess,runtype);
+				orc_input_cat.write_inp(geo_file.Molecule,QMmethod,base_basis,oname_cat);
+				orcaInput orc_input_an(an_charge,ion_multi,m_NumOfProcess,runtype);
+				orc_input_an.write_inp(geo_file.Molecule,QMmethod,base_basis,oname_an);	
 				break;
 			}
 		}
-	}										 
+	}
+	this->make_sh(fnames);
+}
+/************************************************************/
+void QCPinput::make_sh(vector<string> _fnames ){
+	
+	string run_txt_1 = " ";
+	string run_txt_2 = " ";
+	
+	vector<string> inps( _fnames.size() );
+	vector<string> outs( _fnames.size() );
+	
+	if ( program == package::GAMESS ){	
+		for(int i=0;i<inps.size();i++){
+			inps[i] = remove_extension( _fnames[i].c_str() );
+			outs[i] = inps[i]+".log";
+		}
+	}else if ( program == package::ORCA ){
+		for(int i=0;i<inps.size();i++){
+			inps[i] = change_extension( _fnames[i].c_str(), ".inp");
+			outs[i] = change_extension( inps[i].c_str(),".out" );
+		}
+	}else if (program == package::MOPAC ){
+		for(int i=0;i<inps.size();i++){
+			inps[i] = change_extension( _fnames[i].c_str(), ".mop");
+			outs[i] = change_extension( inps[i].c_str(),".log" );
+		}
+	}
+	
+	if ( program == package::ORCA ){
+		run_txt_1 = "orca ";
+		run_txt_2 = " > ";
+	}else if ( program == package::GAMESS ){
+		run_txt_1 = "gms ";
+		run_txt_2 = " 00 ";
+		run_txt_2 += std::to_string(m_NumOfProcess);
+		run_txt_2 += " > ";
+	}else if ( program == package::MOPAC ){
+		run_txt_1 = "/opt/mopac/MOPAC2016.exe ";
+		run_txt_2 = " > ";
+	}
+	
+	string lgc_ee = "&&\n";
+	
+	
+	std::ofstream sh_file;
+	sh_file.open("run_QCP_inp.sh");
+	sh_file << "#!/bin/sh\n";
+	for(int i=0;i<_fnames.size();i++){
+		if ( i == _fnames.size()-1 ){
+			lgc_ee = " ";
+		}
+		sh_file << run_txt_1
+				<< inps[i]
+				<< run_txt_2
+				<< outs[i]
+				<< lgc_ee;
+	}
+	cout << "writting file" << endl;
+	sh_file.close();
 }
 //////////////////////////////////////////////////////////////
