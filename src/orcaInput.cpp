@@ -96,7 +96,8 @@ void orcaInput::write_inp(	const molecule& mol		,
 			<< qm_method
 			<< " "
 			<< rtyp
-			<< " "
+			<< "\n"
+			<< "!PrintBasis "
 			<< basis
 			<< "\n"
 			<< "%output \n"
