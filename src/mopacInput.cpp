@@ -109,7 +109,8 @@ void mopac_input::write_file(molecule& mol, std::string out_name ){
 	out_file << endl;
 	
 	for(int i=0;i<mol.nAtoms;i++){
-		out_file << mol.atoms[i].element 				 
+		out_file << mol.atoms[i].element 
+				 << " "
 				 << mol.atoms[i].xc
 				 << " 1 "
 				 << mol.atoms[i].zc
