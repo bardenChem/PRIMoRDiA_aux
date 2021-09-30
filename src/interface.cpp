@@ -42,7 +42,7 @@ interface::interface(int argc, char* argv[]):
 	for(int i =0;i<m_argc;i++){
 		m_argv.emplace_back(argv[i]);
 	}	
-	cout << "Starting interface++ ! "	<< endl;
+	cout << "Starting PRIMoRDIA Auxialliary software! "	<< endl;
 	
 }
 /**********************************************************************/
@@ -87,8 +87,7 @@ void interface::run(){
 	/********************************/
 	//creat input from QCP calculations
 	else if ( m_argv[1] == "-QCP_inp" ){
-		this->input_QM();	
-	
+		this->input_QM();
 	}
 	/********************************/
 	else if ( m_argv[1] == "-MDprep" ){
@@ -121,7 +120,7 @@ void interface::input_QM(){
 	string rtype	= "Energy";
 	int charge_diff	= 1;
 	
-	for(int i =0;i<m_argc;i++){
+	for( int i =0; i<m_argc; i++ ){
 		if ( m_argv[i] == "-gExt" ){
 			geo_ext = m_argv[i+1];
 		}
@@ -166,7 +165,16 @@ void interface::print_options(){
 }
 /**********************************************************************/
 void interface::help(){
-	
+	cout<< "PRIMoRDiA Auxilliary Help info!\n\n"
+		<<"-h,--help: Print this option\n " 
+		<<"-QCP_inp: Prepare input for quantum chemistry package\n"
+		<<"-MDprep: Prepare files for molecular dynamics simulations\n"
+		<<"-check_QCP_outputs: Check the quantum chemistry package output files in the folder\n"
+		<<"-extract_frame: Extract one frame from PDB trajectory file \n"
+		<<"-extract_frames: Extract several frames from PDB trajectory file\n"
+		<<"-traj_geo: Geometric analysis of a molecular dynamics trajectory\n"
+		<<"-dist_an: Distance Analysis of pair of atoms of a molecular dynamics trajectory\n"
+		<<"-------------------------------------------------------------------------------\n";
 }
 /**********************************************************************/
 void interface::test(){

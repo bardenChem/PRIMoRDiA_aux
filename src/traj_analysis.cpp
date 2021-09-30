@@ -239,7 +239,6 @@ void traj_an::calc_distances(const char* pdb_file){
 /***********************************************************************/
 void traj_an::extract_frame(const char* pdb_file, int frames){
 	
-	
 	PDB traj_pdb(pdb_file);
 	string frame = std::to_string(frames);
 	string frame_name = remove_extension(pdb_file);
@@ -247,7 +246,7 @@ void traj_an::extract_frame(const char* pdb_file, int frames){
 	frame_name += frame;
 	frame_name += ".pdb";
 	
-	traj_pdb.models[frames].write_model(frame_name);	
+	traj_pdb.models[frames].write_model(frame_name);
 }
 /***********************************************************************/
 void traj_an::extract_frames(const char* pdb_file, int interval,int fr_sz){

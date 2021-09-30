@@ -52,7 +52,7 @@ MDprep::MDprep(std::string bs_name	,
 	net_chg(0)						,
 	ref_temp(310.15)				,
 	prod_time(10)					,
-	sys_basename(bs_name)			{	
+	sys_basename(bs_name)			{
 	
 	switch ( pkg ){
 		case AMBER:
@@ -73,7 +73,7 @@ MDprep::MDprep(std::string bs_name	,
 MDprep::~MDprep(){}
 /******************************************************/
 void MDprep::prepare_ligand(int nligand		, 
-							bool ambTools)	{	
+							bool ambTools)	{
 }
 /******************************************************/
 void MDprep::prepare_complex(int nligand){

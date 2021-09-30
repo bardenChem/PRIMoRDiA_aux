@@ -41,7 +41,7 @@ class traj_an{
 		void extract_frame(const char* pdb_file, int frames);
 		void extract_frames(const char* pdb_file, int interval,int fr_sz);
 		int bi_most_probable_point( std::vector<double> v1, std::vector<double> v2 );
-		void prune_waters(int radius);	
+		void prune_waters(int radius);
 };
 /****************************************************/
 
