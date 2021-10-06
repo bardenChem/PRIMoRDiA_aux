@@ -66,7 +66,6 @@ double atomMass[] = {
 ///////////////////////////////////////////////
 // FILE HANDLING UTILITIES :
 
-/***************************************************************************/
 bool IF_file(const char* name){
 	fs::path file_name(name);
 	return fs::exists(file_name);
@@ -120,11 +119,9 @@ void rename_file(const char* file_name,
 	fs::path nf_name( fs::current_path() / new_file_name );
 	fs::rename(f_name,nf_name);
 }
-
 ////////////////////////////////////////////////////////
-// VECTOR MATH/STAT MANIPULATION
+// VECTOR MATH/STAT MANIPULATION :
 
-/*********************************************************************************/
 double mean_dvec(vector<double>& vec){
 	double result = 0.0;
 	for(unsigned int i=0;i<vec.size();i++){
@@ -177,6 +174,7 @@ vector<double> scale_dvec(vector<double>& vec){
 	return result;
 }
 /******************************************************************************/
+//ATOMIC PROPERTIES GETTERS :
 float get_atom_mass(std::string sym){
 	int indx = 0;
 	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) indx = i;
@@ -188,4 +186,11 @@ int get_atomic_number(std::string sym){
 	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) atomic_num = i+1;
 	return atomic_num;
 }
+/******************************************************************************/
+//OTHER HELPER FUNCTIONS :
+
+void clean_dir(){
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////

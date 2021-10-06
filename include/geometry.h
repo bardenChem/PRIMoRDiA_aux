@@ -29,7 +29,7 @@ class molecule;
 //===============================================
 enum units	{ Ang, Bohr };
 //----------------------------------
-enum GEO_file{ INVALID, xyz_, mol2_	, GRO_, CRD_, pdb_ };
+enum GEO_file{ INVALID, xyz_, mol2_	, GRO_, pdb_ };
 /*********************************************************************/
 class MOL2{
 	public:

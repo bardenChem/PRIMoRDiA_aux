@@ -39,9 +39,10 @@ double min_dvec(std::vector<double>& vec);
 double sum_dvec(std::vector<double>& vec);
 double sd_dvec(std::vector<double>& vec);
 std::vector<double> scale_dvec(std::vector<double>& vec);
-
-
+//ATOMIC PROPERTIES GETTERS 
 float get_atom_mass(std::string sym);
 int get_atomic_number(std::string sym);
+//OTHER HELPER FUNCTIONS 
+void clean_dir();
 
 #endif

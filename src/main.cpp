@@ -13,7 +13,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
  
-/***********************************/
+/************************************************/
+
+
+/********************************************************
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ +		***Functionalities of the PRIMoRDiA AUX***		+ 
+ +														+
+ +	1. Automatization of MDtraj to obtain RMSD and RG	+
+ +	2. Atomic Distances Distribution Analysis from Traj	+
+ +	3. Extract Frames from trajectories					+
+ +	4. Check Quantum Chemistry simulation outputs files	+
+  * 5. 
+ ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+*********************************************************/
 
 #include <iostream>
 #include "../include/interface.h"
@@ -21,8 +35,7 @@
 /***********************************/
 int main(int argc, char** argv){
 	interface program(argc,argv);
-	//program.test();
 	program.run();
-	return 0;	
+	return 0;
 }
 //======================================= 

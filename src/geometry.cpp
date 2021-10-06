@@ -56,7 +56,7 @@ geometry::geometry():
 /*********************************************************************/
 geometry::geometry(	const char* file_name)	:
 	type(INVALID)							,
-	cUnit(Ang)								{	
+	cUnit(Ang)								{
 	
 	if ( check_file_ext(".xyz",file_name ) ){
 		type = xyz_;

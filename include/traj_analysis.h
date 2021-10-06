@@ -22,6 +22,8 @@
 #include <string>
 #include <fstream>
 
+
+/*****************************************************/
 class traj_an{
 	public:
 		std::vector<int> atoms_pairs;

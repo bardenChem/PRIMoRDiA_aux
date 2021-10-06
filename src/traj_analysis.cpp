@@ -56,7 +56,6 @@ traj_an::traj_an(string file_name):
 	R_name += "_rscript.R";
 	
 	R_script.open( R_name.c_str() );
-	
 }
 /***********************************************************************/
 traj_an::traj_an(string file_name, vector<int> atoms):
@@ -77,8 +76,8 @@ traj_an::~traj_an(){
 }
 /***********************************************************************/
 void traj_an::mdtraj_geo(){
-	string topname = change_extension( traj_file.c_str(),".pdb" );
 	
+	string topname = change_extension( traj_file.c_str(),".pdb" );
 	python_script << " #/usr/bin/env python \n"
 				  << " # -*- coding: utf-8 -*- \n\n"
 				  << "import mdtraj as md \n"
@@ -115,17 +114,17 @@ void traj_an::mdtraj_geo(){
 		if ( line > 0 ){
 			std::stringstream stream(tmp_line);
 			while( stream >> tmp_doub ){
-				if ( col == 0){
+				if ( col == 0 ){
 					time.push_back(tmp_doub);
 					col++;
-				}else if ( col == 1){
+				}else if ( col == 1 ){
 					rmsd.push_back(tmp_doub);
 					col++;
 				}else if ( col == 2 ){
 					rg.push_back(tmp_doub);
 					col = 0;
 				}
-			}			
+			}
 		}
 		line++;
 	}
@@ -155,7 +154,7 @@ void traj_an::mdtraj_geo(){
 			 << "gp2\n"
 			 << "dev.off()\n"
 			 << "aa <-data.frame(scale(a))\n"
-			 << "gp3 <- ggplot(aa, aes(x=RG, y=RMSD)) +\n"			 
+			 << "gp3 <- ggplot(aa, aes(x=RG, y=RMSD)) +\n"
 			 << "geom_point()+ \n"
 			 << "geom_density_2d() + \n"
 			 << "stat_density_2d(aes(fill = ..level..), geom='polygon')+\n"	
@@ -164,10 +163,12 @@ void traj_an::mdtraj_geo(){
 			 << "xlab('RG') \n"
 			 << "png('RMSD_rg_biplot.png',units='in',res=600,width=6,height=4)\n"
 			 << "gp3 \n"
-			 << "dev.off()";
-
-  
+			 << "dev.off()";  
+	
 	R_script.close();
+	
+	comand = "Rscript " + R_name; 
+	system( comand.c_str() );
 }
 /***********************************************************************/
 void traj_an::calc_distances(const char* pdb_file){
@@ -187,7 +188,6 @@ void traj_an::calc_distances(const char* pdb_file){
 			dist[j].emplace_back( traj_pdb.models[i].get_distance( atoms_pairs[j], atoms_pairs[j+1] ) );
 		}
 	}
-	
 
 	string frame_name = remove_extension(pdb_file);
 
@@ -217,7 +217,6 @@ void traj_an::calc_distances(const char* pdb_file){
 		this->extract_frame(pdb_file,frame);
 	}	
 	
-	
 	R_script << "b <-read.table('" <<frame_name<<"',header=T)\n"
 			 << "gp4 <- ggplot(b, aes(x=pair_0, y=pair_1)) + \n"
 			 << "geom_point()+ \n"
@@ -229,10 +228,10 @@ void traj_an::calc_distances(const char* pdb_file){
 			 << "png('"<<frame_name<<"_biplotDist.png',units='in',res=600,width=6,height=4)\n"
 			 << "gp4\n"
 			 << "dev.off()";
-			 
 
 	dist_file.close();
-	python_script.close();	
+	
+	python_script.close();
 	R_script.close();
 	
 }
