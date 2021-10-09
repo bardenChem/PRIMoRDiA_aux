@@ -1,4 +1,4 @@
-//atom.h
+//unit_test.h
 
 /*********************************************************************/
 /* This source code file is part of LQQCMMtools software project created 
@@ -15,36 +15,18 @@
  
 /*********************************************************************/
 
-#ifndef ATOM_H
-#define ATOM_H
+#ifndef UNIT_TEST
+#define UNIT_TEST
 
-#include <string>
+#include <fstream>
 
-class atom{
+class UnitTests{
 	public:
-		double xc;
-		double yc;
-		double zc;
-		float pCharge;
-		float aMass;
-		unsigned int aNmb;
-		std::string element;
-		atom();
-		~atom();
-		atom(double x, double y, double z, std::string type);
-		atom(const atom& rhs);
-		atom& operator=(const atom& rhs);
-		atom(atom&& rhs) noexcept;
-		atom& operator=(atom&& rhs) noexcept;
-		void set_element( std::string Type);
-		void set_coord(double x, double y, double z);
-		double get_distance(const atom& a2);
-		void set_pCharge(double chg);
-		std::string print();
+		UnitTests();
+		UnitTests(const UnitTests& rhs) = delete;
+		UnitTests& operator=(const UnitTests& rhs) = delete;
+		~UnitTests();
+		void run_unit_tests();
 };
-/**************************************************************/
-
-void UnitTest_atom();
-
 
 #endif

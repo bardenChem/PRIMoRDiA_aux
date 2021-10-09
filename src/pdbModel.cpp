@@ -44,7 +44,7 @@ pdbModel::pdbModel():
 	model(0)		,
 	nChains(0)		,
 	nResidues(0)	,
-	nAtoms(0)		{	
+	nAtoms(0)		{
 }
 /*********************************************************/
 pdbModel::pdbModel(std::vector<residue> residues):
@@ -96,7 +96,7 @@ pdbModel::pdbModel(const char* pdb_file, int mdl){
 				}
 			}
 			line++;
-		}		
+		}
 	}
 }
 /*********************************************************/

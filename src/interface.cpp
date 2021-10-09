@@ -21,7 +21,12 @@
 #include "../include/global.h"
 #include "../include/interface.h"
 #include "../include/traj_analysis.h"
+#include "../include/read_traj.h"
 #include "../include/QCPinput.h"
+
+#include "../include/unit_test.h"
+
+#include <experimental/filesystem>
 
 using std::cout;
 using std::endl;
@@ -29,6 +34,8 @@ using std::string;
 using std::vector;
 using std::to_string;
 using std::stoi;
+
+namespace fs = std::experimental::filesystem;
 //=====================================================================
 interface::interface(){}
 /**********************************************************************/
@@ -68,7 +75,7 @@ void interface::run(){
 	else if ( m_argv[1] == "-ext_frame" ){
 		int arg3 = stoi(m_argv[3]);
 		int arg4 = stoi(m_argv[4]);
-		traj_an Trajectory
+		traj_an Trajectory;
 		if ( arg4 > 0 ){
 			Trajectory.extract_frames(m_argv[2].c_str(),arg3,arg4);
 		}else{
@@ -82,9 +89,16 @@ void interface::run(){
 	}
 	/********************************/
 	else if ( m_argv[1] == "-MDprep" ){}
+	/********************************/
 	else if ( m_argv[1] == "-check_QCP" ){}
-	}else{
-		cout << "None valid flag was selected!\n Exiting PRIMoRDiA AUX\n" << endl
+	/********************************/
+	else if ( m_argv[1] == "-test" ) {
+		this->UnitTest();
+		//this->test();
+	}
+	/********************************/
+	else{
+		cout << "None valid flag was selected!\n Exiting PRIMoRDiA AUX\n" << endl;
 		exit(-1);
 	}
 }
@@ -164,7 +178,17 @@ void interface::help(){
 }
 /**********************************************************************/
 void interface::test(){
+	std::string test_path = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/";
+	std::string Top = test_path + "tim.pdb";
+	std::string DCD = test_path + "scan1d.dcd";
 	
+	ReadTraj TestTraj( DCD.c_str(), Top.c_str() );
+	TestTraj.parse();
+}
+/**********************************************************************/
+void interface::UnitTest(){
+	UnitTests tests;
+	tests.run_unit_tests();
 }
 /**********************************************************************/
 void interface::set_nprocs(){

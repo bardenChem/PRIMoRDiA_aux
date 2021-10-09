@@ -18,9 +18,14 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <iostream>
 
 #include "../include/global.h"
 #include "../include/atom.h"
+
+using std::cout;
+using std::endl;
+using std::move;
 
 /**********************************************************/
 atom::atom()	:
@@ -30,7 +35,7 @@ atom::atom()	:
 	pCharge(0.0),
 	aMass(1.0)	,
 	aNmb(1)		,
-	element("H"){	
+	element("H"){
 }
 /**********************************************************/
 atom::~atom(){}
@@ -42,6 +47,7 @@ atom::atom(double x			,
 		   xc(x)			,
 		   yc(y)			,
 		   zc(z)			,
+		   pCharge(0.0)		,
 		   element(type)	{
 	
 	aMass = get_atom_mass(element);
@@ -79,7 +85,7 @@ atom::atom(atom&& rhs) noexcept :
 	element( move(rhs.element) ),
 	pCharge(rhs.pCharge)		,
 	aMass(rhs.aMass)			,
-	aNmb(rhs.aNmb)				{	
+	aNmb(rhs.aNmb)				{
 }
 /**********************************************************/
 atom& atom::operator=(atom&& rhs) noexcept{
@@ -118,4 +124,68 @@ double atom::get_distance(const atom& a2){
 void atom::set_pCharge(double chg){
 	pCharge = chg;
 }
+/**********************************************************/
+std::string atom::print(){
+	
+	std::string p_info = " Printing atom information\n";
+	p_info +=  "\tElement name: ";
+	p_info += element;
+	p_info += "\n\tx axis coordinate: ";
+	p_info += std::to_string(xc);
+	p_info += "\n\yx axis coordinate: ";
+	p_info += std::to_string(yc);
+	p_info += "\n\zx axis coordinate: ";
+	p_info += std::to_string(zc);
+	p_info += "\n\tPartial charge: ";
+	p_info += std::to_string(pCharge);
+	p_info += "\n\tAtomic mass: ";
+	p_info += std::to_string(aMass);
+	p_info += "\n\tAtomic number: ";
+	p_info += std::to_string(aNmb);
+	
+	cout << p_info << endl;
+	return p_info;
+}
+
 ///////////////////////////////////////////////////////////
+void UnitTest_atom(){
+	atom _Atom_A; // default constructor 
+	_Atom_A.print();
+	atom _Atom_B(0.000,0.000,0.000, "H" ); // info constructor
+	_Atom_B.print();
+	atom _Atom_C(_Atom_B); // copy constructor
+	
+	ut_log.input_line("Printing Copied atom: ");
+	ut_log.input_line( _Atom_C.print() );
+	
+	atom _Atom_D = _Atom_C; // operator overloading 
+	cout << "Printing atomic copied information with operator overloading:" << endl;
+	_Atom_D.print();
+	
+	atom _Atom_E( move(_Atom_D) ); // move constructor
+	cout << "Printing atom after being moved: " << endl;
+	_Atom_D.print();
+	cout << "Printing atom after receive infor from move : " << endl;
+	_Atom_E.print();
+	
+	atom _Atom_F = move(_Atom_E); // move assign operator oveloading
+	cout << "Printing atom after being moved: " << endl;
+	_Atom_E.print();
+	cout << "Printing atom after receive infor from move : " << endl;
+	_Atom_F.print();
+	
+	cout << "Testing the charge setting " << endl;
+	_Atom_F.set_pCharge( -1.00 );
+	cout << "Testing coordinates setting " << endl;
+	_Atom_F.set_coord(1.000,0.000,0.000);
+	cout << "Testing elment setting " << endl;
+	_Atom_F.set_element("C");
+	cout << "Printing new information" << endl;
+	_Atom_F.print();
+	
+	cout << "Calculate distance with other atom : " << endl;
+	double distance = _Atom_F.get_distance(_Atom_B);
+	cout << "Calculated distance: " << distance << endl;
+	cout << "Finishing Unit test for class 'atom'" << endl;
+}
+/**********************************************************/

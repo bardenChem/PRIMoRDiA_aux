@@ -23,8 +23,8 @@
 
 #include "../include/PDB.h"
 #include "../include/XYZ.h"
+#include "../include/molecule.h"
 
-class molecule;
 
 //===============================================
 enum units	{ Ang, Bohr };
@@ -43,7 +43,7 @@ class MOL2{
 /*********************************************************************/
 class geometry{
 	public:
-		GEO_file type;
+		GEO_file Type;
 		XYZ xyz;
 		PDB pdb;
 		MOL2 mol2;

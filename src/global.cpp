@@ -34,6 +34,9 @@ using std::vector;
 using std::move;
 using std::map;
 
+using std::cout;
+using std::endl;
+
 namespace fs = std::experimental::filesystem;
 unsigned int m_NumOfProcess = 1;
 //============================================================================================
@@ -188,9 +191,28 @@ int get_atomic_number(std::string sym){
 }
 /******************************************************************************/
 //OTHER HELPER FUNCTIONS :
-
 void clean_dir(){
 
 }
-
+/******************************************************************************/
+logFile::logFile()			:
+	file_name("no_init.log"){
+	data.open( file_name.c_str() );
+}
+/******************************************************************************/
+void logFile::input_line(std::string line){
+	data << line << endl;
+}
+/******************************************************************************/
+logFile::logFile(const char* fn):
+	file_name(fn)				{
+	data.open(fn);
+}
+/******************************************************************************/
+logFile::~logFile(){
+	data.close();
+}
+/******************************************************************************/
+logFile ut_log("unit_test.log");
+logFile test_log("test.log");
 ////////////////////////////////////////////////////////////////////////////////

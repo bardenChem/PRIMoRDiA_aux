@@ -22,7 +22,7 @@
 #include <string>
 #include <fstream>
 
-class pDynamo_Output{
+class pDynamoOutput{
 	public:
 		std::string sym_type;
 		

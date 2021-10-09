@@ -1,6 +1,3 @@
-//interface.h
-
-/*********************************************************************/
 /* This source code file is part of LQQCMMtools software project created 
  * by Igor Barden Grillo at Federal University of Paraíba. 
  * barden.igor@gmail.com ( Personal e-mail ) 
@@ -15,27 +12,17 @@
  
 /*********************************************************************/
 
-#ifndef INTERFACE_H
-#define INTERFACE_H
 
-#include <string>
-#include <vector>
-class interface{
-	public:
-		int m_argc;
-		std::vector<std::string> m_argv;
-		interface();
-		~interface();
-		interface(int argc, char* argv[]);
-		interface(const interface& rhs) = delete;
-		interface& operator=(const interface& rhs) = delete;
-		void run();
-		void input_QM();
-		void print_options();
-		void help();
-		void test();
-		void UnitTest();
-		void set_nprocs();
-};
+#include "../include/unit_test.h"
+#include "../include/atom.h"
 
-#endif
+
+/*********************************************************************/
+UnitTests::UnitTests(){}
+/*********************************************************************/
+UnitTests::~UnitTests(){}
+/*********************************************************************/
+void UnitTests::run_unit_tests(){
+	UnitTest_atom();
+}
+///////////////////////////////////////////////////////////////////////

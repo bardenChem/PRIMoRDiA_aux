@@ -45,15 +45,15 @@ PDB::PDB(const char* pdb_file){
 	vector<int> mod_lines;	
 	
 	basename = remove_extension(pdb_file);
-	char pdb_line[10];
+	char pdb_line[100];
 	string word = "#";
-	word.reserve(10);
+	word.reserve(100);
 	int line = 0;
 	
 	if ( IF_file( pdb_file ) ){
 		std::ifstream buf(pdb_file);
 		while( !buf.eof() ){
-			buf.getline(pdb_line,10);
+			buf.getline(pdb_line,100);
 			word = pdb_line;
 			word = word.substr(0,6);
 			if ( word == "MODEL " ) { 

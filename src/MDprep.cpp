@@ -41,7 +41,7 @@ MDprep::MDprep()		:
 	prod_time(10)		,
 	top_file("")		,
 	crd_file("")		,
-	sys_basename("")	{	
+	sys_basename("")	{
 }
 /******************************************************/
 MDprep::MDprep(std::string bs_name	,

@@ -23,7 +23,7 @@
 
 class pdbAtom;
 class residue;
-
+/***********************************************************/
 class pdbModel{
 	public:
 		std::string index;
@@ -33,7 +33,7 @@ class pdbModel{
 		unsigned int model;
 		unsigned int nChains;
 		unsigned int nResidues;
-		unsigned int nAtoms;		
+		unsigned int nAtoms;
 		pdbModel();
 		pdbModel(std::vector<residue> residues);
 		pdbModel(const char* pdb_file, int mdl);
@@ -49,8 +49,11 @@ class pdbModel{
 		void remove_ions();
 		void remove_atom(unsigned int res, unsigned int at);
 		void remove_residue(unsigned int i);
-		void split_complex(std::string mol);
-		void built_complex(const char* pdb_mol);
-		double get_distance(int a1, int a2);
+		void remove_chain( unsigned nchain );
+		std::vector<unsigned> spherical_selection(unsigned center_atom, double radius, bool within );
+		void split_complex( std::string mol );
+		void built_complex( const char* pdb_mol );
+		double get_distance( int a1, int a2 );
 };
+/***********************************************************/
 #endif 

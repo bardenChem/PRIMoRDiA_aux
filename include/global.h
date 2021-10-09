@@ -21,6 +21,8 @@
 
 #include <string>
 #include <vector> 
+#include <fstream>
+
 #include <experimental/filesystem>
 extern unsigned int m_NumOfProcess;
 //========================================================
@@ -45,4 +47,20 @@ int get_atomic_number(std::string sym);
 //OTHER HELPER FUNCTIONS 
 void clean_dir();
 
+/****************************************************************/
+class logFile{
+	public:
+		std::ofstream data;
+		std::string file_name;
+		logFile();
+		logFile(const char* fn);
+		logFile(const logFile& rhs) = delete;
+		logFile& operator=(const logFile& rhs ) = delete;
+		void input_line( std::string line);
+		~logFile();
+};
+/****************************************************************/
+extern logFile ut_log;
+extern logFile test_log;
+/////////////////////////////////////////////////////////////////
 #endif

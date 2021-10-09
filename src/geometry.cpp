@@ -28,6 +28,7 @@
 #include "../include/PDB.h"
 #include "../include/geometry.h"
 
+#include "../include/chemfiles.hpp"
 
 using std::string;
 using std::vector;
@@ -50,20 +51,22 @@ MOL2::MOL2(MOL2&& rhs) noexcept{}
 MOL2& MOL2::operator=(MOL2&& rhs) noexcept{}
 ///////////////////////////////////////////////////////////////////////
 geometry::geometry():
-	type(INVALID)	,
-	cUnit(Ang)		{	
+	Type(INVALID)	,
+	cUnit(Ang)		{
 }
 /*********************************************************************/
 geometry::geometry(	const char* file_name)	:
-	type(INVALID)							,
+	Type(INVALID)							,
 	cUnit(Ang)								{
 	
 	if ( check_file_ext(".xyz",file_name ) ){
-		type = xyz_;
+		Type = GEO_file::xyz_;
 	}else if ( check_file_ext(".pdb",file_name ) ){
-		type = pdb_;
+		Type = GEO_file::pdb_;
+	}else if ( check_file_ext(".gro", file_name ) ){
+		Type = GEO_file::GRO_;
 	}
-	switch( type ){
+	switch( Type ){
 		case xyz_:
 			xyz = XYZ(file_name);
 			Molecule = xyz.get_molecule();
@@ -72,24 +75,27 @@ geometry::geometry(	const char* file_name)	:
 			pdb = PDB(file_name);
 			Molecule = pdb.get_system_from_model(0);
 			break;
+		case INVALID:
+			cout << "Ivalid or unsupported extension of geometry file!" << endl;
+			break;
 	}
-		
+
 }
 /*********************************************************************/
 geometry::~geometry(){}
 /*********************************************************************/
 geometry::geometry(const geometry& rhs) :
-	type(rhs.type)						,
+	Type(rhs.Type)						,
 	xyz(rhs.xyz)						,
 	pdb(rhs.pdb)						,
 	mol2(rhs.mol2)						,
 	Molecule(rhs.Molecule)				,
-	cUnit(rhs.cUnit)					{		
+	cUnit(rhs.cUnit)					{
 }
 /*********************************************************************/
 geometry& geometry::operator=(const geometry& rhs){
 	if ( this != &rhs ){
-		type	= rhs.type;
+		Type	= rhs.Type;
 		xyz		= rhs.xyz;
 		pdb		= rhs.pdb;
 		mol2	= rhs.mol2;
@@ -100,7 +106,7 @@ geometry& geometry::operator=(const geometry& rhs){
 }
 /*********************************************************************/
 geometry::geometry(geometry&& rhs) noexcept:
-	type(rhs.type)						,
+	Type(rhs.Type)						,
 	xyz( move(rhs.xyz) )				,
 	pdb( move(rhs.pdb) )				,
 	mol2( move(rhs.mol2) )				,
@@ -111,14 +117,14 @@ geometry::geometry(geometry&& rhs) noexcept:
 /*********************************************************************/
 geometry& geometry::operator=(geometry&& rhs) noexcept{
 	if ( this != &rhs ){
-		type	= rhs.type;
+		Type	= rhs.Type;
 		xyz		= move(rhs.xyz);
 		pdb		= move(rhs.pdb);
 		mol2	= move(rhs.mol2);
 		Molecule= move(rhs.Molecule);
 		cUnit	= move(rhs.cUnit);
 	}
-	return *this;	
+	return *this;
 }
 /*********************************************************************/
 void geometry::read_QCPinput(const char* file_name, std::string program){
@@ -138,7 +144,6 @@ void geometry::convert_to_ang(){
 			Molecule.atoms[i].zc *= bohrtoang;
 		}
 	}
-
 }
 /*********************************************************************/
 void geometry::convert_to_bohr(){
@@ -150,19 +155,18 @@ void geometry::convert_to_bohr(){
 			Molecule.atoms[i].zc *= angtobohr;
 		}
 	}
-	
 }
 /*********************************************************************/
 void geometry::write_to_file(std::string out_name,std::string format){
 	if ( format == "xyz" ){
-		if ( type == xyz_){
+		if ( Type == GEO_file::xyz_){
 			xyz.write_xyz(out_name);
 		}else{
 			xyz = XYZ(Molecule);
 			xyz.write_xyz(out_name);
 		}		
 	}else if ( format == "pdb"){
-		if ( type == pdb_){
+		if ( Type == GEO_file::pdb_){
 			pdb.write_pdb(out_name);
 		}else{
 			pdb.init_from_system(Molecule);

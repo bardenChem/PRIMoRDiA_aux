@@ -134,13 +134,13 @@ residue& residue::operator=(const residue& rhs){
 	if ( this != &rhs ){
 		type 		= rhs.type;
 		AAname		= rhs.AAname;
-		ligand		= rhs.ligand;				
-		terminal	= rhs.terminal;	
+		ligand		= rhs.ligand;
+		terminal	= rhs.terminal;
 		first		= rhs.first;
 		pdb_index	= rhs.pdb_index;
-		nHydrogens	= rhs.nHydrogens;		
-		fCharge 	= rhs.fCharge;			
-		nAtoms 		= rhs.nAtoms;				
+		nHydrogens	= rhs.nHydrogens;
+		fCharge 	= rhs.fCharge;
+		nAtoms 		= rhs.nAtoms;
 		r_atoms 	= rhs.r_atoms;
 	}
 	return *this;
@@ -164,13 +164,13 @@ residue& residue::operator=( residue&& rhs) noexcept{
 	if ( this != &rhs ){
 		type 		= rhs.type;
 		AAname		= rhs.AAname;
-		ligand		= rhs.ligand;				
-		terminal	= rhs.terminal;	
+		ligand		= rhs.ligand;
+		terminal	= rhs.terminal;
 		first		= rhs.first;
 		pdb_index	= rhs.pdb_index;
-		nHydrogens	= rhs.nHydrogens;		
-		fCharge 	= rhs.fCharge;			
-		nAtoms 		= rhs.nAtoms;				
+		nHydrogens	= rhs.nHydrogens;
+		fCharge 	= rhs.fCharge;
+		nAtoms 		= rhs.nAtoms;
 		r_atoms 	= move(rhs.r_atoms);
 	}
 	return *this;	

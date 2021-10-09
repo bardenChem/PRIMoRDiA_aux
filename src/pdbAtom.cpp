@@ -131,6 +131,7 @@ bool pdbAtom::is_hydrogen(){
 	else return false;
 	
 }
+/*********************************************************/
 double pdbAtom::get_distance(const pdbAtom& a2){
 	double dist = 0.0;
 	dist = (xc - a2.xc)*(xc - a2.xc);

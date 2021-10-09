@@ -22,12 +22,12 @@
 #include <vector>
 #include <string>
 
-#include <chemfiles.hpp>
-
-class geometry;
-
-enum traj_type{ pdb, dcd, xtc, gro, xyz, mol2 };
-
+#include "../include/geometry.h"
+/*****************************************************/
+class PDB;
+/*****************************************************/
+enum traj_type{ pdb, dcd, xtc, gro, xyz, mol2, NONE };
+/*****************************************************/
 class positions3D{
 	public:
 		unsigned int natoms;
@@ -44,8 +44,8 @@ class positions3D{
 		double get_distance(unsigned atom1, unsigned atom2, unsigned frame);
 		std::vector<double> get_distances(unsigned atom1, unsigned atom2);
 		double avg_distance(unsigned atom1, unsigned atom2);
-}
-
+		void resize(unsigned nframes);
+};
 /*****************************************************/
 class ReadTraj{
 	public:
@@ -59,10 +59,11 @@ class ReadTraj{
 		ReadTraj( const char* file_name );
 		ReadTraj( const char* file_name, const char* topol_file );
 		ReadTraj( const ReadTraj& rhs );
-		ReadTraj& operator=( ReadTraj&& rhs ) noexcept;
-		ReadTraj( const ReadTraj& rhs );
+		ReadTraj& operator=( const ReadTraj& rhs );
+		ReadTraj(  ReadTraj&& rhs ) noexcept;
 		ReadTraj& operator=( ReadTraj&& rhs ) noexcept;
 		void parse();
+		PDB sample(unsigned interval );
 };
-
+/*****************************************************/
 #endif
