@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 #include "../include/global.h"
 #include "../include/molecule.h"
@@ -97,6 +98,18 @@ void MDprep::prepare_production(){
 }
 /******************************************************/
 void MDprep::organize_dir_files(){
+	
+}
+/******************************************************/
+std::ostream& operator<<(std::ostream& out, const MDprep& obj){
+
+}
+/******************************************************/
+void MDprep::print(){
+	
+}
+/******************************************************/
+void UnitTest_MDprep(){
 	
 }
 ////////////////////////////////////////////////////////

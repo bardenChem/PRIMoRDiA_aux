@@ -15,10 +15,14 @@
  
 /*********************************************************************/
 
+#include "../include/global.h"
 #include "../include/pdbAtom.h"
 
 #include <string>
 #include <cmath>
+#include <iostream>
+
+using std::endl;
 using std::string;
 
 /******************************************************************/
@@ -33,7 +37,7 @@ pdbAtom::pdbAtom()		:
 	sideC(false)		,
 	xc(0.00)			,
 	yc(0.00)			,
-	zc(0.00)			{	
+	zc(0.00)			{
 }
 /*********************************************************/
 pdbAtom::~pdbAtom(){}
@@ -42,7 +46,7 @@ pdbAtom::pdbAtom(const pdbAtom& rhs):
 	atom_name(rhs.atom_name)		,
 	indx(rhs.indx)					,
 	res_name(rhs.res_name)			,
-	res_indx(0)						,
+	res_indx(rhs.res_indx)			,
 	chain_name(rhs.chain_name)		,
 	occupancy(rhs.occupancy)		,
 	b_factor(rhs.b_factor)			,
@@ -63,10 +67,10 @@ pdbAtom& pdbAtom::operator=(const pdbAtom& rhs){
 		b_factor	= rhs.b_factor;
 		sideC		= rhs.sideC;
 		xc			= rhs.xc;
-		yc			= rhs.yc;					
+		yc			= rhs.yc;
 		zc			= rhs.zc;
 	}
-	return *this;	
+	return *this;
 }
 /*********************************************************/
 pdbAtom::pdbAtom(pdbAtom&& rhs) noexcept:
@@ -95,7 +99,7 @@ pdbAtom& pdbAtom::operator=(pdbAtom&& rhs) noexcept{
 		b_factor	= rhs.b_factor;
 		sideC		= rhs.sideC;
 		xc			= rhs.xc;
-		yc			= rhs.yc;					
+		yc			= rhs.yc;
 		zc			= rhs.zc;
 	}
 	return *this;
@@ -106,7 +110,9 @@ pdbAtom::pdbAtom(std::string& pdb_line)	:
 	res_name(pdb_line,17,3)				,
 	chain_name(pdb_line,21,2)			{
 	
-	string tmp_rsi(pdb_line,23,3);
+	string tmp_rsin(pdb_line,6,5);
+	indx	 = stoi(tmp_rsin);
+	string tmp_rsi(pdb_line,22,4);
 	res_indx = stoi(tmp_rsi);
 	string temp_xc(pdb_line,31,6);
 	string temp_yc(pdb_line,39,6);
@@ -129,7 +135,6 @@ bool pdbAtom::is_hydrogen(){
 	else if ( tmp1 == "2H" ) return true;
 	else if ( tmp1 == "3H" ) return true;
 	else return false;
-	
 }
 /*********************************************************/
 double pdbAtom::get_distance(const pdbAtom& a2){
@@ -138,4 +143,68 @@ double pdbAtom::get_distance(const pdbAtom& a2){
 	dist+= (yc - a2.yc)*(yc - a2.yc);
 	dist+= (zc - a2.zc)*(zc - a2.zc);
 	return sqrt(dist);
-}////////////////////////////////////////////////////////////
+}
+/*********************************************************/
+std::ostream& operator<<(std::ostream& out, const pdbAtom& obj){
+	out << "Outputting information about object of a class 'pdbAtom'"
+		<< "\nAtom name: "				<< obj.atom_name
+		<< "\n\t index: "				<< obj.indx
+		<< "\n\t residue "				<< obj.res_name
+		<< "\n\t residue index "		<< obj.res_indx
+		<< "\n\t chain name "			<< obj.chain_name
+		<< "\n\t b-factor "				<< obj.b_factor
+		<< "\n\t occupancy "			<< obj.occupancy
+		<< "\n\t x-coordinate "			<< obj.xc
+		<< "\n\t y-coordinate "			<< obj.yc
+		<< "\n\t z-coordinate "			<< obj.zc;
+		
+		return out;
+}
+/*********************************************************/
+void pdbAtom::print(){
+	std::cout << *this << std::endl;
+}
+/*********************************************************/
+void UnitTest_pdbAtom(){
+	string pdb_line_A = "ATOM      1  N   ALA  1         53.325  28.151  42.519  0.00  0.00          N  ";
+	string pdb_line_B = "HETATM 3732  C02 LIG  248       41.143  37.015  22.775  0.00  0.00          C  ";
+	
+	ut_log.input_line("========================================");
+	ut_log.input_line("Starting unit test for 'pdbAtom' class");
+	ut_log.input_line("Default constructor:");
+	pdbAtom _atom_a;
+	ut_log.data << _atom_a << endl;
+	
+	ut_log.input_line("String line constructor:");
+	pdbAtom _atom_b(pdb_line_A);
+	ut_log.data << _atom_b << endl;
+	
+	ut_log.input_line("copy constructor:");
+	pdbAtom _atom_c(_atom_b);
+	ut_log.data << _atom_c << endl;
+	
+	ut_log.input_line("Assign operator overloading:");
+	pdbAtom _atom_d = _atom_c;
+	ut_log.data << _atom_d << endl;
+	
+	ut_log.input_line("move constructor:");
+	pdbAtom _atom_e( std::move(_atom_b) );
+	ut_log.input_line("\tmoved atom:");
+	ut_log.data << _atom_b << endl;
+	ut_log.input_line("\tnew atom:");
+	ut_log.data << _atom_e << endl;
+	
+	ut_log.input_line("move Assign operator overloading:");
+	pdbAtom _atom_f = std::move(_atom_e);
+	ut_log.data << _atom_f << endl;
+	
+	pdbAtom _atom_g(pdb_line_B);
+	double distance = _atom_f.get_distance(_atom_g);
+	ut_log.input_line("calculated distance between two atoms: ");
+	ut_log.data << distance << endl;
+	
+	ut_log.input_line("Finished the unit test of the 'pdbAtom' class!\n");
+
+}
+
+////////////////////////////////////////////////////////////

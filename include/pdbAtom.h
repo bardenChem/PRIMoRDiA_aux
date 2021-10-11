@@ -43,8 +43,12 @@ class pdbAtom{
 		bool operator==(const pdbAtom& rhs);
 		bool is_hydrogen();
 		double get_distance(const pdbAtom& a2);
+		friend std::ostream& operator<<(std::ostream& out, const pdbAtom& obj);
+		void print();
 };
+/*******************************************************************/
 
+void UnitTest_pdbAtom();
 
 
 #endif 

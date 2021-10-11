@@ -25,7 +25,6 @@
 class pDynamoOutput{
 	public:
 		std::string sym_type;
-		
 };
 
 

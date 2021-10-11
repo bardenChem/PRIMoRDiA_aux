@@ -32,7 +32,7 @@ enum MopacMulti{
 };
 //----------------------------
 enum Hamiltonian{
-	AM1, RM1, PM3, PM6,	PM7,	
+	AM1, RM1, PM3, PM6,	PM7,
 	NumOfHamiltonians
 };
 //----------------------------
@@ -42,6 +42,7 @@ enum MopacRuntype{
 };
 
 //==============================================
+/***********************************************/
 class mopac_input{
 	public:
 		unsigned int charge;
@@ -60,7 +61,11 @@ class mopac_input{
 		void init(int chg, unsigned int mpcty, std::string solvent, std::string lmo, std::string Method );
 		void write_file( molecule& mol,std::string out_name );
 		void read_from_input(const char* inp_file, std::string out_name);
+		friend std::ostream& operator<<(std::ostream& out, const mopac_input& obj);
+		void print();
 };
+/***********************************************/
+void UnitTest_mopac_input();
 //////////////////////////////////////////////////
 
 #endif

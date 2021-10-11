@@ -40,13 +40,16 @@ class orcaInput{
 		std::string rtyp;
 		std::string basis;
 		std::ofstream out_fl;
-		orcaInput();	
+		orcaInput();
 		~orcaInput();
 		orcaInput(int chg, int mlt,int _nprocs,std::string _rtyp);
 		orcaInput(const orcaInput& rhs) = delete;
 		orcaInput& operator=(const orcaInput& rhs) = delete;
 		void write_inp(const molecule& mol, std::string mth,std::string _basis,std::string out_file);
+		friend std::ostream& operator<<(std::ostream& out, const orcaInput& obj);
+		void print();
 };
-
+/********************************************************************/
+void UnitTest_orcaInput();
 ///////////////////////////////////////////////////////////////////////
 #endif

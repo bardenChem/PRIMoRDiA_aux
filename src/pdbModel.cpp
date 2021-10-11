@@ -36,11 +36,10 @@ using std::move;
 using std::endl;
 
 //=========================================================
-
 pdbModel::pdbModel():
-	index(0)		,
-	remark("")		,
-	title("")		,
+	index("0")		,
+	remark("REMARK"),
+	title("TITLE")	,
 	model(0)		,
 	nChains(0)		,
 	nResidues(0)	,
@@ -48,9 +47,9 @@ pdbModel::pdbModel():
 }
 /*********************************************************/
 pdbModel::pdbModel(std::vector<residue> residues):
-	index(0)					,
-	remark("")					,
-	title("")					,
+	index("0")					,
+	remark("REMARK")			,
+	title("TITLE")				,
 	model(0)					,
 	nChains(0)					,
 	nResidues(residues.size())	,
@@ -58,7 +57,15 @@ pdbModel::pdbModel(std::vector<residue> residues):
 	monomers(residues)			{
 }
 /*********************************************************/
-pdbModel::pdbModel(const char* pdb_file, int mdl){
+pdbModel::pdbModel(const char* pdb_file, int mdl)	:
+	index("0")										,
+	remark("REMARK")								,
+	title("TITLE")									,
+	model(0)										,
+	nChains(0)										,
+	nResidues(0)									,
+	nAtoms(0)										{
+	
 	if ( !check_file_ext(".pdb",pdb_file) )	{
 		std::cout << "Warning! The file has wrong extension name!" << std::endl;
 	}
@@ -67,8 +74,10 @@ pdbModel::pdbModel(const char* pdb_file, int mdl){
 	
 	char pdb_line[100];
 	int line = 0;
-	string old_res = "0";
-	string curr_res = "_";	
+	unsigned old_res = -1;
+	unsigned curr_res = 0;
+	string old_chain = "a";
+	string curr_chain = "_";
 	string pdb_lineS;
 	
 	if ( IF_file( pdb_file ) ){
@@ -79,24 +88,50 @@ pdbModel::pdbModel(const char* pdb_file, int mdl){
 				string word(pdb_line,0,6);
 				if ( word == "ATOM  " || word == "HETATM" ) {
 					pdb_lineS = pdb_line;
-					pdbAtom _atom(pdb_lineS);					
-					if ( old_res == "0" ) { old_res = _atom.res_name; }
-					curr_res = _atom.res_name;
-					tmp_atoms.emplace_back( move(_atom) );
+					pdbAtom _atom(pdb_lineS);
+					nAtoms++;
+					if ( old_res == -1 ) { 
+						old_res = _atom.res_indx;
+					}
+					curr_res = _atom.res_indx;
 					if ( curr_res != old_res ){
 						residue _residue(tmp_atoms);
 						monomers.emplace_back(_residue);
 						old_res = curr_res;
+						nResidues++;
+						tmp_atoms.clear();
+						tmp_atoms.emplace_back( move(_atom) );
+					}else{
+						tmp_atoms.emplace_back( move(_atom) );
 					}
+					/**********************************/
+					if ( old_chain == "a" ){
+						old_chain == _atom.chain_name;
+					}
+					curr_chain = _atom.chain_name;
+					if ( curr_chain != old_chain ){
+						old_chain = curr_chain;
+						nChains++;
+					}
+					/**********************************/
 				}
-				else if ( 	word == "TER   " ||
-							word == "ENDMDL" || 
-							word == "END   " ){
+				else if (	word == "TER   " || word == "ENDMDL" || word == "END   " ){
+					if ( nResidues > 0 ){
+						residue _residue(tmp_atoms);
+						monomers.emplace_back(_residue);
+						old_res = curr_res;
+						nResidues++;
+					}
 					break;
 				}
 			}
 			line++;
 		}
+		residue _residue(tmp_atoms);
+		monomers.emplace_back(_residue);
+		nResidues++;
+	}else{
+		std::cout << "PDB file not open!" << std::endl;
 	}
 }
 /*********************************************************/
@@ -115,14 +150,14 @@ pdbModel::pdbModel(const pdbModel& rhs):
 /*********************************************************/
 pdbModel& pdbModel::operator=(const pdbModel& rhs){
 	if ( this != &rhs ){
-		index		= rhs.index;					
-		remark		= rhs.remark;					
-		title		= rhs.title;					
-		model		= rhs.model;					
-		nChains		= rhs.nChains;				
-		nResidues	= rhs.nResidues;			
-		nAtoms		= rhs.nAtoms;					
-		monomers	= rhs.monomers;			
+		index		= rhs.index;
+		remark		= rhs.remark;
+		title		= rhs.title;
+		model		= rhs.model;
+		nChains		= rhs.nChains;
+		nResidues	= rhs.nResidues;
+		nAtoms		= rhs.nAtoms;
+		monomers	= rhs.monomers;
 	}
 	return *this;
 }
@@ -140,14 +175,14 @@ pdbModel::pdbModel(pdbModel&& rhs) noexcept:
 /*********************************************************/
 pdbModel& pdbModel::operator=(pdbModel&& rhs) noexcept{
 	if ( this != &rhs ){
-		index		= rhs.index;					
-		remark		= move(rhs.remark);					
-		title		= move(rhs.title);					
-		model		= rhs.model;					
-		nChains		= rhs.nChains;				
-		nResidues	= rhs.nResidues;			
-		nAtoms		= rhs.nAtoms;					
-		monomers	= move(rhs.monomers);			
+		index		= rhs.index;
+		remark		= move(rhs.remark);
+		title		= move(rhs.title);
+		model		= rhs.model;
+		nChains		= rhs.nChains;
+		nResidues	= rhs.nResidues;
+		nAtoms		= rhs.nAtoms;
+		monomers	= move(rhs.monomers);
 	}
 	return *this;
 	
@@ -167,13 +202,13 @@ void pdbModel::write_model(std::string out_name){
 		for(j=0;j<monomers[i].nAtoms;j++){
 			pdb_file<< std::setw(6) << std::left  << "ATOM" 
 					<< " "
-					<< std::setw(4) << std::right  << (cont+1) 
+					<< std::setw(4) << std::right  << monomers[i].r_atoms[j].indx
 					<< " "
 					<< std::setw(4) << monomers[i].r_atoms[j].atom_name
 					<< " "
 					<< std::left << std::setw(4) << monomers[i].r_atoms[0].res_name
 					<< " "
-					<< std::right << std::setw(4) << (i+1)
+					<< std::right << std::setw(4) << monomers[i].r_atoms[0].res_indx
 					<< std::setw(5) << " "
 					<< std::setw(7) << monomers[i].r_atoms[j].xc
 					<< " "
@@ -251,7 +286,7 @@ void pdbModel::remove_ions(){
 /*********************************************************/
 void pdbModel::split_complex(std::string mol){
 	unsigned int i;
-	for(i=nResidues-1 ;i>0;i--){
+	for(i=nResidues-1;i>0;i--){
 		if ( mol == monomers[i].r_atoms[0].res_name ) {
 			pdbModel ligand;
 			ligand.monomers.emplace_back(monomers[i]);
@@ -280,12 +315,12 @@ double pdbModel::get_distance(int a1, int a2){
 	
 	for( int i=0;i<monomers.size();i++){
 		if ( count_a1 < a1 ){
-			count_a1 += monomers[i].nAtoms;		
+			count_a1 += monomers[i].nAtoms;
 		}else{
 			resnmb_a1 = i;
 		}
 		if ( count_a2 < a2 ){
-			count_a2 += monomers[i].nAtoms;		
+			count_a2 += monomers[i].nAtoms;
 		}else{
 			resnmb_a2 = i;
 		}
@@ -304,6 +339,59 @@ double pdbModel::get_distance(int a1, int a2){
 	}
 	
 	return atom1.get_distance(atom2);
-	
 }
+/*********************************************************/
+std::ostream& operator<<(std::ostream& out, const pdbModel& obj){
+	out << "Outputting information for model in a PDB file\n"
+		<< obj.title 
+		<< "\n"
+		<< obj.remark
+		<< "\n\tNumber of atoms in the model "	<< obj.nAtoms
+		<< "\n\tNumber of residues "			<< obj.nResidues
+		<< "\n\tNumber of chains "				<< obj.nChains
+		<< "\n\tmodel index	"					<< obj.index;
+	return out;
+}
+/*********************************************************/
+void pdbModel::print(){
+	std::cout << *this << endl;
+}
+/*********************************************************/
+void UnitTest_pdbModel(){
+	ut_log.input_line("=======================================");
+	ut_log.input_line("Starting unit test for 'pdbModel class!");
+	ut_log.input_line("Default constructor: ");
+	pdbModel _model_A;
+	ut_log.data << _model_A << endl;
+	
+	const char* pdb_file  = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/tim.pdb";
+	pdbModel _model_B(pdb_file,0);
+	ut_log.input_line("File opening constructor: ");
+	ut_log.data << _model_B << endl;
+	
+	ut_log.input_line("Writting method testing. \nWill open Pymol! ");
+	_model_B.write_model("test.pdb");
+	
+	system("pymol test.pdb");
+	
+	ut_log.input_line("Testing copy constructor!");
+	pdbModel _model_C(_model_B);
+	ut_log.data << _model_C << endl;
+	
+	ut_log.input_line("Testing assing operator overloading!");
+	pdbModel _model_D = _model_C; 
+	ut_log.data << _model_C << endl;
+	
+	ut_log.input_line("Testing move constructor!");
+	pdbModel _model_E( std::move(_model_D) );
+	ut_log.data << _model_E << endl;
+	
+	ut_log.input_line("Testing move constructor!");
+	pdbModel _model_F = std::move(_model_E);
+	ut_log.data << _model_F << endl;
+	
+	ut_log.input_line("Finished the unit test of the 'pdbModel' class!\n");
+
+}	
+
 //////////////////////////////////////////////////////////

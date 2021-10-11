@@ -21,6 +21,8 @@
 #include <vector>
 #include <string>
 
+#include <fstream>
+
 class atom;
 
 /********************************************************************/
@@ -45,6 +47,11 @@ class molecule{
 		void add_atom(atom a);
 		void add_atom(double x,double y, double z, std::string el);
 		void remove_atom(unsigned int i);
+		friend std::ostream& operator<<(std::ostream& out, const molecule& obj);
+		void print();
 };
 /********************************************************************/
+
+void UnitTest_molecule();
+
 #endif

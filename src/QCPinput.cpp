@@ -21,6 +21,7 @@
 #include <sstream>
 #include <algorithm>
 #include <experimental/filesystem>
+#include <iostream>
 
 #include "../include/global.h"
 #include "../include/molecule.h" 
@@ -251,5 +252,17 @@ void QCPinput::make_sh(vector<string> _fnames ){
 	}
 	cout << "writting file" << endl;
 	sh_file.close();
+}
+/*************************************************************/
+std::ostream& operator<<(std::ostream& out, const QCPinput& obj){
+	
+}
+/*************************************************************/
+void QCPinput::print(){
+	
+}
+/*************************************************************/
+void UnitTest_QCPinput(){
+	
 }
 //////////////////////////////////////////////////////////////

@@ -54,6 +54,10 @@ class pdbModel{
 		void split_complex( std::string mol );
 		void built_complex( const char* pdb_mol );
 		double get_distance( int a1, int a2 );
+		friend std::ostream& operator<<(std::ostream& out, const pdbModel& obj);
+		void print();
 };
+/***********************************************************/
+void UnitTest_pdbModel();
 /***********************************************************/
 #endif 

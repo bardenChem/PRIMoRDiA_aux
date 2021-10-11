@@ -124,4 +124,16 @@ void orcaInput::write_inp(	const molecule& mol		,
 	out_fl << "*";
 	out_fl.close();
 }
+/******************************************************/
+std::ostream& operator<<(std::ostream& out, const orcaInput& obj){
+	
+}
+/******************************************************/
+void orcaInput::print(){
+	
+}
+/******************************************************/
+void UnitTest_orcaInput(){
+	
+}
 ///////////////////////////////////////////////////////

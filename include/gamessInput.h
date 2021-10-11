@@ -20,7 +20,7 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+#include <fstream>
 
 class molecule;
 
@@ -33,12 +33,12 @@ enum GMS_Group{
 //----------------------------
 enum GMS_TheoryLevel { 	
 	HF, DFT, DFTB2, DFTB3,
-	FMO , P_HF, Semi,MP2,						
+	FMO , P_HF, Semi,MP2,
 	NumOfTheory
 };
 //----------------------------
 enum SCF_TYPE { 
-	RHF, UHF, ROHF,				
+	RHF, UHF, ROHF,
 	NumOfSCFoptions
 };
 //----------------------------
@@ -53,8 +53,8 @@ enum GMS_Run_Type {
 	SurfaceRun		,
 	FMOEnergy		,
 	FMOoptimize		,
-	FMOdynamics		,					
-	NumOfRunTypeOptions					
+	FMOdynamics		,
+	NumOfRunTypeOptions
 };
 //----------------------------
 enum GMS_Conv_OPT { 
@@ -91,6 +91,8 @@ class GMS_basis{
 		~GMS_basis();
 		GMS_basis(const GMS_basis& rhs);
 		GMS_basis& operator=(const GMS_basis& rhs);
+		friend std::ostream& operator<<(std::ostream& out, const GMS_basis& obj);
+		void print();
 };
 
 /*********************************************************************/
@@ -106,6 +108,7 @@ class gms_group{
 		gms_group& operator=(const gms_group& rhs);
 		gms_group(gms_group&& rhs) noexcept;
 		gms_group& operator=(gms_group&& rhs) noexcept;
+		void print();
 };
 std::ostream& operator<<(std::ostream& out, gms_group& grp);
 /*********************************************************************/
@@ -123,7 +126,7 @@ class gms_input{
 		unsigned int maxit;
 		unsigned int mwords;
 		unsigned short npunch;
-		unsigned int nsteps;		
+		unsigned int nsteps;
 		GMS_Conv_OPT copt;
 		GMS_Conv_OPT2 copt2;
 		GMS_TheoryLevel QMlevel;
@@ -153,7 +156,9 @@ class gms_input{
 		void read_input(const char* file_name);
 		void restart_input(const char* inp_name, const char* vec_data);
 		void write_input(std::string out_name);
-		void clear_directory();		
+		void clear_directory();
+		friend std::ostream& operator<<(std::ostream& out, const gms_input& obj);
+		void print();
 };
 /*********************************************************************
 class FMO_fragment{
@@ -164,4 +169,11 @@ class FMO_options{
 	
 };
 */
+void UnitTest_gms_basis();
+void UnitTest_gms_group();
+void UnitTest_gms_input();
+
+
+
+
 #endif

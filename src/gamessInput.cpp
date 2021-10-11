@@ -19,6 +19,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <experimental/filesystem>
 
 #include "../include/Line.h"
@@ -279,7 +280,7 @@ gms_group::gms_group( GMS_Group grp_type )	:
 			inp_text.emplace_back("gbasis=");
 			inp_text.emplace_back("sto"); 			// variable 2 
 			inp_text.emplace_back(" polar=");
-			inp_text.emplace_back("none");			// varible 4 		
+			inp_text.emplace_back("none");			// varible 4
 			inp_text.emplace_back(gEnd);
 			/*
 			inp_text.emplace_back(grpName);
@@ -331,6 +332,10 @@ gms_group& gms_group::operator=(gms_group&& rhs) noexcept{
 	return *this;
 }
 /**************************************************/
+void gms_group::print(){
+	cout << *this << endl;
+}
+/**************************************************/
 std::ostream& operator<<(std::ostream& out, gms_group& grp){
 	for ( int i=0;i<grp.inp_text.size();i++){
 		out << grp.inp_text[i];	
@@ -352,7 +357,7 @@ gms_input::gms_input()	:
 	nsteps(10)			,
 	copt(SOSCF)			,
 	copt2(None)			,
-	QMlevel(HF)		,
+	QMlevel(HF)			,
 	scftyp(RHF)			,
 	solvent("none")		,
 	guess("huckel")		,
@@ -361,7 +366,7 @@ gms_input::gms_input()	:
 	swdiis(0.005)		,
 	ethrsh(2.0)			,
 	alg("QA")			,
-	disp("UFF")			{	
+	disp("UFF")			{
 }
 /**************************************************/
 gms_input::~gms_input(){}
@@ -397,7 +402,7 @@ void gms_input::init(	int chg				,
 		QMlevel = GMS_TheoryLevel::MP2;
 	}	
 	
-	//----------------------------------------------			
+	//----------------------------------------------
 	// creating the basic groups
 	groups.emplace_back( GMS_Group::CTRL ); // 0
 	groups.emplace_back( GMS_Group::SYS  ); // 1
@@ -645,4 +650,15 @@ void gms_input::write_input(std::string out_name){
 void gms_input::clear_directory(){
 	
 }
+/**************************************************/
+ std::ostream& operator<<(std::ostream& out, const gms_input& obj){
+
+ }
+ /**************************************************/
+ void gms_input::print(){
+	 cout << *this << endl;
+ }
 //==================================================
+void UnitTest_gms_basis(){}
+void UnitTest_gms_group(){}
+void UnitTest_gms_input(){}

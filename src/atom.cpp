@@ -125,67 +125,68 @@ void atom::set_pCharge(double chg){
 	pCharge = chg;
 }
 /**********************************************************/
-std::string atom::print(){
+std::ostream& operator<<(std::ostream& out, const atom& obj){
 	
-	std::string p_info = " Printing atom information\n";
-	p_info +=  "\tElement name: ";
-	p_info += element;
-	p_info += "\n\tx axis coordinate: ";
-	p_info += std::to_string(xc);
-	p_info += "\n\yx axis coordinate: ";
-	p_info += std::to_string(yc);
-	p_info += "\n\zx axis coordinate: ";
-	p_info += std::to_string(zc);
-	p_info += "\n\tPartial charge: ";
-	p_info += std::to_string(pCharge);
-	p_info += "\n\tAtomic mass: ";
-	p_info += std::to_string(aMass);
-	p_info += "\n\tAtomic number: ";
-	p_info += std::to_string(aNmb);
+	out << "Outputting atomic information \n" 
+		<< "\tElement name: " << obj.element
+		<< "\n\tx axis coordinate: " << obj.xc
+		<< "\n\ty axis coordinate: " << obj.yc
+		<< "\n\tz axis coordinate: " << obj.zc
+		<< "\n\tPartial charge: " << obj.pCharge
+		<< "\n\tAtomic mass: " << obj.aMass
+		<< "\n\tAtomic number: " << obj.aNmb;
 	
-	cout << p_info << endl;
-	return p_info;
+	return out;
 }
 
+/**********************************************************/
+void atom::print(){
+	cout << *this << endl;
+}
 ///////////////////////////////////////////////////////////
 void UnitTest_atom(){
+	ut_log.input_line("Starting 'atom' class unit test!");
+	ut_log.input_line("================================");
 	atom _Atom_A; // default constructor 
-	_Atom_A.print();
+	ut_log.data << _Atom_A << endl;
 	atom _Atom_B(0.000,0.000,0.000, "H" ); // info constructor
-	_Atom_B.print();
+	ut_log.data << _Atom_B << endl;
 	atom _Atom_C(_Atom_B); // copy constructor
 	
 	ut_log.input_line("Printing Copied atom: ");
-	ut_log.input_line( _Atom_C.print() );
+	ut_log.data << _Atom_C << endl;
 	
 	atom _Atom_D = _Atom_C; // operator overloading 
-	cout << "Printing atomic copied information with operator overloading:" << endl;
-	_Atom_D.print();
+	
+	ut_log.input_line( "Printing atomic copied information with operator overloading:");
+	ut_log.data << _Atom_D << endl;
 	
 	atom _Atom_E( move(_Atom_D) ); // move constructor
-	cout << "Printing atom after being moved: " << endl;
-	_Atom_D.print();
-	cout << "Printing atom after receive infor from move : " << endl;
-	_Atom_E.print();
+	
+	ut_log.input_line( "Printing atom after being moved: ");
+	ut_log.data <<_Atom_D << endl;
+	ut_log.input_line( "Printing atom after receive infor from move : ");
+	ut_log.data <<_Atom_E << endl;
 	
 	atom _Atom_F = move(_Atom_E); // move assign operator oveloading
-	cout << "Printing atom after being moved: " << endl;
-	_Atom_E.print();
-	cout << "Printing atom after receive infor from move : " << endl;
-	_Atom_F.print();
+	ut_log.input_line("Printing atom after being moved: ");
+	ut_log.data <<_Atom_E  << endl;
+	ut_log.input_line("Printing atom after receive infor from move : ");
+	ut_log.data <<_Atom_F  << endl;
 	
-	cout << "Testing the charge setting " << endl;
+	ut_log.input_line("Testing the charge setting ");
 	_Atom_F.set_pCharge( -1.00 );
-	cout << "Testing coordinates setting " << endl;
+	ut_log.input_line("Testing coordinates setting ");
 	_Atom_F.set_coord(1.000,0.000,0.000);
-	cout << "Testing elment setting " << endl;
+	ut_log.input_line("Testing elment setting ");
 	_Atom_F.set_element("C");
-	cout << "Printing new information" << endl;
-	_Atom_F.print();
+	ut_log.input_line("Printing new information");
+	ut_log.data <<_Atom_F  << endl;
 	
-	cout << "Calculate distance with other atom : " << endl;
+	ut_log.input_line("Calculate distance with other atom : ");
 	double distance = _Atom_F.get_distance(_Atom_B);
-	cout << "Calculated distance: " << distance << endl;
-	cout << "Finishing Unit test for class 'atom'" << endl;
+	ut_log.input_line("Calculated distance: "); 
+	ut_log.data << distance << endl;
+	ut_log.input_line("Finishing Unit test for class 'atom'");
 }
 /**********************************************************/

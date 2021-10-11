@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "../include/PDB.h"
 #include "../include/XYZ.h"
@@ -62,6 +63,10 @@ class geometry{
 		void convert_to_bohr();
 		void write_to_file(std::string out_name,std::string format);
 		void center_coord();
+		friend std::ostream& operator<<(std::ostream& out, const geometry& obj);
+		void print();
 };
+/*********************************************************************/
+void UnitTest_geometry();
 ///////////////////////////////////////////////////////////
 #endif

@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 class pdbModel;
 class molecule;
@@ -46,7 +47,11 @@ class PDB{
 		void init_from_system(const molecule& mol);
 		molecule get_system_from_model(unsigned int model);
 		std::vector<molecule> get_systems();
-		
+		friend std::ostream& operator<<(std::ostream& out, const PDB& obj);
+		void print();
+
 };
+/******************************************************************************/
+void UnitTest_PDB();
 
 #endif

@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "../include/geometry.h"
 /*****************************************************/
@@ -45,6 +46,8 @@ class positions3D{
 		std::vector<double> get_distances(unsigned atom1, unsigned atom2);
 		double avg_distance(unsigned atom1, unsigned atom2);
 		void resize(unsigned nframes);
+		friend std::ostream& operator<<(std::ostream& out, const positions3D& obj);
+		void print();
 };
 /*****************************************************/
 class ReadTraj{
@@ -64,6 +67,11 @@ class ReadTraj{
 		ReadTraj& operator=( ReadTraj&& rhs ) noexcept;
 		void parse();
 		PDB sample(unsigned interval );
+		friend std::ostream& operator<<(std::ostream& out, const ReadTraj& obj);
+		void print();
 };
+/*****************************************************/
+void UnitTest_positions3D();
+void UnitTest_ReadTraj();
 /*****************************************************/
 #endif

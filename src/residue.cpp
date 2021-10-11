@@ -18,6 +18,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <fstream>
+#include <iostream>
 
 #include "../include/global.h"
 #include "../include/pdbAtom.h"
@@ -25,6 +27,7 @@
 
 using std::string;
 using std::vector;
+using std::endl;
 
 ////////////////////////////////////////////////////////////////////////////
 std::map<AAres, int> AAnHydrogens = {
@@ -80,7 +83,8 @@ std::map<string, res_type> lig_t = {
 ///////////////////////////////////////////////////////////
 residue::residue()	:
 	type(UNK)		,
-	AAname(OTH)     ,
+	name("UKN")		,
+	AAname(OTH)		,
 	DNAname(OTHd)	,
 	IONname(OTHi)	,
 	ligand(false)	,
@@ -100,26 +104,31 @@ residue::residue( vector<pdbAtom> resAtoms ):
 	ligand(false)							,
 	terminal(false)							,
 	first(false)        					,
-	pdb_index(0)							,
+	nHydrogens(0)							,
 	fCharge(0.0)							{
 		
 
 	type = get_type();
-	if 		( type == res_type::AA  ) AAname = R3name[r_atoms[0].res_name];
-	else if ( type == res_type::DNA ) DNAname= DNA_t[r_atoms[0].res_name];
-	else if ( type == res_type::ION ) IONname= ions_t[r_atoms[0].res_name];
+	name = r_atoms[0].res_name;
+	if 		( type == res_type::AA  ) AAname = R3name[name];
+	else if ( type == res_type::DNA ) DNAname= DNA_t[name];
+	else if ( type == res_type::ION ) IONname= ions_t[name];
 	else if ( type == res_type::LIG ) ligand = true;
-		
+
 	for(int i=0;i<resAtoms.size();i++){
-		if ( resAtoms[i].is_hydrogen() ) nHydrogens++;
-	}
-	 
+		if ( resAtoms[i].is_hydrogen() ) 
+			nHydrogens++;
+	} 
+	
+	pdb_index	= r_atoms[0].res_indx;
+	nAtoms		= r_atoms.size();
 }
 /*********************************************************/
 residue::~residue(){}
 /*********************************************************/
 residue::residue(const residue& rhs):
 	type(rhs.type)					,
+	name(rhs.name)					,
 	AAname(rhs.AAname)				,
 	ligand(rhs.ligand)				,
 	terminal(rhs.terminal)			,
@@ -127,7 +136,7 @@ residue::residue(const residue& rhs):
 	fCharge(rhs.fCharge)			,
 	pdb_index(rhs.pdb_index)        ,
 	nAtoms(rhs.nAtoms)				,
-	r_atoms(rhs.r_atoms)			{	
+	r_atoms(rhs.r_atoms)			{
 }
 /*********************************************************/
 residue& residue::operator=(const residue& rhs){
@@ -148,6 +157,7 @@ residue& residue::operator=(const residue& rhs){
 /*********************************************************/
 residue::residue( residue&& rhs) noexcept:
 	type( rhs.type )					,
+	name( move(rhs.name ) )				,
 	AAname(rhs.AAname)					,
 	ligand(rhs.ligand)					,
 	terminal(rhs.terminal)				,
@@ -163,6 +173,7 @@ residue::residue( residue&& rhs) noexcept:
 residue& residue::operator=( residue&& rhs) noexcept{
 	if ( this != &rhs ){
 		type 		= rhs.type;
+		name		= move(rhs.name);
 		AAname		= rhs.AAname;
 		ligand		= rhs.ligand;
 		terminal	= rhs.terminal;
@@ -173,7 +184,7 @@ residue& residue::operator=( residue&& rhs) noexcept{
 		nAtoms 		= rhs.nAtoms;
 		r_atoms 	= move(rhs.r_atoms);
 	}
-	return *this;	
+	return *this;
 }
 /*********************************************************/
 res_type residue::get_type(){
@@ -186,8 +197,8 @@ res_type residue::get_type(){
 						return rt;
 					}else rt = res_type::LIG;
 				}else rt = res_type::WAT;
-			}else rt= res_type::DNA;			
-		}else rt = res_type::ION;		
+			}else rt= res_type::DNA;
+		}else rt = res_type::ION;
 	}else rt = res_type::AA;
 	
 	return rt;
@@ -202,7 +213,7 @@ void residue::set_charge(){
 			case ASP:
 			case GLU:
 				if ( first || terminal ){
-					fCharge = nHydrogens - base_HN - 2;				
+					fCharge = nHydrogens - base_HN - 2;
 				}else{
 					fCharge = nHydrogens - base_HN  -1;
 				} 
@@ -211,7 +222,7 @@ void residue::set_charge(){
 			case ARG:
 			case LYS:
 				if ( first || terminal ) {
-					fCharge = nHydrogens - base_HN;					
+					fCharge = nHydrogens - base_HN;
 				}
 				else {
 					fCharge = nHydrogens - base_HN +1;
@@ -238,7 +249,7 @@ void residue::set_charge(){
 				else {
 					fCharge = 0;
 				}
-			break;			
+			break;
 		}		
 	}
 	else if ( type == ION ){
@@ -254,6 +265,64 @@ void residue::set_charge(){
 			fCharge = -2;
 		else fCharge = 0;
 		
-	}	
+	}
+}
+/*******************************************************************/
+std::ostream& operator<<(std::ostream& out, const residue& obj){
+	out <<	"Outputting residue object class!\n"
+		<<	"Name: " 						<< obj.name
+		<<	"\n\tFormal charge: "			<< obj.fCharge
+		<<	"\n\tNumber of atoms: "			<< obj.nAtoms
+		<<	"\n\tNumber of hydrogens: "		<< obj.nHydrogens
+		<<	"\n\tIndex in pdb: "			<< obj.pdb_index;
+		
+	return out;
+}
+/*******************************************************************/
+void residue::print(){
+	std::cout << *this << endl;
+}
+/*******************************************************************/
+void UnitTest_residue(){
+	
+	ut_log.input_line("================================");
+	ut_log.input_line("Starting the unit test for 'residue' class");
+	ut_log.input_line("Deafult constructor: ");	
+	
+	residue _res_A;
+	ut_log.data << _res_A << endl;
+	
+	string _atom_1 = "HETATM 5316  O   WAT  3376      48.909  18.828  10.446  0.00  0.00          O   ";
+	string _atom_2 = "HETATM 5317  H1  WAT  3376      49.523  19.146   9.784  0.00  0.00          H   ";
+	string _atom_3 = "HETATM 5318  H2  WAT  3376      49.454  18.343  11.066  0.00  0.00          H   ";
+	
+	std::vector<pdbAtom> rs_atoms;
+	rs_atoms.emplace_back(_atom_1);
+	rs_atoms.emplace_back(_atom_2);
+	rs_atoms.emplace_back(_atom_3);
+	
+	residue _res_B(rs_atoms);
+	ut_log.input_line("pdbAtom vector constructor: ");
+	ut_log.data << _res_B << endl;
+	
+	ut_log.input_line("Copy constructor: ");
+	residue _res_C(_res_B);
+	ut_log.data << _res_C << endl;
+	
+	ut_log.input_line("Assign operator overloading: ");
+	residue _res_D = _res_C;
+	ut_log.data << _res_D << endl;
+	
+	ut_log.input_line("Move constructor: ");
+	residue _res_E( std::move(_res_D) );
+	ut_log.data << _res_E << endl;
+	
+	ut_log.input_line("Assign operator overloading: ");
+	residue _res_F = std::move( _res_E );
+	ut_log.data << _res_F << endl;
+	
+	
+	ut_log.input_line("Finishin unit test for 'residue' class");
+
 }
 ////////////////////////////////////////////////////////////////////

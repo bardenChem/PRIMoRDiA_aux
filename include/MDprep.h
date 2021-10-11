@@ -61,7 +61,12 @@ class MDprep{
 		void prepare_equilibration();
 		void prepare_production();
 		void organize_dir_files();
+		friend std::ostream& operator<<(std::ostream& out, const MDprep& obj);
+		void print();
 };
+/****************************************/
+void UnitTest_MDprep();
+
 /////////////////////////////////////////
 
 #endif

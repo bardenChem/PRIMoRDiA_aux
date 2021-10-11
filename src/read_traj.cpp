@@ -19,6 +19,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 #include "../include/global.h"
 #include "../include/pdbAtom.h"
@@ -109,6 +110,14 @@ void positions3D::resize(unsigned nframes){
 	xc.resize(nframes);
 	yc.resize(nframes);
 	zc.resize(nframes);
+}
+/*********************************************************/
+std::ostream& operator<<(std::ostream& out, const positions3D& obj){
+	
+}
+/*********************************************************/
+void positions3D::print(){
+	
 }
 /*********************************************************/
 ReadTraj::ReadTraj()		:
@@ -214,3 +223,17 @@ PDB ReadTraj::sample(unsigned interval){
 	
 }
 /*********************************************************/
+std::ostream& operator<<(std::ostream& out, const ReadTraj& obj){
+	
+}
+/*********************************************************/
+void ReadTraj::print(){
+	
+}
+/*********************************************************/
+void UnitTest_positions3D(){
+	
+}
+void UnitTest_ReadTraj(){
+	
+}

@@ -126,4 +126,16 @@ void mopac_input::read_from_input(	const char* inp_file,
 									std::string out_name){
 	
 }
+/*************************************************************/
+ std::ostream& operator<<(std::ostream& out, const mopac_input& obj){
+	
+}
+/*************************************************************/
+void mopac_input::print(){
+	
+}
+/*************************************************************/
+void UnitTest_mopac_input(){
+	
+}
 ////////////////////////////////////////////////////////////////

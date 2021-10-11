@@ -21,7 +21,7 @@
 
 #include <string>
 #include <vector>
-
+#include <fstream>
 ///////////////////////////////////////////////////////////////////////
 enum AAres{
 	OTH=-1,
@@ -50,6 +50,7 @@ class pdbAtom; // foward declaration
 class residue{
 	public:
 		res_type type;
+		std::string name;
 		AAres AAname;
 		IONres IONname;
 		DNAres DNAname;
@@ -60,7 +61,7 @@ class residue{
 		int pdb_index;
 		unsigned int nHydrogens;
 		unsigned int nAtoms;
-		std::vector<pdbAtom> r_atoms;		
+		std::vector<pdbAtom> r_atoms;
 		residue();
 		residue(std::vector<pdbAtom> resAtoms);
 		~residue();
@@ -69,7 +70,12 @@ class residue{
 		residue( residue&& rhs) noexcept;
 		residue& operator=( residue&& rhs) noexcept;
 		res_type get_type();
+		std::string get_name();
 		void set_charge();
+		friend std::ostream& operator<<(std::ostream& out, const residue& obj);
+		void print();
 };
-
+/****************************************************************/
+void UnitTest_residue();
+///////////////////////////////////////////////////////////////////
 #endif

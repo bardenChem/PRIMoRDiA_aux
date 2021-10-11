@@ -40,6 +40,9 @@ class XYZ{
 		XYZ& operator=(XYZ&& rhs) noexcept;
 		void write_xyz(std::string out_name);
 		molecule get_molecule();
+		friend std::ostream& operator<<(std::ostream& out, const XYZ& obj);
+		void print();
 };
-
+/*******************************************************************************/
+void UnitTest_XYZ();
 #endif 

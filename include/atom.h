@@ -40,10 +40,13 @@ class atom{
 		void set_coord(double x, double y, double z);
 		double get_distance(const atom& a2);
 		void set_pCharge(double chg);
-		std::string print();
-};
-/**************************************************************/
+		friend std::ostream& operator<<(std::ostream& out, const atom& obj);
+		void print();
+};		
 
+
+
+/**************************************************************/
 void UnitTest_atom();
 
 

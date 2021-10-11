@@ -18,6 +18,8 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <fstream>
+#include <iostream>
 
 #include "../include/global.h"
 #include "../include/atom.h"
@@ -29,7 +31,7 @@ using std::string;
 using std::move;
 
 /***********************************************************/
-molecule::molecule()	:
+molecule::molecule():
 	nAtoms(0)		,
 	nElectrons(0)	,
 	name("nonamed")	,
@@ -110,11 +112,11 @@ molecule::molecule(molecule&& rhs) noexcept:
 molecule& molecule::operator=(const molecule& rhs){
 	if( this != &rhs ){
 		nAtoms 		= rhs.nAtoms;
-		nElectrons 	= rhs.nElectrons;	
+		nElectrons 	= rhs.nElectrons;
 		name 		= rhs.name;		
-		type 		= rhs.type;			
-		atoms 		= rhs.atoms;			
-		molar_mass 	= rhs.molar_mass;  		
+		type 		= rhs.type;
+		atoms 		= rhs.atoms;
+		molar_mass 	= rhs.molar_mass;
 		
 		for(int i=0;i<3;i++){
 			ver_inf[i] = rhs.ver_inf[i];
@@ -127,11 +129,11 @@ molecule& molecule::operator=(const molecule& rhs){
 molecule& molecule::operator=(molecule&& rhs) noexcept{
 	if( this != &rhs ){
 		nAtoms 		= rhs.nAtoms;
-		nElectrons 	= rhs.nElectrons;	
-		name 		= move(rhs.name);		
-		type 		= move(rhs.type);			
-		atoms 		= move(rhs.atoms);			
-		molar_mass 	= rhs.molar_mass;  		
+		nElectrons 	= rhs.nElectrons;
+		name 		= move(rhs.name);
+		type 		= move(rhs.type);
+		atoms 		= move(rhs.atoms);
+		molar_mass 	= rhs.molar_mass;
 		
 		for(int i=0;i<3;i++){
 			ver_inf[i] = rhs.ver_inf[i];
@@ -158,5 +160,25 @@ void molecule::add_atom(double x		,
 void molecule::remove_atom(unsigned int i){
 	atoms.erase( atoms.begin()+i );
 	nAtoms--;
+}
+/*********************************************************/
+std::ostream& operator<<(std::ostream& out, const molecule& obj){
+	out <<"Outputting information about molecule object"
+		<<"\nmolecule name " 			<< obj.name
+		<<"\n\tNumber of atoms:"		<< obj.nAtoms
+		<<"\n\tNumber of electrons:"	<< obj.nElectrons
+		<<"\n\tFormal charge: "			<< obj.fCharge
+		<<"\n\tMolar Mass: "			<< obj.molar_mass
+		<<"\n\tSize of the atom container" << obj.atoms.size();
+		
+	return out;
+}
+/*********************************************************/
+void molecule::print(){
+	std::cout << *this << std::endl;
+}
+/*********************************************************/
+void UnitTest_molecule(){
+	
 }
 ////////////////////////////////////////////////////////////

@@ -43,6 +43,11 @@ class QCPinput{
 		// for finite differences calculations
 		void make_input_from_folder_FD(package QCP,unsigned int bs_mlt,int bs_chg,int chg_diff); 
 		void make_sh(std::vector<std::string> _fnames);
+		friend std::ostream& operator<<(std::ostream& out, const QCPinput& obj);
+		void print();
 };
+/*********************************************************************/
+void UnitTest_QCPinput();
+
 /////////////////////////////////////////////////////////////////////
 #endif 

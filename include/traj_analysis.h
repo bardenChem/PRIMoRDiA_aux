@@ -44,7 +44,9 @@ class traj_an{
 		void extract_frames(const char* pdb_file, int interval,int fr_sz);
 		int bi_most_probable_point( std::vector<double> v1, std::vector<double> v2 );
 		void prune_waters(int radius);
+		friend std::ostream& operator<<(std::ostream& out, const traj_an& obj);
+		void print();
 };
 /****************************************************/
-
+void UnitTest_traj_an();
 #endif
