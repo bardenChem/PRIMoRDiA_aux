@@ -238,6 +238,16 @@ pdbAtom& pdbModel::pick_atom(unsigned i){
 	pdbAtom empty;
 	return empty;
 }
+/*********************************************************/
+residue& pdbModel::pick_res(unsigned pdb_i){	
+	for(unsigned i=0;i<monomers.size();i++){
+		if ( monomers[i].pdb_index == pdb_i ){
+			return monomers[i];
+		}
+	}
+	residue empty;
+	return empty;
+}
 /****************************************************************************/
 vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 												double radius				,
@@ -277,7 +287,6 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 		}
 	}
 	
-	
 	if ( within ){
 		return selection;
 	}else{
@@ -287,7 +296,6 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 /*********************************************************/
 pdbModel pdbModel::prune_atoms( std::vector<unsigned> selection ){
 	pdbModel pruned = *this;
-	
 	unsigned count = nAtoms;
 	for(unsigned i=monomers.size();i>0;i--){
 		for(unsigned j=monomers[i].r_atoms.size();j>0;j--){
@@ -304,15 +312,18 @@ pdbModel pdbModel::prune_atoms( std::vector<unsigned> selection ){
 /*********************************************************/
 pdbModel pdbModel::prune_atoms_by_residue( unsigned res, double radius ){
 	pdbModel pruned = *this;
+	residue ref = this->pick_res(res);
+	double dist_ = 0.0;
+	for(unsigned i=monomers.size();i>0;i--){
+		dist_ = ref.smallest_distance(monomers[i]);
+		if ( dist_ < radius ){
+			pruned.remove_residue(i);
+		}
+	}	
 	return pruned;
 }
 /*********************************************************/
-pdbModel pdbModel::prune_atoms_beyond_residue( unsigned res, double radius ){
-	pdbModel pruned = *this;
-	return pruned;
-}
-/*********************************************************/
-void pdbModel::remove_atom(unsigned int res, unsigned int at){	
+void pdbModel::remove_atom(unsigned int res, unsigned int at){
 	
 	monomers[res].r_atoms.erase( monomers[res].r_atoms.begin()+at);
 	monomers[res].nAtoms--;
@@ -346,17 +357,12 @@ void pdbModel::remove_waters(){
 }
 /*********************************************************/
 void pdbModel::remove_waters(double radius, unsigned int res){
-	double refXC, refYC, refZC, distTemp = 0.000;
-	refXC = monomers[res].r_atoms[0].xc;
-	refYC = monomers[res].r_atoms[0].yc;
-	refZC = monomers[res].r_atoms[0].zc;
-	
-	for(unsigned i=monomers.size()-1;i>0;i--){
+	double distTemp = 0.0;
+	residue ref = this->pick_res(res);
+	unsigned i = nResidues;
+	for(i; i>0; i--){
 		if ( monomers[i].type == WAT ) {
-			distTemp =  (monomers[i].r_atoms[0].xc - refXC)*(monomers[i].r_atoms[0].xc - refXC);
-			distTemp += (monomers[i].r_atoms[0].yc - refYC)*(monomers[i].r_atoms[0].yc - refYC);
-			distTemp += (monomers[i].r_atoms[0].zc - refZC)*(monomers[i].r_atoms[0].zc - refZC);
-			distTemp = sqrt(distTemp);
+			distTemp = ref.smallest_distance( monomers[i] );
 			if ( distTemp > radius )
 				this->remove_residue(i);
 		}
@@ -484,7 +490,7 @@ void UnitTest_pdbModel(){
 	system("pymol test_wwater.pdb");
 	
 	ut_log.input_line("Testing the water removal from a given radius of a residue!");
-	_model_C.remove_waters(7.0,93);
+	_model_C.remove_waters(7.0,94);
 	_model_C.write_model("test_wwater_r.pdb");
 	system("pymol test_wwater_r.pdb");
 	

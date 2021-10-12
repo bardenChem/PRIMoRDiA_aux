@@ -43,12 +43,12 @@ class pdbModel{
 		pdbModel(pdbModel&& rhs) noexcept;
 		pdbModel& operator=(pdbModel&& rhs) noexcept;
 		pdbAtom& pick_atom(unsigned i);
+		residue& pick_res(unsigned pdb_i);
 		void write_model(std::string out_name);
 		void prune_atoms();
 		std::vector<unsigned> spherical_selection(unsigned center_atom, double radius, bool within, bool byres );
 		pdbModel prune_atoms( std::vector<unsigned> selection );
 		pdbModel prune_atoms_by_residue( unsigned res, double radius );
-		pdbModel prune_atoms_beyond_residue( unsigned res, double radius );
 		void remove_waters();
 		void remove_waters(double radius, unsigned int res);
 		void remove_ions();
