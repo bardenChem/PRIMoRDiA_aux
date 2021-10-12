@@ -72,6 +72,7 @@ class residue{
 		res_type get_type();
 		std::string get_name();
 		void set_charge();
+		double smallest_distance(const residue& rhs);
 		friend std::ostream& operator<<(std::ostream& out, const residue& obj);
 		void print();
 };

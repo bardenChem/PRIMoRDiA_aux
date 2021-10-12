@@ -268,6 +268,21 @@ void residue::set_charge(){
 	}
 }
 /*******************************************************************/
+double residue::smallest_distance(const residue& rhs){
+	double distance = 0.0;
+	double smallest_d = r_atoms[0].get_distance( rhs.r_atoms[0] );
+	
+	for(unsigned i=0;i<r_atoms.size();i++ ){
+		for(unsigned j=0;j<rhs.r_atoms.size();i++ ){
+			distance = r_atoms[i].get_distance( rhs.r_atoms[j] );
+			if ( distance < smallest_d ){
+				smallest_d = distance;
+			}
+		}
+	}
+	return smallest_d;
+}
+/*******************************************************************/
 std::ostream& operator<<(std::ostream& out, const residue& obj){
 	out <<	"Outputting residue object class!\n"
 		<<	"Name: " 						<< obj.name

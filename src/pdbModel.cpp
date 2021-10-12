@@ -227,12 +227,99 @@ void pdbModel::write_model(std::string out_name){
 	pdb_file.close();
 }
 /*********************************************************/
+pdbAtom& pdbModel::pick_atom(unsigned i){
+	for(unsigned i=0;i<monomers.size();i++){
+		for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
+			if ( monomers[i].r_atoms[j].indx == i){
+				return monomers[i].r_atoms[j];
+			}
+		}
+	}
+	pdbAtom empty;
+	return empty;
+}
+/****************************************************************************/
+vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
+												double radius				,
+												bool within					, 
+												bool byres 					){
+	vector<unsigned> selection;
+	vector<unsigned> unselection;
+	
+	pdbAtom c_atom = this->pick_atom(center_atom);
+	
+	double dist_ref = 0.0;
+	double dist_calc= 0.0;
+	unsigned count = 0;
+	
+	if ( byres ){
+		for(unsigned i=0;i<monomers.size();i++){
+			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
+				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j]);
+				if ( dist_calc > radius ){
+					unselection.push_back(i);
+				}else{
+					selection.push_back(i);
+				}
+			}
+		}
+	}else{
+		dist_ref = c_atom.get_distance( monomers[0].r_atoms[0]);
+		for(unsigned i=0;i<monomers.size();i++){
+			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
+				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j]);
+				if ( dist_calc > radius ){
+					unselection.push_back(count++);
+				}else{
+					selection.push_back(count++);
+				}
+			}
+		}
+	}
+	
+	
+	if ( within ){
+		return selection;
+	}else{
+		return unselection;
+	}
+}
+/*********************************************************/
+pdbModel pdbModel::prune_atoms( std::vector<unsigned> selection ){
+	pdbModel pruned = *this;
+	
+	unsigned count = nAtoms;
+	for(unsigned i=monomers.size();i>0;i--){
+		for(unsigned j=monomers[i].r_atoms.size();j>0;j--){
+			for( unsigned k=selection.size();k>0;k--){
+				if ( count == selection[count] ){
+					pruned.remove_atom(i,j);
+				}
+			}
+			count--;
+		}
+	}	
+	return pruned;
+}
+/*********************************************************/
+pdbModel pdbModel::prune_atoms_by_residue( unsigned res, double radius ){
+	pdbModel pruned = *this;
+	return pruned;
+}
+/*********************************************************/
+pdbModel pdbModel::prune_atoms_beyond_residue( unsigned res, double radius ){
+	pdbModel pruned = *this;
+	return pruned;
+}
+/*********************************************************/
 void pdbModel::remove_atom(unsigned int res, unsigned int at){	
 	
 	monomers[res].r_atoms.erase( monomers[res].r_atoms.begin()+at);
 	monomers[res].nAtoms--;
 	nAtoms--;
-	
+	if ( monomers[res].r_atoms.size() == 0 ){
+		this->remove_residue(res);
+	}
 }
 /*********************************************************/
 void pdbModel::remove_residue(unsigned int i){
@@ -252,20 +339,19 @@ void pdbModel::prune_atoms(){
 }
 /*********************************************************/
 void pdbModel::remove_waters(){
-	unsigned int i;
-	for(i=0;i<nResidues;i++){
-		if ( monomers[i].type == WAT ) this->remove_residue(i);
+	for(unsigned i=monomers.size()-1;i>0;i--){
+		if ( monomers[i].type == WAT ) 
+			this->remove_residue(i);
 	}
 }
 /*********************************************************/
 void pdbModel::remove_waters(double radius, unsigned int res){
-	unsigned int i;
 	double refXC, refYC, refZC, distTemp = 0.000;
 	refXC = monomers[res].r_atoms[0].xc;
 	refYC = monomers[res].r_atoms[0].yc;
 	refZC = monomers[res].r_atoms[0].zc;
 	
-	for(i=0;i<nResidues;i++){
+	for(unsigned i=monomers.size()-1;i>0;i--){
 		if ( monomers[i].type == WAT ) {
 			distTemp =  (monomers[i].r_atoms[0].xc - refXC)*(monomers[i].r_atoms[0].xc - refXC);
 			distTemp += (monomers[i].r_atoms[0].yc - refYC)*(monomers[i].r_atoms[0].yc - refYC);
@@ -278,15 +364,14 @@ void pdbModel::remove_waters(double radius, unsigned int res){
 }
 /*********************************************************/
 void pdbModel::remove_ions(){
-	unsigned int i = 0;
-	for(i;i<nResidues;i++){
-		if ( monomers[i].type == ION ) this->remove_residue(i);
+	for(unsigned i=monomers.size()-1;i>0;i--){
+		if ( monomers[i].type == ION ) 
+			this->remove_residue(i);
 	}
 }
 /*********************************************************/
 void pdbModel::split_complex(std::string mol){
-	unsigned int i;
-	for(i=nResidues-1;i>0;i--){
+	for(unsigned i=nResidues-1;i>0;i--){
 		if ( mol == monomers[i].r_atoms[0].res_name ) {
 			pdbModel ligand;
 			ligand.monomers.emplace_back(monomers[i]);
@@ -305,7 +390,7 @@ void pdbModel::built_complex(const char* pdb_mol){
 	nAtoms += temp.monomers[0].nAtoms;
 }
 /*********************************************************/
-double pdbModel::get_distance(int a1, int a2){
+double pdbModel::atom_distance(unsigned a1, unsigned a2){
 	int count_a1	= 0;
 	int count_a2	= 0;
 	int resnmb_a1	= 0;
@@ -337,8 +422,11 @@ double pdbModel::get_distance(int a1, int a2){
 			atom2 = monomers[resnmb_a2].r_atoms[j];
 		}
 	}
-	
 	return atom1.get_distance(atom2);
+}
+/*********************************************************/
+double pdbModel::atom_angle(unsigned a1, unsigned a2, unsigned a3){
+	
 }
 /*********************************************************/
 std::ostream& operator<<(std::ostream& out, const pdbModel& obj){
@@ -389,6 +477,16 @@ void UnitTest_pdbModel(){
 	ut_log.input_line("Testing move constructor!");
 	pdbModel _model_F = std::move(_model_E);
 	ut_log.data << _model_F << endl;
+	
+	ut_log.input_line("Testing the water removal!");
+	_model_F.remove_waters();
+	_model_F.write_model("test_wwater.pdb");
+	system("pymol test_wwater.pdb");
+	
+	ut_log.input_line("Testing the water removal from a given radius of a residue!");
+	_model_C.remove_waters(7.0,93);
+	_model_C.write_model("test_wwater_r.pdb");
+	system("pymol test_wwater_r.pdb");
 	
 	ut_log.input_line("Finished the unit test of the 'pdbModel' class!\n");
 

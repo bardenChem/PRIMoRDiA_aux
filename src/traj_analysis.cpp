@@ -185,7 +185,7 @@ void traj_an::calc_distances(const char* pdb_file){
 	
 	for(int i=0;i<traj_pdb.nModels;i++){
 		for ( int j=0;j<dist.size();j++){
-			dist[j].emplace_back( traj_pdb.models[i].get_distance( atoms_pairs[j], atoms_pairs[j+1] ) );
+			dist[j].emplace_back( traj_pdb.models[i].atom_distance( atoms_pairs[j], atoms_pairs[j+1] ) );
 		}
 	}
 
