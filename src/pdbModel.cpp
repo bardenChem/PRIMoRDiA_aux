@@ -55,6 +55,10 @@ pdbModel::pdbModel(std::vector<residue> residues):
 	nResidues(residues.size())	,
 	nAtoms(0)					,
 	monomers(residues)			{
+	
+	for(unsigned int i=0;i<monomers.size();i++){
+		nAtoms += monomers[i].r_atoms.size();
+	}
 }
 /*********************************************************/
 pdbModel::pdbModel(const char* pdb_file, int mdl)	:
@@ -227,11 +231,23 @@ void pdbModel::write_model(std::string out_name){
 	pdb_file.close();
 }
 /*********************************************************/
-pdbAtom& pdbModel::pick_atom(unsigned i){
-	for(unsigned i=0;i<monomers.size();i++){
-		for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
-			if ( monomers[i].r_atoms[j].indx == i){
-				return monomers[i].r_atoms[j];
+pdbAtom& pdbModel::pick_atom(unsigned pdb_i, bool pdb){
+	if ( pdb ){
+		for(unsigned i=0;i<monomers.size();i++){
+			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
+				if ( monomers[i].r_atoms[j].indx == pdb_i ){
+					return monomers[i].r_atoms[j];
+				}
+			}
+		}
+	}else{
+		unsigned count = 0;
+		for(unsigned i=0;i<monomers.size();i++){
+			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
+				if ( count == pdb_i ){
+					return monomers[i].r_atoms[j];
+				}
+				count++;
 			}
 		}
 	}
@@ -239,7 +255,7 @@ pdbAtom& pdbModel::pick_atom(unsigned i){
 	return empty;
 }
 /*********************************************************/
-residue& pdbModel::pick_res(unsigned pdb_i){	
+residue& pdbModel::pick_res(unsigned pdb_i){
 	for(unsigned i=0;i<monomers.size();i++){
 		if ( monomers[i].pdb_index == pdb_i ){
 			return monomers[i];
@@ -256,20 +272,27 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 	vector<unsigned> selection;
 	vector<unsigned> unselection;
 	
-	pdbAtom c_atom = this->pick_atom(center_atom);
+	pdbAtom c_atom = this->pick_atom(center_atom,true);
 	
 	double dist_ref = 0.0;
 	double dist_calc= 0.0;
 	unsigned count = 0;
 	
+	unsigned old_res = -1;
 	if ( byres ){
 		for(unsigned i=0;i<monomers.size();i++){
 			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
-				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j]);
-				if ( dist_calc > radius ){
-					unselection.push_back(i);
+				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j] );
+				if ( dist_calc < radius ){
+					if ( i != old_res ){
+						selection.push_back(i);
+						old_res =i;
+					}
 				}else{
-					selection.push_back(i);
+					if ( i != old_res ){
+						unselection.push_back(i);
+						old_res =i;
+					}
 				}
 			}
 		}
@@ -295,36 +318,55 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 }
 /*********************************************************/
 pdbModel pdbModel::prune_atoms( std::vector<unsigned> selection ){
-	pdbModel pruned = *this;
-	unsigned count = nAtoms;
-	for(unsigned i=monomers.size();i>0;i--){
-		for(unsigned j=monomers[i].r_atoms.size();j>0;j--){
-			for( unsigned k=selection.size();k>0;k--){
-				if ( count == selection[count] ){
-					pruned.remove_atom(i,j);
-				}
-			}
-			count--;
+	vector<residue> residues;
+	vector<pdbAtom> atoms;
+	
+	if ( selection.size() == 0 ){
+		pdbModel empty;
+		return empty;
+	}
+	pdbAtom _atom_a = this->pick_atom( selection[0],false );
+	unsigned pdb_iold = _atom_a.res_indx;
+	unsigned pdb_curr = 0;
+		
+	for( unsigned i=0;i<selection.size();i++ ){
+		pdbAtom _atom = this->pick_atom( selection[i],false );
+		pdb_curr = _atom.res_indx;
+		if ( pdb_iold != pdb_curr ){
+			residues.emplace_back( atoms );
+			pdb_iold = pdb_curr;
+			atoms.clear();
 		}
+		atoms.emplace_back( _atom );
 	}	
+	pdbModel pruned(residues);
+	return pruned;
+}
+/*********************************************************/
+pdbModel pdbModel::prune_atoms_by_residue( std::vector<unsigned> selection ){
+	vector<residue> residues;
+	for( unsigned k=0;k<selection.size();k++){
+		residues.emplace_back( monomers[ selection[k] ]);
+	}
+	pdbModel pruned(residues);
 	return pruned;
 }
 /*********************************************************/
 pdbModel pdbModel::prune_atoms_by_residue( unsigned res, double radius ){
-	pdbModel pruned = *this;
 	residue ref = this->pick_res(res);
+	vector<residue> residues;
 	double dist_ = 0.0;
-	for(unsigned i=monomers.size();i>0;i--){
-		dist_ = ref.smallest_distance(monomers[i]);
+	for( unsigned i=0; i<monomers.size(); i++ ){
+		dist_ = ref.smallest_distance( monomers[i] );
 		if ( dist_ < radius ){
-			pruned.remove_residue(i);
+			residues.emplace_back( monomers[i] );
 		}
-	}	
+	}
+	pdbModel pruned(residues);
 	return pruned;
 }
 /*********************************************************/
 void pdbModel::remove_atom(unsigned int res, unsigned int at){
-	
 	monomers[res].r_atoms.erase( monomers[res].r_atoms.begin()+at);
 	monomers[res].nAtoms--;
 	nAtoms--;
@@ -485,14 +527,43 @@ void UnitTest_pdbModel(){
 	ut_log.data << _model_F << endl;
 	
 	ut_log.input_line("Testing the water removal!");
-	_model_F.remove_waters();
-	_model_F.write_model("test_wwater.pdb");
+	pdbModel _model_G = _model_F;
+	_model_G.remove_waters();
+	_model_G.write_model("test_wwater.pdb");
 	system("pymol test_wwater.pdb");
 	
 	ut_log.input_line("Testing the water removal from a given radius of a residue!");
 	_model_C.remove_waters(7.0,94);
 	_model_C.write_model("test_wwater_r.pdb");
 	system("pymol test_wwater_r.pdb");
+	
+	ut_log.input_line("Testing spherical selections\n");
+	vector<unsigned> selection_res		= _model_F.spherical_selection(3732,10.0,true,true);
+	vector<unsigned> unselection_res	= _model_F.spherical_selection(3732,10.0,false,true);
+	vector<unsigned> selection_atom		= _model_F.spherical_selection(3732,10.0,true,false);
+	vector<unsigned> unselection_atom	= _model_F.spherical_selection(3732,10.0,false,false);
+	
+	ut_log.input_line("Using spherical selections to prune proteins\n");
+	pdbModel _pruned_a = _model_F.prune_atoms_by_residue(selection_res);
+	_pruned_a.write_model("test_pruned_res_selection.pdb");
+	system("pymol test_pruned_res_selection.pdb");
+	
+	pdbModel _pruned_b = _model_F.prune_atoms_by_residue(unselection_res);
+	_pruned_b.write_model("test_pruned_res_unselection.pdb");
+	system("pymol test_pruned_res_unselection.pdb");
+	
+	pdbModel _pruned_c = _model_F.prune_atoms(selection_atom);
+	_pruned_c.write_model("test_pruned_atoms_selection.pdb");
+	system("pymol test_pruned_atoms_selection.pdb");
+	
+	pdbModel _pruned_d = _model_F.prune_atoms(unselection_atom);
+	_pruned_d.write_model("test_pruned_atoms_unselection.pdb");
+	system("pymol test_pruned_atoms_unselection.pdb");
+	
+	
+	pdbModel _pruned_e = _model_F.prune_atoms_by_residue(94,10.0);
+	_pruned_e.write_model("test_e.pdb");
+	system("pymol test_e.pdb");
 	
 	ut_log.input_line("Finished the unit test of the 'pdbModel' class!\n");
 
