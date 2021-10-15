@@ -73,6 +73,7 @@ class residue{
 		std::string get_name();
 		void set_charge();
 		double smallest_distance(const residue& rhs);
+		double smallest_distance(const pdbAtom& _atom);
 		friend std::ostream& operator<<(std::ostream& out, const residue& obj);
 		void print();
 };

@@ -283,6 +283,19 @@ double residue::smallest_distance(const residue& rhs){
 	return smallest_d;
 }
 /*******************************************************************/
+double residue::smallest_distance(const pdbAtom& _atom){
+	double distance = 0.0;
+	double smallest_d = r_atoms[0].get_distance( _atom );
+	
+	for(unsigned i=0;i<r_atoms.size();i++ ){
+		distance = r_atoms[i].get_distance( _atom );
+		if ( distance < smallest_d ){
+			smallest_d = distance;
+		}
+	}
+	return smallest_d;
+}
+/*******************************************************************/
 std::ostream& operator<<(std::ostream& out, const residue& obj){
 	out <<	"Outputting residue object class!\n"
 		<<	"Name: " 						<< obj.name

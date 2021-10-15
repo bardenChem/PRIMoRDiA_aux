@@ -19,6 +19,7 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 
 #include "../include/global.h"
 #include "../include/atom.h"
@@ -38,11 +39,12 @@ PDB::PDB()				:
 	nModels(0)			,
 	PDB_ID("0XXX")		,
 	basename("noname")	,
-	MULTI(false)		{	
+	MULTI(false)		{
 }
 /*********************************************************************/
-PDB::PDB(const char* pdb_file){
-	vector<int> mod_lines;	
+PDB::PDB(const char* pdb_file)	:
+	nModels(0)					{
+	vector<int> mod_lines;
 	
 	basename = remove_extension(pdb_file);
 	char pdb_line[100];
@@ -67,12 +69,12 @@ PDB::PDB(const char* pdb_file){
 		MULTI = true;
 		for(unsigned int j=0;j<mod_lines.size();j++){
 			models.emplace_back(pdb_file,mod_lines[j]);
+			nModels++;
 		}
 	}else{
 		models.emplace_back(pdb_file,0);
 		nModels++;
 	}
-		
 }
 /*********************************************************************/
 PDB::~PDB(){}
@@ -101,7 +103,7 @@ PDB::PDB(PDB&& rhs) noexcept		:
 	PDB_ID( move(rhs.PDB_ID) )		,
 	basename( move(rhs.basename) )	,
 	MULTI(rhs.MULTI)				,
-	models( move(rhs.models) )		{	
+	models( move(rhs.models) )		{
 }
 /*********************************************************************/
 PDB& PDB::operator=(PDB&& rhs) noexcept{
@@ -122,7 +124,6 @@ void PDB::split_models_in_files(){
 		name_ +="_";
 		name_ +=std::to_string(i);
 		name_ +="_.pdb";
-		
 		models[i].write_model(name_);
 	}
 }
@@ -205,6 +206,55 @@ void PDB::init_from_system(const molecule& mol){
 	vector<residue> _res;
 	_res.emplace_back(_atoms);
 	models.emplace_back(_res);
+}	
+/*********************************************************************/
+void PDB::iterate_models(std::string func_call, std::vector<std::string>& parameters ){
+	if ( func_call == "remove_waters"){
+		if ( parameters.size() == 0 ){
+			for( unsigned i=0; i<models.size(); i++) models[i].remove_waters();
+		}else if ( parameters.size() == 2 ){
+			double rad = std::stod(parameters[0]);
+			double res = std::stoi(parameters[1]);
+			for( unsigned i=0; i<models.size(); i++) models[i].remove_waters(rad,res);
+		}
+	}else if ( func_call == "prune_atoms"){
+		if ( parameters.size() == 0 ){
+			for( unsigned i=0; i<models.size(); i++) models[i].prune_atoms();
+		}else if ( parameters.size() == 4 ){
+			unsigned catom = std::stoi(parameters[0]);
+			unsigned rad = std::stod(parameters[1]);
+			bool Within = false;
+			bool ByRes = true;
+			if ( parameters[2] == "within" ){ Within = true;}
+			if ( parameters[3] == "byAtom" ){ ByRes = false; }
+			for( unsigned i=0; i<models.size(); i++) {
+				vector<unsigned> selection = models[i].spherical_selection(catom,rad,Within,ByRes);
+				models[i].prune_atoms( selection );
+			}
+		}
+	}else if ( func_call == "prune_atoms_ByRes"){ 
+		if ( parameters.size() == 3 ){
+			unsigned res = std::stoi(parameters[0]);
+			unsigned rad = std::stod(parameters[1]);
+			bool Within = false;
+			if ( parameters[2] == "within" ){ Within = true;}
+			for( unsigned i=0; i<models.size(); i++) {
+				vector<unsigned> selection = models[i].spherical_selection(res,rad,Within,true);
+				models[i].prune_atoms_by_residue(selection);
+			}
+		}else if ( parameters.size() == 4 ){
+			unsigned catom = std::stoi(parameters[0]);
+			unsigned rad = std::stod(parameters[1]);
+			bool Within = false;
+			bool ByRes = true;
+			if ( parameters[2] == "within" ){ Within = true; }
+			if ( parameters[3] == "byAtom" ){	ByRes = false; }
+			for( unsigned i=0; i<models.size(); i++) {
+				vector<unsigned> selection = models[i].spherical_selection(catom,rad,Within,ByRes);
+				models[i].prune_atoms( selection );
+			}
+		}
+	}
 }
 /*********************************************************************/
 molecule PDB::get_system_from_model(unsigned int model){
@@ -230,15 +280,39 @@ vector<molecule> PDB::get_systems(){
 }
 /*********************************************************************/
 std::ostream& operator<<(std::ostream& out, const PDB& obj){
-	
+	out << obj.basename	<< "\n"
+		<< obj.nModels	<< "\n"
+		<< obj.PDB_ID	<< "\n";
+	if ( obj.models.size() > 0 ){
+		out << "printing info of first model in PDB:" << std::endl;
+		out << obj.models[0] << std::endl;
+	}
+	return out;
 }
 /*********************************************************************/
 void PDB::print(){
-	
+	std::cout << *this << std::endl;
 }
 /*********************************************************************/
 void UnitTest_PDB(){
 	
+	const char* pdb_file  = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/1l2y.pdb";
+	
+	ut_log.input_line("=======================================");
+	ut_log.input_line("Starting unit test for 'PDB class!");
+	ut_log.input_line("Default constructor: ");
+	
+	PDB _PDB_A;
+	ut_log.data << _PDB_A << endl;
+	
+	ut_log.input_line("File constructor!");
+	PDB _PDB_B(pdb_file);
+	ut_log.data << _PDB_B << endl;
+	
+	_PDB_B.split_models_in_files();
+	
+	ut_log.input_line("Finished the unit test of the 'pdbModel' class!\n");
+
 }
 
 //////////////////////////////////////////////////////

@@ -32,6 +32,7 @@
  +	5. Make input for Quantum Chemistry Packages		+
  +	6. Make QM/MM inputs for energy refinement in Mopac +
  +	7. Automate the preparation of simple MD Simulations+
+ +	8. PDB file manipulations							+
  +														+
  ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 

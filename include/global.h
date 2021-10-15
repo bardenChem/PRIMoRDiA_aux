@@ -56,6 +56,7 @@ class logFile{
 		logFile(const char* fn);
 		logFile(const logFile& rhs) = delete;
 		logFile& operator=(const logFile& rhs ) = delete;
+		void open();
 		void input_line( std::string line);
 		~logFile();
 };

@@ -12,13 +12,14 @@
  
 /*********************************************************************/
 
-
+#include "../include/global.h"
 #include "../include/unit_test.h"
 #include "../include/atom.h"
 #include "../include/molecule.h"
 #include "../include/pdbAtom.h"
 #include "../include/residue.h"
 #include "../include/pdbModel.h"
+#include "../include/PDB.h"
 
 /*********************************************************************/
 UnitTests::UnitTests(){}
@@ -26,10 +27,12 @@ UnitTests::UnitTests(){}
 UnitTests::~UnitTests(){}
 /*********************************************************************/
 void UnitTests::run_unit_tests(){
-	UnitTest_atom();
-	UnitTest_molecule();
-	UnitTest_pdbAtom();
-	UnitTest_residue();
-	UnitTest_pdbModel();
+	ut_log.open();
+	//UnitTest_atom();
+	//UnitTest_molecule();
+	//UnitTest_pdbAtom();
+	//UnitTest_residue();
+	//UnitTest_pdbModel();
+	UnitTest_PDB();
 }
 ///////////////////////////////////////////////////////////////////////

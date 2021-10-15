@@ -50,6 +50,8 @@ class pdbModel{
 		pdbModel prune_atoms( std::vector<unsigned> selection );
 		pdbModel prune_atoms_by_residue( std::vector<unsigned> selection );
 		pdbModel prune_atoms_by_residue( unsigned res, double radius );
+		void detect_chains();
+		pdbModel get_chain(std::string chain);
 		void remove_waters();
 		void remove_waters(double radius, unsigned int res);
 		void remove_ions();

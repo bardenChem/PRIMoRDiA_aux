@@ -201,9 +201,9 @@ void pdbModel::write_model(std::string out_name){
 	pdb_file << title << endl;
 	pdb_file << remark << endl;
 	
-	unsigned int i,j,cont;
-	for(i=0;i<nResidues;i++){
-		for(j=0;j<monomers[i].nAtoms;j++){
+	unsigned i,j,cont;
+	for( i=0; i<monomers.size(); i++ ){
+		for( j=0; j<monomers[i].r_atoms.size(); j++ ){
 			pdb_file<< std::setw(6) << std::left  << "ATOM" 
 					<< " "
 					<< std::setw(4) << std::right  << monomers[i].r_atoms[j].indx
@@ -281,18 +281,16 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 	unsigned old_res = -1;
 	if ( byres ){
 		for(unsigned i=0;i<monomers.size();i++){
-			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
-				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j] );
-				if ( dist_calc < radius ){
-					if ( i != old_res ){
-						selection.push_back(i);
-						old_res =i;
-					}
-				}else{
-					if ( i != old_res ){
-						unselection.push_back(i);
-						old_res =i;
-					}
+			dist_calc = monomers[i].smallest_distance(c_atom);
+			if ( dist_calc < radius ){
+				if ( i != old_res ){
+					selection.push_back(i);
+					old_res =i;
+				}
+			}else{
+				if ( i != old_res ){
+					unselection.push_back(i);
+					old_res =i;
 				}
 			}
 		}
@@ -300,7 +298,7 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 		dist_ref = c_atom.get_distance( monomers[0].r_atoms[0]);
 		for(unsigned i=0;i<monomers.size();i++){
 			for(unsigned j=0;j<monomers[i].r_atoms.size();j++){
-				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j]);
+				dist_calc = c_atom.get_distance( monomers[i].r_atoms[j] );
 				if ( dist_calc > radius ){
 					unselection.push_back(count++);
 				}else{
@@ -382,7 +380,7 @@ void pdbModel::remove_residue(unsigned int i){
 }
 /*********************************************************/
 void pdbModel::prune_atoms(){
-	unsigned int i,j;	
+	unsigned int i,j;
 	for(i=0;i<nResidues;i++){
 		for(j=0;j<monomers[i].nAtoms;j++){
 			if ( monomers[i].r_atoms[j].res_name.substr(0,1) == "B" ) 
@@ -391,8 +389,31 @@ void pdbModel::prune_atoms(){
 	}
 }
 /*********************************************************/
-void pdbModel::remove_waters(){
-	for(unsigned i=monomers.size()-1;i>0;i--){
+void pdbModel::detect_chains(){
+	if ( nChains == 1 && monomers[0].r_atoms[0].chain_name == " " ){
+		for( unsigned i=0; i< monomers.size(); i++ ){
+			for( unsigned j=0; j< monomers[i].r_atoms.size(); j++ ){
+				monomers[i].r_atoms[j].chain_name = "A";
+			}
+		}
+	}
+}
+/*********************************************************/
+pdbModel pdbModel::get_chain(std::string chain){
+	this->detect_chains();
+	vector<residue> residues;
+	for( unsigned i=0; i< monomers.size(); i++ ){
+		if ( monomers[i].r_atoms[0].chain_name == chain ){
+			residues.emplace_back( monomers[i] );
+		}
+	}
+	pdbModel model(residues);
+	return model;
+}
+/*********************************************************/
+void pdbModel::remove_waters(){	
+	size_t i = nResidues-1;
+	for( i; i>0; i-- ){
 		if ( monomers[i].type == WAT ) 
 			this->remove_residue(i);
 	}
@@ -401,32 +422,36 @@ void pdbModel::remove_waters(){
 void pdbModel::remove_waters(double radius, unsigned int res){
 	double distTemp = 0.0;
 	residue ref = this->pick_res(res);
-	unsigned i = nResidues;
+	size_t i = nResidues-1;
 	for(i; i>0; i--){
 		if ( monomers[i].type == WAT ) {
 			distTemp = ref.smallest_distance( monomers[i] );
-			if ( distTemp > radius )
+			if ( distTemp > radius ){
 				this->remove_residue(i);
+			}
 		}
 	}
 }
 /*********************************************************/
 void pdbModel::remove_ions(){
-	for(unsigned i=monomers.size()-1;i>0;i--){
+	size_t i = nResidues-1;
+	for( i; i>0; i-- ){
 		if ( monomers[i].type == ION ) 
 			this->remove_residue(i);
 	}
 }
 /*********************************************************/
 void pdbModel::split_complex(std::string mol){
-	for(unsigned i=nResidues-1;i>0;i--){
+	for(size_t i=0; i<nResidues; i++){
 		if ( mol == monomers[i].r_atoms[0].res_name ) {
 			pdbModel ligand;
-			ligand.monomers.emplace_back(monomers[i]);
+			ligand.monomers.emplace_back( monomers[i] );
 			ligand.title  = "Ligand " + mol;
 			ligand.remark = "Ligand splitted from complex files.";
 			ligand.nAtoms = monomers[i].nAtoms;
 			ligand.write_model( mol +".pdb" );
+			this->remove_residue(i);
+			this->write_model( "protein.pdb" );
 		}
 	}
 }
@@ -446,7 +471,7 @@ double pdbModel::atom_distance(unsigned a1, unsigned a2){
 	pdbAtom atom1;
 	pdbAtom atom2;
 	
-	for( int i=0;i<monomers.size();i++){
+	for( unsigned i=0; i<monomers.size(); i++ ){
 		if ( count_a1 < a1 ){
 			count_a1 += monomers[i].nAtoms;
 		}else{
@@ -459,13 +484,13 @@ double pdbModel::atom_distance(unsigned a1, unsigned a2){
 		}
 	}
 	
-	for(int j=0;j<monomers[resnmb_a1].nAtoms;j++){
+	for( unsigned j=0; j<monomers[resnmb_a1].nAtoms; j++ ){
 		if ( monomers[resnmb_a1].r_atoms[j].indx == a1 ){
 			atom1 = monomers[resnmb_a1].r_atoms[j];
 		}
 	}
 	
-	for(int j=0;j<monomers[resnmb_a2].nAtoms;j++){
+	for( unsigned j=0; j<monomers[resnmb_a2].nAtoms; j++ ){
 		if ( monomers[resnmb_a2].r_atoms[j].indx == a2 ){
 			atom2 = monomers[resnmb_a2].r_atoms[j];
 		}
@@ -474,7 +499,8 @@ double pdbModel::atom_distance(unsigned a1, unsigned a2){
 }
 /*********************************************************/
 double pdbModel::atom_angle(unsigned a1, unsigned a2, unsigned a3){
-	
+	double angle = 0.0;
+	return angle;
 }
 /*********************************************************/
 std::ostream& operator<<(std::ostream& out, const pdbModel& obj){
@@ -560,13 +586,17 @@ void UnitTest_pdbModel(){
 	_pruned_d.write_model("test_pruned_atoms_unselection.pdb");
 	system("pymol test_pruned_atoms_unselection.pdb");
 	
-	
 	pdbModel _pruned_e = _model_F.prune_atoms_by_residue(94,10.0);
 	_pruned_e.write_model("test_e.pdb");
 	system("pymol test_e.pdb");
 	
+	ut_log.input_line("Testing splitting ligand from protein\n");
+	_model_C.split_complex("LIG");
+	system("pymol LIG.pdb");
+	system("pymol protein.pdb");
+
 	ut_log.input_line("Finished the unit test of the 'pdbModel' class!\n");
 
-}	
+}
 
 //////////////////////////////////////////////////////////
