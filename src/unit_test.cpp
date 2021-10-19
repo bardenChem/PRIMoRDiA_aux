@@ -20,6 +20,7 @@
 #include "../include/residue.h"
 #include "../include/pdbModel.h"
 #include "../include/PDB.h"
+#include "../include/read_traj.h"
 
 /*********************************************************************/
 UnitTests::UnitTests(){}
@@ -33,6 +34,7 @@ void UnitTests::run_unit_tests(){
 	//UnitTest_pdbAtom();
 	//UnitTest_residue();
 	//UnitTest_pdbModel();
-	UnitTest_PDB();
+	//UnitTest_PDB();
+	UnitTest_ReadTraj();
 }
 ///////////////////////////////////////////////////////////////////////

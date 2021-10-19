@@ -28,35 +28,14 @@
 class PDB;
 /*****************************************************/
 enum traj_type{ pdb, dcd, xtc, gro, xyz, mol2, NONE };
-/*****************************************************/
-class positions3D{
-	public:
-		unsigned int natoms;
-		unsigned int nframes;
-		std::vector< std::vector<double> > xc;
-		std::vector< std::vector<double> > yc;
-		std::vector< std::vector<double> > zc;
-		positions3D();
-		~positions3D();
-		positions3D( const positions3D& rhs );
-		positions3D& operator=( const positions3D& rhs);
-		positions3D( positions3D&& rhs ) noexcept;
-		positions3D& operator=( positions3D&& rhs ) noexcept;
-		double get_distance(unsigned atom1, unsigned atom2, unsigned frame);
-		std::vector<double> get_distances(unsigned atom1, unsigned atom2);
-		double avg_distance(unsigned atom1, unsigned atom2);
-		void resize(unsigned nframes);
-		friend std::ostream& operator<<(std::ostream& out, const positions3D& obj);
-		void print();
-};
+
 /*****************************************************/
 class ReadTraj{
 	public:
 		std::string traj_file;
 		unsigned int natoms;
 		unsigned int nframes;
-		geometry topology;
-		positions3D coordinates;
+		PDB Positions;
 		traj_type Type;
 		ReadTraj();
 		ReadTraj( const char* file_name );

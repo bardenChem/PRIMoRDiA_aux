@@ -207,7 +207,16 @@ void PDB::init_from_system(const molecule& mol){
 	vector<residue> _res;
 	_res.emplace_back(_atoms);
 	models.emplace_back(_res);
-}	
+}
+/*********************************************************************/
+void PDB::init_models(unsigned frames){
+	if ( nModels == 1 ){
+		for( unsigned i=1;i<frames;i++){
+			models.emplace_back( models[0] );
+		}
+	}
+	nModels = models.size();
+}
 /*********************************************************************/
 void PDB::iterate_models(std::string func_call, std::vector<std::string>& parameters ){
 	if ( func_call == "remove_waters"){
@@ -249,7 +258,7 @@ void PDB::iterate_models(std::string func_call, std::vector<std::string>& parame
 			unsigned res = std::stoi(parameters[0]);
 			unsigned rad = std::stod(parameters[1]);
 			bool Within = false;
-			if ( parameters[2] == "within" ){ Within = true;}
+			if ( parameters[2] == "within" ){ Within = true; }
 			for( unsigned i=0; i<models.size(); i++) {
 				vector<unsigned> selection = models[i].spherical_selection(res,rad,Within,true);
 				models[i] = models[i].prune_atoms_by_residue(selection);
@@ -266,7 +275,11 @@ void PDB::iterate_models(std::string func_call, std::vector<std::string>& parame
 				models[i] = models[i].prune_atoms( selection );
 			}
 		}
-	}
+	}else if ( func_call == "get_chain" ){
+		for( unsigned i=0; i<models.size(); i++ ) {
+			models[i] = models[i].get_chain( parameters[0] );
+		}
+	} 
 }
 /*********************************************************************/
 molecule PDB::get_system_from_model(unsigned int model){

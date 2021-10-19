@@ -149,7 +149,7 @@ void QCPinput::make_input_from_folder_FD(package QCP			,
 		geometry geo_file( fnames[i].c_str() );
 		string oname = remove_extension( fnames[i].c_str() );
 		string oname_cat = oname + "_cat";
-		string oname_an = oname + "_an";		
+		string oname_an = oname + "_an";
 		switch( program ){
 			case package::GAMESS:
 			{

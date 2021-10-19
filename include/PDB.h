@@ -45,6 +45,7 @@ class PDB{
 		void remove_model(unsigned int model);
 		void write_pdb(std::string out_name);
 		void init_from_system(const molecule& mol);
+		void init_models(unsigned frames);
 		void iterate_models(std::string func_call, std::vector<std::string>& parameters );
 		molecule get_system_from_model(unsigned int model);
 		std::vector<molecule> get_systems();
