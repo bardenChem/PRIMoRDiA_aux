@@ -23,6 +23,7 @@
 class pdbAtom{
 	public:
 		std::string atom_name;
+		std::string atom_type;
 		unsigned int indx;
 		std::string res_name;
 		int res_indx;

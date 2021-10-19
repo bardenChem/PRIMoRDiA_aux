@@ -180,13 +180,19 @@ vector<double> scale_dvec(vector<double>& vec){
 //ATOMIC PROPERTIES GETTERS :
 float get_atom_mass(std::string sym){
 	int indx = 0;
-	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) indx = i;
+	for (unsigned int i=0;i<103;i++) {
+		if ( sym == atomType[i] ) {
+			indx = i;
+		}
+	}
 	return atomMass[indx];
 }
 /******************************************************************************/
 int get_atomic_number(std::string sym){
 	int atomic_num;
-	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) atomic_num = i+1;
+	for (unsigned int i=0;i<103;i++) if ( sym == atomType[i] ) {
+		atomic_num = i+1;
+	}
 	return atomic_num;
 }
 /******************************************************************************/

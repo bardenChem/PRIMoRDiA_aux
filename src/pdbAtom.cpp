@@ -21,13 +21,14 @@
 #include <string>
 #include <cmath>
 #include <iostream>
-
+#include<algorithm>
 using std::endl;
 using std::string;
 
 /******************************************************************/
 pdbAtom::pdbAtom()		:
 	atom_name("nonamed"),
+	atom_type("H")		,
 	indx(1)				,
 	res_name("UNK")		,
 	res_indx(0)			,
@@ -44,6 +45,7 @@ pdbAtom::~pdbAtom(){}
 /*********************************************************/
 pdbAtom::pdbAtom(const pdbAtom& rhs):
 	atom_name(rhs.atom_name)		,
+	atom_type(rhs.atom_type)		,
 	indx(rhs.indx)					,
 	res_name(rhs.res_name)			,
 	res_indx(rhs.res_indx)			,
@@ -59,6 +61,7 @@ pdbAtom::pdbAtom(const pdbAtom& rhs):
 pdbAtom& pdbAtom::operator=(const pdbAtom& rhs){
 	if ( this != &rhs ){
 		atom_name	= rhs.atom_name;
+		atom_type	= rhs.atom_type;
 		indx		= rhs.indx;
 		res_name	= rhs.res_name;
 		res_indx	= rhs.res_indx;
@@ -75,6 +78,7 @@ pdbAtom& pdbAtom::operator=(const pdbAtom& rhs){
 /*********************************************************/
 pdbAtom::pdbAtom(pdbAtom&& rhs) noexcept:
 	atom_name( move(rhs.atom_name) )	,
+	atom_type( move(rhs.atom_type) )	,
 	indx(rhs.indx)						,
 	res_name( move(rhs.res_name) )		,
 	res_indx( rhs.res_indx )			,
@@ -91,6 +95,7 @@ pdbAtom::pdbAtom(pdbAtom&& rhs) noexcept:
 pdbAtom& pdbAtom::operator=(pdbAtom&& rhs) noexcept{
 	if ( this != &rhs ){
 		atom_name	= move(rhs.atom_name);
+		atom_type	= move(rhs.atom_type);
 		indx		= rhs.indx;
 		res_name	= move(rhs.res_name);
 		res_indx	= rhs.res_indx; 
@@ -108,7 +113,24 @@ pdbAtom& pdbAtom::operator=(pdbAtom&& rhs) noexcept{
 pdbAtom::pdbAtom(std::string& pdb_line)	:
 	atom_name(pdb_line,12,4)			,
 	res_name(pdb_line,17,3)				,
-	chain_name(pdb_line,21,2)			{
+	chain_name(pdb_line,21,1)			{
+	
+	string atom_symbol = atom_name;
+	std::remove(atom_symbol.begin(), atom_symbol.end(), ' ');
+	atom_symbol = atom_symbol.substr(0,2);
+	if ( atom_symbol == "Mg") {
+		atom_type = "Mg";
+	}else if( atom_symbol == "Cl"){
+		atom_type = "Cl";
+	}else if( atom_symbol == "Zn"){
+		atom_type = "Zn";
+	}else if( atom_symbol == "Ca"){
+		atom_type = "Ca";
+	}else if( atom_symbol == "Na"){
+		atom_type = "Na";
+	}else{
+		atom_type = atom_symbol.substr(0,1);
+	}
 	
 	string tmp_rsin(pdb_line,6,5);
 	indx	 = stoi(tmp_rsin);

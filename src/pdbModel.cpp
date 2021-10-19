@@ -119,7 +119,7 @@ pdbModel::pdbModel(const char* pdb_file, int mdl)	:
 					}
 					/**********************************/
 				}
-				else if (	word == "TER   " || word == "ENDMDL" || word == "END   " ){
+				else if ( word == "ENDMDL" || word == "END   " ){
 					if ( nResidues > 0 ){
 						residue _residue(tmp_atoms);
 						monomers.emplace_back(_residue);
@@ -404,7 +404,7 @@ pdbModel pdbModel::get_chain(std::string chain){
 	vector<residue> residues;
 	for( unsigned i=0; i< monomers.size(); i++ ){
 		if ( monomers[i].r_atoms[0].chain_name == chain ){
-			residues.emplace_back( monomers[i] );
+			residues.push_back( monomers[i] );
 		}
 	}
 	pdbModel model(residues);
@@ -526,14 +526,16 @@ void UnitTest_pdbModel(){
 	pdbModel _model_A;
 	ut_log.data << _model_A << endl;
 	
-	const char* pdb_file  = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/tim.pdb";
+	const char* pdb_1dnk  = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/1dnk.pdb";
+	const char* pdb_file  = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/tim.pdb";
+	
 	pdbModel _model_B(pdb_file,0);
 	ut_log.input_line("File opening constructor: ");
 	ut_log.data << _model_B << endl;
 	
 	ut_log.input_line("Writting method testing. \nWill open Pymol! ");
 	_model_B.write_model("test.pdb");
-	
+	/*
 	system("pymol test.pdb");
 	
 	ut_log.input_line("Testing copy constructor!");
@@ -594,6 +596,12 @@ void UnitTest_pdbModel(){
 	_model_C.split_complex("LIG");
 	system("pymol LIG.pdb");
 	system("pymol protein.pdb");
+	*/
+	ut_log.input_line("Testing detection of chains.");
+	pdbModel _model_h(pdb_1dnk,0);
+	pdbModel _model_i = _model_h.get_chain("C");
+	_model_i.write_model("1dnk_c.pdb");	
+	system("pymol 1dnk_c.pdb");
 
 	ut_log.input_line("Finished the unit test of the 'pdbModel' class!\n");
 

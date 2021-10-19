@@ -50,7 +50,6 @@ class PDB{
 		std::vector<molecule> get_systems();
 		friend std::ostream& operator<<(std::ostream& out, const PDB& obj);
 		void print();
-
 };
 /******************************************************************************/
 void UnitTest_PDB();
