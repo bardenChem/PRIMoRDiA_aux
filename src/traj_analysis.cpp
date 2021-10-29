@@ -58,9 +58,9 @@ traj_an::traj_an(string file_name):
 	R_script.open( R_name.c_str() );
 }
 /***********************************************************************/
-traj_an::traj_an(string file_name, vector<int> atoms):
-	traj_file(file_name)					   ,
-	atoms_pairs(atoms)						   {
+traj_an::traj_an(string file_name, vector<int> atoms)	:
+	traj_file(file_name)								,
+	atoms_pairs(atoms)									{
 		
 	py_name = remove_extension( file_name.c_str() );
 	py_name += "_mdtraj.py";
@@ -97,7 +97,7 @@ void traj_an::mdtraj_geo(){
 	python_script.close();
 	
 	string comand = "python3 " + py_name; 
-	system( comand.c_str() );	
+	system( comand.c_str() );
 
 	vector<double> time;
 	vector<double> rmsd;

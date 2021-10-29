@@ -35,6 +35,6 @@ void UnitTests::run_unit_tests(){
 	//UnitTest_residue();
 	//UnitTest_pdbModel();
 	//UnitTest_PDB();
-	UnitTest_ReadTraj();
+	//UnitTest_ReadTraj();
 }
 ///////////////////////////////////////////////////////////////////////
