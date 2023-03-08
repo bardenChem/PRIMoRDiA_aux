@@ -101,7 +101,7 @@ void QCPinput::make_input_from_folder(	package QCP			,
 			case package::MOPAC:
 			{
 				mopac_input mpc_input;
-				mpc_input.init(base_charge,base_multi,runtype,QMmethod,base_basis);
+				mpc_input.init(base_charge,base_multi,"h2o","mozyme",QMmethod);
 				mpc_input.write_file(geo_file.Molecule,oname);
 				break;
 			}

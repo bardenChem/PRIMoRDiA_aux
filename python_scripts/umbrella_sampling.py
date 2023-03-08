@@ -26,8 +26,6 @@ class MD:
 		self.constrained	= constrained 
 		self.samplen		= 0
 		
-		if self.sample_traj > 0:
-			self.samplen = self.nsteps_prod/self.sample_traj
 		
 		self.folder = os.path.join( self.base_name+"_trj" )
 		self.folder_sc = os.path.join( self.base_name+"_softc_trj" )
@@ -44,11 +42,13 @@ class MD:
 		randomNumberGenerator  = RandomNumberGenerator ( )
 		normalDeviateGenerator = NormalDeviateGenerator.WithRandomNumberGenerator ( randomNumberGenerator )
 		
-		randomNumberGenerator.SetSeed ( 291731  )
+		randomNumberGenerator.SetSeed ( 292731  )
 		log_equi_path = os.path.join(self.folder,"equi_log.txt")
 		log_equi  = TextLogFileWriter( log_equi_path )
 		
-		self.molecule.energyModel.qcModel.converger.SetOptions( maximumSCFCycles = 1000 )
+		self.molecule.energyModel.qcModel.converger.SetOptions( maximumSCFCycles = 10000 )
+		self.molecule.energyModel.qcModel.converger.SetOptions( densityTolerance = 2.0e-6 )
+		self.molecule.energyModel.qcModel.converger.SetOptions( energyTolerance = 2.0e-3 )
 		
 		#. Leap Frog equilibration
 		LeapFrogDynamics_SystemGeometry(self.molecule									,
@@ -67,7 +67,8 @@ class MD:
 		log_prod  = TextLogFileWriter ( log_prod_path )
         
 		if self.constrained:
-			if self.sample_traj >0 :
+			if self.samplen >0:
+				print("sampling:{}".format( self.nsteps_prod/self.samplen ) )
 				trajectoryS	= SystemSoftConstraintTrajectory ( self.folder_sc , self.molecule, mode = "w" )
 				trajectory	= SystemGeometryTrajectory ( self.folder , self.molecule, mode = "w" )
 				LeapFrogDynamics_SystemGeometry ( self.molecule						,
@@ -76,12 +77,12 @@ class MD:
                                       steps					= self.nsteps_prod		,
                                       temperature			= self.temperature		,
                                       temperatureControl	= True					,
-                                      temperatureCoupling	=	0.1					,
+                                      temperatureCoupling	= 0.1					,
                                       timeStep				= 0.001					,
-                                      trajectories			= [ ( trajectoryS, 1 ), (trajectory, self.samplen) ] )
+                                      trajectories			= [ ( trajectoryS, 1 ), ( trajectory, self.samplen) ] )
                
-				DCDTrajectory_FromSystemGeometryTrajectory( os.path.join(self.folder_traj,self.base_name), self.folder_trj , self.molecule )
 			else:
+				print("Not Sampling")
 				trajectoryS	= SystemSoftConstraintTrajectory ( self.folder_sc , self.molecule, mode = "w" )
 				LeapFrogDynamics_SystemGeometry ( self.molecule						,
                                       logFrequency			=	self.nsteps_prod/500,
@@ -104,7 +105,6 @@ class MD:
                                       timeStep				= 0.001					,
                                       trajectories			= [ (trajectory, self.samplen) ] )
 			
-			DCDTrajectory_FromSystemGeometryTrajectory( os.path.join(self.folder,".dcd"), self.folder, self.molecule )
 
                                       
 	#.------------------------------------------------------------------
@@ -128,7 +128,7 @@ class umbrella_Sampling:
 		self.nprocs				= 1
 		self.text				= " "
 		self.energies			= []
-		self.forceC				= 1000.0
+		self.forceC				= 2500.0
 		self.nsteps				= [ 1, 1 ]
 		self.maxIt				= 30
 		self.rmsGT				= 0.1
@@ -190,6 +190,7 @@ class umbrella_Sampling:
 			temp = os.path.basename(temp)
 			md_path	= os.path.join( self.folder, temp )
 			md_run	= MD(molecule,md_path,True)
+			md_run.sample_traj = 20
 			md_run.Run()
 			self.completed.append( files_list[i] )
 	
@@ -223,10 +224,12 @@ class umbrella_Sampling:
 				temp = os.path.basename(temp)
 				md_path	= os.path.join( self.folder, temp )
 				md_run	= MD(molecule,md_path,True)
+				md_run.sample_traj = 20
 				md_run.Run()
 				self.completed.append( files_list[i] )
 				
 	#.------------------------------------------------------------------
+	
 	def Sample2D(self,x,y):
 		pat = os.path.join(self.traj_folder,"trj","")
 		files_list = glob.glob(pat+"*.pkl")
@@ -270,14 +273,14 @@ class umbrella_Sampling:
 				md_run.Run()
 	
 	#.------------------------------------------------------------------
-	def Sample2D_parallel(self, x, y):
+	def Sample2D_parallel(self, sample):
 		
 		pat = os.path.join(self.traj_folder,"trj","")
 		files_list = glob.glob(pat+"*.pkl")
 		files_list.sort()
 		self.all_files = files_list
 		
-		ATOM1 = self.atoms[0][0]        #0
+		ATOM1 = self.atoms[0][0]		#0
 		ATOM2 = self.atoms[0][1]		#1
 		ATOM3 = self.atoms[0][2]		#2
 		ATOM4 = self.atoms[1][0]		#3
@@ -292,28 +295,32 @@ class umbrella_Sampling:
 		self.molecule.DefineSoftConstraints( constraints )
 		
 		with pymp.Parallel(self.nprocs) as p:
-			with pymp.Parallel(self.nprocs) as p:
-				for i in p.range( 0, x ):
-					for j in p.range ( 0,y ):
-						
-						coordinate_file = pat +"frame{}_{}.pkl".format( i, j )
-						self.molecule.coordinates3 = Unpickle( coordinate_file )
-						
-						distance_1 = self.molecule.coordinates3.Distance( ATOM1, ATOM2 ) - self.molecule.coordinates3.Distance( ATOM2, ATOM3 )
-						scModel  = SoftConstraintEnergyModelHarmonic ( distance_1, self.forceC )
-						constraint=SoftConstraintMultipleDistance ( [ [ATOM2, ATOM1, SIGMA13], [ATOM2, ATOM3, SIGMA31] ], scModel )
-						constraints["ReactionCoord"] = constraint
-						
-						distance_2 = self.molecule.coordinates3.Distance( ATOM4, ATOM5 ) - self.molecule.coordinates3.Distance( ATOM5, ATOM6 )
-						scModel2  = SoftConstraintEnergyModelHarmonic ( distance_2, self.forceC )
-						constraint2=SoftConstraintMultipleDistance ( [ [ATOM5, ATOM4, SIGMA46], [ATOM5, ATOM6, SIGMA64] ], scModel2 )
-						constraints["ReactionCoord2"] = constraint2
-						
-						temp = coordinate_file[:-4]
-						temp = os.path.basename(temp)
-						md_path	= os.path.join( self.folder, temp )
-						md_run	= MD(self.molecule,md_path,True)
-						md_run.Run()
+			for i in p.range( len(files_list) ):
+								
+				coordinate_file = files_list[i]
+
+				temp = coordinate_file[:-4]
+				temp = os.path.basename(temp)
+				md_path	= os.path.join( self.folder, temp )
+				if  not os.path.exists( md_path +"_softc_trj" ):
+					self.molecule.coordinates3 = Unpickle( coordinate_file )
+									
+					distance_1 = self.molecule.coordinates3.Distance( ATOM1, ATOM2 ) - self.molecule.coordinates3.Distance( ATOM2, ATOM3 )
+					scModel  = SoftConstraintEnergyModelHarmonic ( distance_1, self.forceC )
+					constraint=SoftConstraintMultipleDistance ( [ [ATOM2, ATOM1, SIGMA13], [ATOM2, ATOM3, SIGMA31] ], scModel )
+					constraints["ReactionCoord"] = constraint
+				
+					distance_2 = self.molecule.coordinates3.Distance( ATOM4, ATOM5 ) - self.molecule.coordinates3.Distance( ATOM5, ATOM6 )
+					scModel2  = SoftConstraintEnergyModelHarmonic ( distance_2, self.forceC )
+					constraint2=SoftConstraintMultipleDistance ( [ [ATOM5, ATOM4, SIGMA46], [ATOM5, ATOM6, SIGMA64] ], scModel2 )
+					constraints["ReactionCoord2"] = constraint2
+					md_run	= MD(self.molecule,md_path,True)
+					if sample:
+						md_run.samplen = 1000
+						print("set sampling")
+					md_run.Run()
+				else:
+					continue
 		
 #=======================================================================
 class PMF:
@@ -375,7 +382,11 @@ class PMF:
 		FE			= state["Free Energies"]
 		
 		self.text += "X Y FE\n"
+		x = -1
+		y = -1
 		for i in range( len(FE) ):
+			x = -1
+			y = -1
 			a = os.path.basename( self.fileNames[i] )
 			b = a[5:-10]
 			if len(b) == 5:
@@ -391,8 +402,10 @@ class PMF:
 				except:
 					x = int( b[0:2] )
 					y = int( b[3:4] )
-
-			self.text += "{} {} {}\n".format( x, y, FE[i]-FE[0] )
+			if x == -1:
+				self.text += "{} {}\n".format( i, FE[i]-FE[0] )
+			else:
+				self.text += "{} {} {}\n".format( x,y, FE[i]-FE[0] )
 		
 		histogram.ToTextFileWithData ( self.base_name+".dat" , [ pmf ], format = "{:20.3f} {:20.3f} {:20.3f}\n" )
 		

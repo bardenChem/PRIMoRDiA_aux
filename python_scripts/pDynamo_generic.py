@@ -263,7 +263,7 @@ def reescale_charges(molecule, tc):
 	new_tc = Get_total_charge(scaled_system)
 	print ("New Charges Sum:",new_tc)	
 	
-	return(scaled_system)	
+	return(scaled_system)
 	
 #-----------------------------------------------------------------------
 

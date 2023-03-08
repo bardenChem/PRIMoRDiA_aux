@@ -23,6 +23,7 @@
 #include "../include/traj_analysis.h"
 #include "../include/read_traj.h"
 #include "../include/QCPinput.h"
+#include "../include/PDB.h"
 
 #include "../include/unit_test.h"
 
@@ -53,25 +54,33 @@ interface::interface(int argc, char* argv[]):
 /**********************************************************************/
 void interface::run(){
 	
-	/********************************/
+	/***************************************************************/
 	//Trajectory analysis with mdtraj
 	if ( m_argv[1] == "-rmsd_rg"){
 		cout << "Selected: RMSD and RG calculations using MDTraj" << endl;
 		traj_an Trajectory( m_argv[2] );
 		Trajectory.mdtraj_geo();
 	}
-	/********************************/
+	/***************************************************************/
 	//Distance analysis from PDB traj
 	else if ( m_argv[1] == "-atom_BID" ){
-		vector<int> ats;
+		vector<int> ats; 
 		for(int i=3;i<m_argc;i++){
 			ats.push_back( std::stoi(m_argv[i]) );
 		}
 		traj_an Trajectory(m_argv[2],ats);
 		Trajectory.calc_distances( m_argv[2].c_str() );
 	}
-	/********************************/
+	/****************************************************************/
 	//Extract frame from a trajectory
+	else if ( m_argv[1] == "-ext_frame_dcd"){
+		int interval = stoi(m_argv[4]);
+		ReadTraj dcd( m_argv[2].c_str(), m_argv[3].c_str() );
+		dcd.parse();
+		PDB _Samp = dcd.sample( interval );
+		_Samp.write_pdb( "sampled.pdb" );
+	}
+	/****************************************************************/
 	else if ( m_argv[1] == "-ext_frame" ){
 		int arg3 = stoi(m_argv[3]);
 		int arg4 = stoi(m_argv[4]);
@@ -82,21 +91,39 @@ void interface::run(){
 			Trajectory.extract_frame(m_argv[2].c_str(),arg3);
 		}
 	}
-	/********************************/
+	/*****************************************************************/
 	//creat input from QCP calculations
 	else if ( m_argv[1] == "-QCP_inp" ){
 		this->input_QM();
 	}
-	/********************************/
+	/*****************************************************************/
 	else if ( m_argv[1] == "-MDprep" ){}
-	/********************************/
+	/*****************************************************************/
 	else if ( m_argv[1] == "-check_QCP" ){}
-	/********************************/
+	/*****************************************************************/
 	else if ( m_argv[1] == "-test" ) {
-		this->UnitTest();
-		//this->test();
+		//this->UnitTest();
+		this->test();
 	}
-	/********************************/
+	else if ( m_argv[1] == "-rH2O_traj" ){
+		if ( m_argv[2] == "pdbs_folder" ){
+			fs::path c_path = fs::current_path();
+			std::vector<string> fnames; 
+		
+			for ( const auto & entry : fs::directory_iterator(c_path) ){
+				string tmp_name = entry.path();
+				if ( check_file_ext( ".pdb",tmp_name.c_str() ) ){
+					fnames.push_back( tmp_name );
+				}
+			}
+			PDB _pdb;
+			_pdb.cat_pdbs(fnames);
+			std::vector<std::string> pars = { m_argv[3], m_argv[4] };
+			_pdb.iterate_models("remove_waters",pars);
+			_pdb.split_models_in_files();
+		}
+	}
+	/****************************************************************/
 	else{
 		cout << "None valid flag was selected!\n Exiting PRIMoRDiA AUX\n" << endl;
 		exit(-1);
@@ -178,12 +205,19 @@ void interface::help(){
 }
 /**********************************************************************/
 void interface::test(){
+	/*
 	std::string test_path = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/";
 	std::string Top = test_path + "tim.pdb";
 	std::string DCD = test_path + "scan1d.dcd";
 	
 	ReadTraj TestTraj( DCD.c_str(), Top.c_str() );
 	TestTraj.parse();
+	*/
+	vector<int> ats = {4672, 5325, 5326, 5357 };
+	
+	std::string fn = "md.pdb";
+	traj_an Trajectory(fn,ats);
+	Trajectory.calc_distances( fn.c_str() );
 }
 /**********************************************************************/
 void interface::UnitTest(){

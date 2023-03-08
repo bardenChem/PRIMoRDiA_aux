@@ -136,9 +136,9 @@ pdbAtom::pdbAtom(std::string& pdb_line)	:
 	indx	 = stoi(tmp_rsin);
 	string tmp_rsi(pdb_line,22,4);
 	res_indx = stoi(tmp_rsi);
-	string temp_xc(pdb_line,31,6);
-	string temp_yc(pdb_line,39,6);
-	string temp_zc(pdb_line,47,6);
+	string temp_xc(pdb_line,31,7);
+	string temp_yc(pdb_line,39,7);
+	string temp_zc(pdb_line,47,7);
 	string occ(pdb_line,56,3);
 	string bfactor(pdb_line,61,5);
 	xc = stod(temp_xc);

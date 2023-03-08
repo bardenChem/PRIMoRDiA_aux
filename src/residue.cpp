@@ -56,8 +56,8 @@ std::map<char, AAres>  R1name = {
 };
 /*********************************************************/
 std::map<string, IONres> ions_t = {
-	{"Cl-", IONres::Cl}, {"K+", IONres::K}, {"Ca+",IONres::Ca},
-	{"Mg+", IONres::Mg}, {"SO4-",IONres::SO4}
+	{"Cl-", IONres::Cl}, {"K+", IONres::K}, {"Ca+",IONres::Ca},{"Na+",IONres::Na},
+	{"Mg+", IONres::Mg}, {"SO4-",IONres::SO4},{"SOD",IONres::Na},{"CLA",IONres::Cl}
 };
 /*********************************************************/
 std::map<IONres, int> ions_chg = {
@@ -66,13 +66,15 @@ std::map<IONres, int> ions_chg = {
 };
 /*********************************************************/
 std::map<string, DNAres> DNA_t = {
-	{"DC", DNAres::DC}, {"DA", DNAres::DA}, 
-	{"DT", DNAres::DT},	{"DG", DNAres::DG}
+	{"DC", DNAres::DC}, {"DA", DNAres::DA},{"GUA",DNAres::DG},
+	{"DT", DNAres::DT},	{"DG", DNAres::DG},{"CYT",DNAres::DC},
+	{"THY",DNAres::DT}, {"ADE",DNAres::DA}
 };
 /*********************************************************/
 std::map<string, res_type> solvent_t = {
 	{"HOH", res_type::WAT}, 
 	{"WAT", res_type::WAT},
+	{"TIP", res_type::WAT},
 	{"SOL", res_type::WAT}
 };
 /*********************************************************/

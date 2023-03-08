@@ -41,6 +41,7 @@ mopac_input::mopac_input()	:
 	charge(0)				,
 	COSMO(false)			,
 	MOZYME(false)			,
+	QMMM(false)				,
 	multiplicity(SINGLET)	,
 	method(AM1)				,
 	rtype(mSCF)				{
@@ -59,15 +60,16 @@ void mopac_input::init( int chg				,
 	
 	
 	keywords.emplace_back(Method);
-	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE");
-	keywords.emplace_back(" charge=");
-	keywords.emplace_back( std::to_string(charge) );
-	
-	if ( MOZYME ) keywords.emplace_back(" MOZYME");
-	if ( COSMO  ) keywords.emplace_back(" eps=78.4");
-	
-	charge = chg;
-	switch ( mpcty ){
+	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE ");
+		
+	if ( MOZYME ){
+		keywords.emplace_back(" MOZYME");
+		//keywords.emplace_back(" charge=n");
+	}
+	else{
+		keywords.emplace_back(" charge=");
+		keywords.emplace_back( std::to_string(charge) );
+		switch ( mpcty ){
 		case 2:
 			multiplicity = DOUBLET;
 			keywords.emplace_back(" Doublet");
@@ -78,7 +80,7 @@ void mopac_input::init( int chg				,
 		break;
 		case 4:
 			multiplicity = QUARTET;
-			keywords.emplace_back(" Quartet");		
+			keywords.emplace_back(" Quartet");
 		break;
 		case 5:
 			multiplicity = QUINTET;
@@ -88,12 +90,20 @@ void mopac_input::init( int chg				,
 			keywords.emplace_back(" Singlet");
 		break;
 	}
+	}
+	if ( COSMO  ) keywords.emplace_back(" eps=78.4");
+	
+	charge = chg;	
 	
 	for (int i=0;i<keywords.size();i++){
 		out_file << keywords[i];
 	}
 	out_file << endl;
 	out_file << endl;
+}
+/*************************************************************/
+void mopac_input::molin_init(pdbModel& qc_region, pdbModel& mm_region, std::string Method){
+	
 }
 /*************************************************************/
 void mopac_input::write_file(molecule& mol, std::string out_name ){
@@ -105,15 +115,17 @@ void mopac_input::write_file(molecule& mol, std::string out_name ){
 	for (int i=0;i<keywords.size();i++){
 		out_file << keywords[i];
 	}
+	out_file <<"\n" << endl;
 	out_file << endl;
-	out_file << endl;
+	out_file << std::fixed;
+	out_file.precision(3);
 	
 	for(int i=0;i<mol.nAtoms;i++){
 		out_file << mol.atoms[i].element 
 				 << " "
 				 << mol.atoms[i].xc
 				 << " 1 "
-				 << mol.atoms[i].zc
+				 << mol.atoms[i].yc
 				 << " 1 "
 				 << mol.atoms[i].zc
 				 << "\n";
@@ -127,7 +139,7 @@ void mopac_input::read_from_input(	const char* inp_file,
 	
 }
 /*************************************************************/
- std::ostream& operator<<(std::ostream& out, const mopac_input& obj){
+std::ostream& operator<<(std::ostream& out, const mopac_input& obj){
 	
 }
 /*************************************************************/

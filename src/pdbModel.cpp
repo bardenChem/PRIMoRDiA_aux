@@ -87,8 +87,8 @@ pdbModel::pdbModel(const char* pdb_file, int mdl)	:
 	if ( IF_file( pdb_file ) ){
 		std::ifstream buf(pdb_file);
 		while( !buf.eof() ){
-			if ( line >= mdl ) {
-				buf.getline(pdb_line,100);
+			buf.getline(pdb_line,100);
+			if ( line > mdl ) {
 				string word(pdb_line,0,6);
 				if ( word == "ATOM  " || word == "HETATM" ) {
 					pdb_lineS = pdb_line;
@@ -119,8 +119,8 @@ pdbModel::pdbModel(const char* pdb_file, int mdl)	:
 					}
 					/**********************************/
 				}
-				else if ( word == "ENDMDL" || word == "END   " ){
-					if ( nResidues > 0 ){
+				else if ( word == "ENDMDL" || word == "END   "){
+					if ( nResidues > 0 ){						
 						residue _residue(tmp_atoms);
 						monomers.emplace_back(_residue);
 						old_res = curr_res;
@@ -464,37 +464,10 @@ void pdbModel::built_complex(const char* pdb_mol){
 }
 /*********************************************************/
 double pdbModel::atom_distance(unsigned a1, unsigned a2){
-	int count_a1	= 0;
-	int count_a2	= 0;
-	int resnmb_a1	= 0;
-	int resnmb_a2	= 0;
-	pdbAtom atom1;
-	pdbAtom atom2;
 	
-	for( unsigned i=0; i<monomers.size(); i++ ){
-		if ( count_a1 < a1 ){
-			count_a1 += monomers[i].nAtoms;
-		}else{
-			resnmb_a1 = i;
-		}
-		if ( count_a2 < a2 ){
-			count_a2 += monomers[i].nAtoms;
-		}else{
-			resnmb_a2 = i;
-		}
-	}
+	pdbAtom atom1 = this->pick_atom(a1,true);
+	pdbAtom atom2 = this->pick_atom(a2,true);
 	
-	for( unsigned j=0; j<monomers[resnmb_a1].nAtoms; j++ ){
-		if ( monomers[resnmb_a1].r_atoms[j].indx == a1 ){
-			atom1 = monomers[resnmb_a1].r_atoms[j];
-		}
-	}
-	
-	for( unsigned j=0; j<monomers[resnmb_a2].nAtoms; j++ ){
-		if ( monomers[resnmb_a2].r_atoms[j].indx == a2 ){
-			atom2 = monomers[resnmb_a2].r_atoms[j];
-		}
-	}
 	return atom1.get_distance(atom2);
 }
 /*********************************************************/

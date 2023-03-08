@@ -23,7 +23,7 @@
 #include <fstream>
 
 class molecule;
-
+class pdbModel;
 //===========================
 enum MopacMulti{
 	SINGLET, DOUBLET, TRIPLET,
@@ -48,6 +48,7 @@ class mopac_input{
 		unsigned int charge;
 		bool COSMO;
 		bool MOZYME;
+		bool QMMM;
 		MopacMulti multiplicity;
 		Hamiltonian method;
 		MopacRuntype rtype;
@@ -59,6 +60,7 @@ class mopac_input{
 		mopac_input& operator=(const mopac_input& rhs) = delete;
 		void check_options();
 		void init(int chg, unsigned int mpcty, std::string solvent, std::string lmo, std::string Method );
+		void molin_init(pdbModel& qc_region, pdbModel& mm_region, std::string Method );
 		void write_file( molecule& mol,std::string out_name );
 		void read_from_input(const char* inp_file, std::string out_name);
 		friend std::ostream& operator<<(std::ostream& out, const mopac_input& obj);

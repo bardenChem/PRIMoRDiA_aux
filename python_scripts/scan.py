@@ -27,7 +27,7 @@ class SCAN:
 		self.energies  			= []
 		self.DMINIMUM  			= [ 0, 0 ]
 		self.DINCREMENT			= [ 0, 0 ]
-		self.forceC				= 4000.0
+		self.forceC				= 800.0
 		self.mass_constraint	= True
 		self.multiple_d			= [False,False]
 		self.nsteps	   			= [ 1, 1 ]
@@ -40,7 +40,6 @@ class SCAN:
 		self.real_distance_2	= []
 		
 		self.LOG  = open(self.base_name+"_scan.log","w")
-		self.text = "Information of pDynamo SCAN \n"
 	
 		self.folder = os.path.join( self.base_name+"pDynamo_pj", "scan_trajectory" )
 		self.folder_trj = os.path.join( self.base_name+"pDynamo_pj", "trj" )
@@ -54,13 +53,13 @@ class SCAN:
 		
 		# . Set reaction coordinates 
 		
-		ndim = self.ndim				
+		ndim = self.ndim
 		self.ndim += 1	
 			
 		self.atoms.append(atoms)
 		self.DINCREMENT[ndim] = dincre
 		self.sigma_a1_a3[ndim] = 1 
-		self.sigma_a3_a1[ndim] = -1		
+		self.sigma_a3_a1[ndim] = -1
 		
 		if self.mass_constraint:
 			atomic_n1 = self.molecule.atoms.items[ self.atoms[ndim][0] ].atomicNumber
@@ -92,7 +91,8 @@ class SCAN:
 		distance = 0.0
 		constraints = SoftConstraintContainer( )
 		self.molecule.DefineSoftConstraints( constraints )
-			
+		self.molecule.energyModel.qcModel.converger.SetOptions( maximumSCFCycles = 1000 )
+	
 		self.text += "Step RC Energy\n"	
 		
 		# .---------------------------------------------------------
@@ -103,9 +103,9 @@ class SCAN:
 			SIGMA13 = self.sigma_a1_a3[0]
 			SIGMA31 = self.sigma_a3_a1[0]
 			
-			# .-----------------------------------------------------	
+			# .-----------------------------------------------------
 			for i in range (self.nsteps[0]):				
-				distance = self.DINCREMENT[0] * float(i) + self.DMINIMUM[0]								
+				distance = self.DINCREMENT[0] * float(i) + self.DMINIMUM[0]
 				scModel  = SoftConstraintEnergyModelHarmonic ( distance, self.forceC )
 				constraint=SoftConstraintMultipleDistance ( [ [ATOM2, ATOM1, SIGMA13], [ATOM2, ATOM3, SIGMA31] ], scModel )
 				constraints["ReactionCoord"] = constraint
@@ -168,6 +168,7 @@ class SCAN:
 		
 		constraints = SoftConstraintContainer( )
 		self.molecule.DefineSoftConstraints( constraints )
+		self.molecule.energyModel.qcModel.converger.SetOptions( maximumSCFCycles = 1000 )
 		
 		for i in range (self.nsteps[0] ):
 			#.----
@@ -231,10 +232,19 @@ class SCAN:
 		
 		constraints = SoftConstraintContainer( )
 		self.molecule.DefineSoftConstraints( constraints )
-		self.text += "Step1 Step2 RC1 RC2 Energy\n"	
-				
+		
+		self.text = "x y RC1 RC2 Energy\n"	
+		
+		self.molecule.energyModel.qcModel.converger.SetOptions( maximumSCFCycles = 1000 )
+		
+		coordinate_file = os.path.join( self.folder_trj , "frame{}_{}.pkl".format( 0, 0 ) )
+		out_name = os.path.join( self.folder,"frame{}_{}.pdb".format(0,0) )	
+		Geometry_Optimization( self.molecule, out_name, self.rmsGT, traj=False )
+		en0 = self.molecule.Energy()
+		Pickle( coordinate_file, self.molecule.coordinates3 )
+		
 		with pymp.Parallel(self.nprocs) as p:
-			for i in p.range ( 0, M ):	
+			for i in p.range ( 1, M ):	
 				#.----				
 				distance_1 = self.DINCREMENT[0] * float(i) + self.DMINIMUM[0]
 				scModel  = SoftConstraintEnergyModelHarmonic ( distance_1, self.forceC )
@@ -247,10 +257,8 @@ class SCAN:
 				constraint2	= SoftConstraintMultipleDistance ( [ [ATOM5, ATOM4, SIGMA46], [ATOM5, ATOM6, SIGMA64] ], scModel )
 				constraints["ReactionCoord2"] = constraint2		
 									
-				if i > 0:
-					init_coordinate_file = os.path.join( self.folder_trj,"frame{}_{}.pkl".format(0,0) )	
-					self.molecule.coordinates3 = Unpickle(init_coordinate_file)
-				
+				init_coordinate_file = os.path.join( self.folder_trj,"frame{}_{}.pkl".format(0,0) )	
+				self.molecule.coordinates3 = Unpickle(init_coordinate_file)				
 				coordinate_file = os.path.join( self.folder_trj , "frame{}_{}.pkl".format( i, j ) )
 				out_name = os.path.join( self.folder,"frame{}_{}.pdb".format(i,j) )	
 				Geometry_Optimization( self.molecule, out_name, self.rmsGT, traj=False )
@@ -284,14 +292,15 @@ class SCAN:
 		#.-----------------
 		self.molecule.DefineSoftConstraints ( None )
 		
+	
 		for i in range(self.nsteps[0]):
 			for j in range(self.nsteps[1]):
 				molecule = self.molecule
 				molecule.coordinates3 = Unpickle( os.path.join( self.folder_trj , "frame{}_{}.pkl".format( i, j ) ) )
-				self.energies[i*M+j] = molecule.Energy()
-				self.real_distance_1[ i*M +j ]	=	molecule.coordinates3.Distance( ATOM1, ATOM2 ) - molecule.coordinates3.Distance( ATOM2, ATOM3 )   
-				self.real_distance_2[ i*M +j ]	=	molecule.coordinates3.Distance( ATOM4, ATOM5 ) - molecule.coordinates3.Distance( ATOM5, ATOM6 )
-				self.text += "{} {} {} {} {}\n".format( i,j,self.real_distance_1[i*M+j],self.real_distance_2[i*M+j],self.energies[i*M+j]-self.energies[0] )
+				Energy = molecule.Energy()
+				RD1	=	molecule.coordinates3.Distance( ATOM1, ATOM2 ) - molecule.coordinates3.Distance( ATOM2, ATOM3 )   
+				RD2	=	molecule.coordinates3.Distance( ATOM4, ATOM5 ) - molecule.coordinates3.Distance( ATOM5, ATOM6 )
+				self.text += "{} {} {} {} {}\n".format( i,j,RD1,RD2,Energy-en0 )
 	
 	#-------------------------------------------------------------------
 	def change_parameters(self,rmsTopt=0.1	,
@@ -354,45 +363,5 @@ class SCAN:
 
 if __name__ == "__main__":	
 	'''
-	filename = os.path.join("pDynamo_tests","TIM_qcmm_opt.pkl")
-	tim_qcmm= Unpickle( filename )
-	
-	C02 	= AtomSelection.FromAtomPattern(tim_qcmm,"*:LIG.248:C02")
-	proton	= AtomSelection.FromAtomPattern(tim_qcmm,"*:LIG.248:H02")
-	oxygen	= AtomSelection.FromAtomPattern(tim_qcmm,"*:GLU.164:OE2")
-	
-	NE2		= AtomSelection.FromAtomPattern(tim_qcmm,"*:HIE.94:NE2")
-	HE2		= AtomSelection.FromAtomPattern(tim_qcmm,"*:HIE.94:HE2")
-	O06		= AtomSelection.FromAtomPattern(tim_qcmm,"*:LIG.248:O06")
-	
-	atom1	= C02.selection.pop()
-	atom2	= proton.selection.pop()
-	atom3	= oxygen.selection.pop()
-	
-	atom4	= NE2.selection.pop()
-	atom5	= HE2.selection.pop()
-	atom6	= O06.selection.pop()
-	
-	rc1_atoms	= [atom1,atom2,atom3]
-	rc2_atoms	= [atom4,atom5,atom6]
-
-	scan1d		= SCAN(tim_qcmm,"TIM1D")
-	scan1d.set_rcs(3,rc1_atoms,0.09)
-	scan1d.Print()
-	scan1d.run_1D_Scan(12)
-	scan1d.write_log()
-	
-	scan2d = SCAN(tim_qcmm,"TIM2D_seq")
-	scan2d.set_rcs(3,rc1_atoms,0.1)
-	scan2d.set_rcs(3,rc2_atoms,0.1)
-	scan2d.run_2D_Scan(15,15)
-	scan2d.write_log()
-	
-	scan2d_p = SCAN(tim_qcmm,"TIM2D_par")
-	scan2d_p.nprocs = 8
-	scan2d_p.set_rcs(3,rc1_atoms,0.07)
-	scan2d_p.set_rcs(3,rc2_atoms,0.07)
-	scan2d_p.run_2D_Scan_parallel(20,20)
-	scan2d_p.write_log()
 	'''
 	

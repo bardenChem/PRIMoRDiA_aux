@@ -93,7 +93,6 @@ void traj_an::mdtraj_geo(){
 				  << "file_rmsd.close()\n"
 				  << "print('md_traj finished')";
 				  
-	
 	python_script.close();
 	
 	string comand = "python3 " + py_name; 
@@ -183,8 +182,8 @@ void traj_an::calc_distances(const char* pdb_file){
 	vector<vector <double> > dist;
 	dist.resize( atoms_pairs.size()/2 );
 	
-	for(int i=0;i<traj_pdb.nModels;i++){
-		for ( int j=0;j<dist.size();j++){
+	for( int i=0; i<traj_pdb.nModels; i++ ) {
+		for ( int j=0; j<dist.size(); j++){
 			dist[j].emplace_back( traj_pdb.models[i].atom_distance( atoms_pairs[j], atoms_pairs[j+1] ) );
 		}
 	}
@@ -209,7 +208,7 @@ void traj_an::calc_distances(const char* pdb_file){
 	
 	int frame = 0;
 	if ( dist.size() == 2 ){
-		frame = this->bi_most_probable_point(dist[0],dist[1]);	
+		frame = this->bi_most_probable_point(dist[0],dist[1]);
 		cout << "Frame number with most probable values of pair distances: " << frame << endl;
 		cout << "D pair 1 = " << dist[0][frame] << endl;
 		cout << "D pair 2 = " << dist[1][frame] << endl;
