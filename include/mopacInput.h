@@ -60,6 +60,7 @@ class mopac_input{
 		mopac_input& operator=(const mopac_input& rhs) = delete;
 		void check_options();
 		void init(int chg, unsigned int mpcty, std::string solvent, std::string lmo, std::string Method );
+		void mark_charge(molecule& mol, std::string out_name, pdbModel& topol, std::string _residue, int charge);
 		void molin_init(pdbModel& qc_region, pdbModel& mm_region, std::string Method );
 		void write_file( molecule& mol,std::string out_name );
 		void read_from_input(const char* inp_file, std::string out_name);

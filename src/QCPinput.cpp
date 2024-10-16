@@ -30,6 +30,7 @@
 #include "../include/orcaInput.h"
 #include "../include/mopacInput.h"
 #include "../include/QCPinput.h"
+#include "../include/pdbModel.h"
 
 using std::string;
 using std::vector;
@@ -101,7 +102,7 @@ void QCPinput::make_input_from_folder(	package QCP			,
 			case package::MOPAC:
 			{
 				mopac_input mpc_input;
-				mpc_input.init(base_charge,base_multi,"h2o","mozyme",QMmethod);
+				mpc_input.init(base_charge,base_multi,"h2o",base_basis,QMmethod);
 				mpc_input.write_file(geo_file.Molecule,oname);
 				break;
 			}
@@ -114,6 +115,40 @@ void QCPinput::make_input_from_folder(	package QCP			,
 		}
 	}
 }
+/************************************************************/
+void QCPinput::make_input_mopac_marked(	package QCP			,
+										const char* topol   ,
+										int _Mcharge        ,
+										string _residue     ,
+										unsigned int bs_mlt	,
+										int bs_chg)			{
+											
+											
+	base_charge = bs_chg;
+	base_multi 	= bs_mlt;
+	
+	pdbModel _topology( topol, 0);
+										
+	fs::path c_path = fs::current_path();
+	std::vector<string> fnames; 
+		
+	for ( const auto & entry : fs::directory_iterator(c_path) ){
+		string tmp_name = entry.path();
+		if ( check_file_ext( geo_ext,tmp_name.c_str() ) ){
+			fnames.push_back( tmp_name );
+		}
+	}
+	
+	for(unsigned int i=0;i<fnames.size();i++){
+		geometry geo_file( fnames[i].c_str() );
+		string oname = remove_extension( fnames[i].c_str() );
+		mopac_input mpc_input;
+		mpc_input.init(base_charge,base_multi,"h2o",base_basis,QMmethod);
+		mpc_input.mark_charge(geo_file.Molecule,oname,_topology,_residue,_Mcharge);
+	}
+	
+}
+	
 /************************************************************/								
 void QCPinput::make_input_from_folder_FD(package QCP			,
 										 unsigned int bs_mlt,

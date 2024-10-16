@@ -154,22 +154,32 @@ void interface::input_QM(){
 	int bmulti		= 1;
 	string rtype	= "Energy";
 	int charge_diff	= 1;
+	bool markCharge = false; 
+	int  Mcharge    = 0;
+	string _residueM= "UNK";
+	string _topology= "";
 	
 	for( int i =0; i<m_argc; i++ ){ 
 		if ( m_argv[i] == "-gExt" ){
 			geo_ext = m_argv[i+1];
 		}
-		else if ( m_argv[i] == "-QMm" )		{ QM_ = m_argv[i+1];					}
-		else if ( m_argv[i] == "-basis" )	{ basis_ = m_argv[i+1];					}
-		else if ( m_argv[i] == "-FD" )		{ mode = "FD";							}
-		else if ( m_argv[i] == "-chg" )		{ bcharge = stoi( m_argv[i+1] );		}
-		else if ( m_argv[i] == "-bmulti" )	{ bmulti = stoi( m_argv[i+1] );			}
-		else if ( m_argv[i] == "-runOP" )	{ rtype = m_argv[i+1];					}
-		else if ( m_argv[i] == "-chgDiff")	{ charge_diff = stoi( m_argv[i+1] );	}
+		else if ( m_argv[i] == "-QMm" )		   { QM_         = m_argv[i+1];			}
+		else if ( m_argv[i] == "-basis" )	   { basis_      = m_argv[i+1];			}
+		else if ( m_argv[i] == "-FD" )		   { mode        = "FD";				}
+		else if ( m_argv[i] == "-chg" )		   { bcharge     = stoi( m_argv[i+1] );	}
+		else if ( m_argv[i] == "-bmulti" )	   { bmulti      = stoi( m_argv[i+1] );	}
+		else if ( m_argv[i] == "-runOP" )	   { rtype       = m_argv[i+1];			}
+		else if ( m_argv[i] == "-chgDiff" )	   { charge_diff = stoi( m_argv[i+1] );	}
+		else if ( m_argv[i] == "-markCharge" ) { markCharge  = true; Mcharge = stoi( m_argv[i+1] ); }
+		else if ( m_argv[i] == "-markResidue" ){ _residueM   = m_argv[i+1] ; }
+		else if ( m_argv[i] == "-topology" )   { _topology   = m_argv[i+1] ; }
 	}
 	
 	//this->print_options();
 	QCPinput Input(geo_ext,rtype,basis_,QM_);
+	if ( markCharge ) {
+		Input.make_input_mopac_marked(prog,_topology.c_str(),markCharge,_residueM,bmulti,bcharge);
+	}
 	if ( mode == "FD" ){
 		Input.make_input_from_folder_FD(prog,bmulti,bcharge,charge_diff);
 	}else{

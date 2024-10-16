@@ -27,6 +27,9 @@
 #include "../include/molecule.h" 
 #include "../include/geometry.h"
 #include "../include/mopacInput.h"
+#include "../include/pdbModel.h"
+#include "../include/residue.h"
+#include "../include/pdbAtom.h"
 
 using std::string;
 using std::vector;
@@ -105,6 +108,52 @@ void mopac_input::init( int chg				,
 void mopac_input::molin_init(pdbModel& qc_region, pdbModel& mm_region, std::string Method){
 	
 }
+/*************************************************************/
+void mopac_input::mark_charge(molecule&mol, std::string out_name, pdbModel& topol, std::string _residue, int charge){
+	
+	std::vector<int> marked_atoms; 	
+	std::string mark;
+	
+	if 		( charge > 0 ) mark = "(+)";
+	else if ( charge < 0 ) mark = "(-)";
+	unsigned int cnt = 0;
+	
+	for (unsigned int i=0;i<topol.nResidues;i++){
+		if ( topol.monomers[i].name == _residue ){
+			marked_atoms.push_back(cnt);
+			cnt += topol.monomers[i].nAtoms;
+		}
+	}
+	
+	for (unsigned int i=0;i<keywords.size();i++){
+		out_file << keywords[i];
+	}
+	out_file <<"\n" << endl;
+	out_file << endl;
+	out_file << std::fixed;
+	out_file.precision(3);
+	
+	cnt = 0;	
+	for(int i=0;i<mol.nAtoms;i++){
+		std::string marking = "";
+		if( i == marked_atoms[cnt] ) { 
+			marking = mark;
+			cnt++;
+		}
+		out_file << mol.atoms[i].element
+				 << marking
+				 << " "
+				 << mol.atoms[i].xc
+				 << " 1 "
+				 << mol.atoms[i].yc
+				 << " 1 "
+				 << mol.atoms[i].zc
+				 << "\n";
+		marking = "";
+	}
+	
+	out_file.close();
+} 
 /*************************************************************/
 void mopac_input::write_file(molecule& mol, std::string out_name ){
 	
