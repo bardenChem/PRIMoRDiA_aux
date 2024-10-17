@@ -59,11 +59,13 @@ void mopac_input::init( int chg				,
 						string Method)		{
 							
 	if ( solvent== "h2o"	) COSMO  = true;
-	if ( lmo 	== "mozyme"	) MOZYME = true;
+	if ( lmo 	== "mozyme"	){
+		MOZYME = true;		
+	}
 	
 	
 	keywords.emplace_back(Method);
-	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE LET");
+	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE ");
 		
 	if ( MOZYME ){
 		keywords.emplace_back(" MOZYME");
@@ -98,9 +100,7 @@ void mopac_input::init( int chg				,
 	
 	charge = chg;	
 	
-	for (int i=0;i<keywords.size();i++){
-		out_file << keywords[i];
-	}
+	
 	out_file << endl;
 	out_file << endl;
 }
@@ -110,6 +110,9 @@ void mopac_input::molin_init(pdbModel& qc_region, pdbModel& mm_region, std::stri
 }
 /*************************************************************/
 void mopac_input::mark_charge(molecule&mol, std::string out_name, pdbModel& topol, std::string _residue, int charge){
+	
+	out_name +=".mop";	
+	out_file.open( out_name.c_str() );
 	
 	std::vector<int> marked_atoms; 	
 	std::string mark;
@@ -121,8 +124,8 @@ void mopac_input::mark_charge(molecule&mol, std::string out_name, pdbModel& topo
 	for (unsigned int i=0;i<topol.nResidues;i++){
 		if ( topol.monomers[i].name == _residue ){
 			marked_atoms.push_back(cnt);
-			cnt += topol.monomers[i].nAtoms;
 		}
+		cnt += topol.monomers[i].nAtoms;
 	}
 	
 	for (unsigned int i=0;i<keywords.size();i++){
@@ -157,8 +160,7 @@ void mopac_input::mark_charge(molecule&mol, std::string out_name, pdbModel& topo
 /*************************************************************/
 void mopac_input::write_file(molecule& mol, std::string out_name ){
 	
-	out_name +=".mop";
-	
+	out_name +=".mop";	
 	out_file.open( out_name.c_str() );
 	
 	for (int i=0;i<keywords.size();i++){

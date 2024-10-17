@@ -170,7 +170,7 @@ void interface::input_QM(){
 		else if ( m_argv[i] == "-bmulti" )	   { bmulti      = stoi( m_argv[i+1] );	}
 		else if ( m_argv[i] == "-runOP" )	   { rtype       = m_argv[i+1];			}
 		else if ( m_argv[i] == "-chgDiff" )	   { charge_diff = stoi( m_argv[i+1] );	}
-		else if ( m_argv[i] == "-markCharge" ) { markCharge  = true; Mcharge = stoi( m_argv[i+1] ); }
+		else if ( m_argv[i] == "-markCharge" ) { markCharge  = true; Mcharge =  stoi(m_argv[i+1]) ; }
 		else if ( m_argv[i] == "-markResidue" ){ _residueM   = m_argv[i+1] ; }
 		else if ( m_argv[i] == "-topology" )   { _topology   = m_argv[i+1] ; }
 	}
@@ -178,9 +178,9 @@ void interface::input_QM(){
 	//this->print_options();
 	QCPinput Input(geo_ext,rtype,basis_,QM_);
 	if ( markCharge ) {
-		Input.make_input_mopac_marked(prog,_topology.c_str(),markCharge,_residueM,bmulti,bcharge);
+		Input.make_input_mopac_marked(prog,_topology.c_str(),Mcharge,_residueM,bmulti,bcharge);
 	}
-	if ( mode == "FD" ){
+	else if ( mode == "FD" ){
 		Input.make_input_from_folder_FD(prog,bmulti,bcharge,charge_diff);
 	}else{
 		Input.make_input_from_folder(prog,bmulti,bcharge);

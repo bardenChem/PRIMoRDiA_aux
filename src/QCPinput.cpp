@@ -130,6 +130,7 @@ void QCPinput::make_input_mopac_marked(	package QCP			,
 	pdbModel _topology( topol, 0);
 										
 	fs::path c_path = fs::current_path();
+	std::cout << c_path << std::endl;
 	std::vector<string> fnames; 
 		
 	for ( const auto & entry : fs::directory_iterator(c_path) ){
