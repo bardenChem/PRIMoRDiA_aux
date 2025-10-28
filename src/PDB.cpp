@@ -255,12 +255,12 @@ void PDB::iterate_models(std::string func_call, std::vector<std::string>& parame
 		}
 	}else if ( func_call == "prune_atoms_ByRes"){ 
 		if ( parameters.size() == 3 ){
-			unsigned res = std::stoi(parameters[0]);
+			string   res = parameters[0];
 			unsigned rad = std::stod(parameters[1]);
 			bool Within = false;
 			if ( parameters[2] == "within" ){ Within = true; }
 			for( unsigned i=0; i<models.size(); i++) {
-				vector<unsigned> selection = models[i].spherical_selection(res,rad,Within,true);
+				vector<unsigned> selection = models[i].spherical_selection(res,rad,Within);
 				models[i] = models[i].prune_atoms_by_residue(selection);
 			}
 		}else if ( parameters.size() == 4 ){

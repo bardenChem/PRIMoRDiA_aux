@@ -36,6 +36,7 @@ class pdbModel{
 		unsigned int nAtoms;
 		pdbModel();
 		pdbModel(std::vector<residue> residues);
+		pdbModel(std::vector<pdbAtom> atoms);
 		pdbModel(const char* pdb_file, int mdl);
 		~pdbModel();
 		pdbModel(const pdbModel& rhs);
@@ -44,9 +45,11 @@ class pdbModel{
 		pdbModel& operator=(pdbModel&& rhs) noexcept;
 		pdbAtom& pick_atom(unsigned pdb_i, bool pdb);
 		residue& pick_res(unsigned pdb_i);
+		residue& pick_LIG();
 		void write_model(std::string out_name);
 		void prune_atoms();
-		std::vector<unsigned> spherical_selection(unsigned center_atom, double radius, bool within, bool byres );
+		std::vector<unsigned> spherical_selection(unsigned center, double radius, bool within, bool byres );
+		std::vector<unsigned> spherical_selection(std::string resname, double radius, bool within );
 		pdbModel prune_atoms( std::vector<unsigned> selection );
 		pdbModel prune_atoms_by_residue( std::vector<unsigned> selection );
 		pdbModel prune_atoms_by_residue( unsigned res, double radius );

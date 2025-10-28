@@ -61,6 +61,41 @@ pdbModel::pdbModel(std::vector<residue> residues):
 	}
 }
 /*********************************************************/
+pdbModel::pdbModel(std::vector<pdbAtom> atoms):
+	index("0")					,
+	remark("REMARK")			,
+	title("TITLE")				,
+	model(0)					,
+	nChains(0)					,
+	nResidues(0)				,
+	nAtoms(atoms.size())		{
+	
+		
+	vector<pdbAtom> tmp_atoms;
+	unsigned old_res  = -1;
+	unsigned curr_res = 0;
+	for(unsigned i=0; i< atoms.size(); i++){
+		nAtoms++;
+		if( old_res == -1 ){
+			old_res  = atoms[i].res_indx;
+		} 
+		curr_res = atoms[i].res_indx;
+		if ( curr_res != old_res ){
+			residue _residue(tmp_atoms);
+			monomers.emplace_back(_residue);
+			old_res = curr_res;
+			nResidues++;
+			tmp_atoms.clear();
+			tmp_atoms.emplace_back( move(atoms[i]) );
+		}else{
+			tmp_atoms.emplace_back( move(atoms[i]) );
+		}
+	}
+	residue _residue(tmp_atoms);
+	monomers.emplace_back(_residue);
+	nResidues++;	
+}
+/*********************************************************/
 pdbModel::pdbModel(const char* pdb_file, int mdl)	:
 	index("0")										,
 	remark("REMARK")								,
@@ -264,21 +299,30 @@ residue& pdbModel::pick_res(unsigned pdb_i){
 	residue empty;
 	return empty;
 }
+/*********************************************************/
+residue& pdbModel::pick_LIG(){
+	for(unsigned i=0;i<monomers.size();i++){
+		if ( monomers[i].ligand ){
+			return monomers[i];
+		}
+	}
+	residue empty;
+	return empty;
+}
 /****************************************************************************/
-vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
-												double radius				,
-												bool within					, 
-												bool byres 					){
+vector<unsigned> pdbModel::spherical_selection(unsigned center			,
+												double radius			,
+												bool within				, 
+												bool byres 				){
 	vector<unsigned> selection;
 	vector<unsigned> unselection;
-	
-	pdbAtom c_atom = this->pick_atom(center_atom,true);
 	
 	double dist_ref = 0.0;
 	double dist_calc= 0.0;
 	unsigned count = 0;
-	
 	unsigned old_res = -1;
+		
+	pdbAtom c_atom = this->pick_atom(center,true);	
 	if ( byres ){
 		for(unsigned i=0;i<monomers.size();i++){
 			dist_calc = monomers[i].smallest_distance(c_atom);
@@ -306,13 +350,41 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center_atom			,
 				}
 			}
 		}
-	}
+	}	
 	
-	if ( within ){
-		return selection;
-	}else{
-		return unselection;
+	if ( within ) return selection;
+	else 		  return unselection; 
+}
+/*********************************************************/
+std::vector<unsigned> pdbModel::spherical_selection(std::string resname, double radius, bool within ){
+	vector<unsigned> selection;
+	vector<unsigned> unselection;
+	
+	double dist_ref = 0.0;
+	double dist_calc= 0.0;
+	unsigned count = 0;
+	unsigned old_res = -1;
+	
+	residue c_res;
+	if ( resname == "LIG"){ c_res = this->pick_LIG(); }	
+	
+	for(unsigned i=0;i<monomers.size();i++){
+		dist_calc = monomers[i].smallest_distance(c_res);
+		if ( dist_calc < radius ){
+			if ( i != old_res ){
+				selection.push_back(i);
+				old_res =i;
+			}
+		}else{
+			if ( i != old_res ){
+				unselection.push_back(i);
+				old_res =i;
+			}
+		}
 	}
+	if ( within ) return selection;
+	else 		  return unselection; 
+	
 }
 /*********************************************************/
 pdbModel pdbModel::prune_atoms( std::vector<unsigned> selection ){
@@ -508,7 +580,8 @@ void UnitTest_pdbModel(){
 	
 	ut_log.input_line("Writting method testing. \nWill open Pymol! ");
 	_model_B.write_model("test.pdb");
-	/*
+	
+	
 	system("pymol test.pdb");
 	
 	ut_log.input_line("Testing copy constructor!");
@@ -544,6 +617,7 @@ void UnitTest_pdbModel(){
 	vector<unsigned> selection_atom		= _model_F.spherical_selection(3732,10.0,true,false);
 	vector<unsigned> unselection_atom	= _model_F.spherical_selection(3732,10.0,false,false);
 	
+	
 	ut_log.input_line("Using spherical selections to prune proteins\n");
 	pdbModel _pruned_a = _model_F.prune_atoms_by_residue(selection_res);
 	_pruned_a.write_model("test_pruned_res_selection.pdb");
@@ -569,7 +643,6 @@ void UnitTest_pdbModel(){
 	_model_C.split_complex("LIG");
 	system("pymol LIG.pdb");
 	system("pymol protein.pdb");
-	*/
 	ut_log.input_line("Testing detection of chains.");
 	pdbModel _model_h(pdb_1dnk,0);
 	pdbModel _model_i = _model_h.get_chain("C");

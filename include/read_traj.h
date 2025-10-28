@@ -46,6 +46,7 @@ class ReadTraj{
 		ReadTraj& operator=( ReadTraj&& rhs ) noexcept;
 		void parse();
 		PDB sample(unsigned interval );
+		PDB sample_chunk(unsigned _init, unsigned _final );
 		friend std::ostream& operator<<(std::ostream& out, const ReadTraj& obj);
 		void print();
 };

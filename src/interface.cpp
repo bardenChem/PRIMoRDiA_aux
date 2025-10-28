@@ -49,7 +49,6 @@ interface::interface(int argc, char* argv[]):
 		m_argv.emplace_back(argv[i]);
 	}	
 	cout << "Starting PRIMoRDIA Auxialliary software! "	<< endl;
-	
 }
 /**********************************************************************/
 void interface::run(){
@@ -91,6 +90,10 @@ void interface::run(){
 			Trajectory.extract_frame(m_argv[2].c_str(),arg3);
 		}
 	}
+	else if ( m_argv[1] == "-spherical_prune"){
+		double arg4 = stod(m_argv[3]); // tamanho do raio
+		PDB( m_argv[2].c_str() );
+	}
 	/*****************************************************************/
 	//creat input from QCP calculations
 	else if ( m_argv[1] == "-QCP_inp" ){
@@ -102,8 +105,8 @@ void interface::run(){
 	else if ( m_argv[1] == "-check_QCP" ){}
 	/*****************************************************************/
 	else if ( m_argv[1] == "-test" ) {
-		//this->UnitTest();
-		this->test();
+		this->UnitTest();
+		//this->test();
 	}
 	else if ( m_argv[1] == "-rH2O_traj" ){
 		if ( m_argv[2] == "pdbs_folder" ){

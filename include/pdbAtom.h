@@ -36,6 +36,7 @@ class pdbAtom{
 		double zc;
 		pdbAtom();
 		~pdbAtom();
+		pdbAtom(std::string _res_name, unsigned _res_num , std::string _element, double _xc, double _yc, double _zc);
 		pdbAtom(const pdbAtom& rhs);
 		pdbAtom& operator=(const pdbAtom& rhs);
 		pdbAtom(pdbAtom&& rhs) noexcept;

@@ -41,7 +41,23 @@ pdbAtom::pdbAtom()		:
 	zc(0.00)			{
 }
 /*********************************************************/
+pdbAtom::pdbAtom(std::string _res_name, unsigned _res_num, std::string element, double _xc, double _yc, double _zc):
+	atom_name(element)	,
+	atom_type("H")		,
+	indx(1)				,
+	res_name(_res_name)	,
+	res_indx(_res_num)	,
+	chain_name(" ")		,
+	occupancy(0.0)		,
+	b_factor(0.00)		,
+	sideC(false)		,
+	xc(_xc)			    ,
+	yc(_yc)			    ,
+	zc(_zc)			    {	
+}
+/*********************************************************/
 pdbAtom::~pdbAtom(){}
+
 /*********************************************************/
 pdbAtom::pdbAtom(const pdbAtom& rhs):
 	atom_name(rhs.atom_name)		,

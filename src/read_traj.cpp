@@ -27,6 +27,7 @@
 #include "../include/pdbModel.h"
 #include "../include/PDB.h"
 #include "../include/read_traj.h"
+#include "../include/GRO.h"
 
 #include <chemfiles.hpp>
 
@@ -64,15 +65,24 @@ ReadTraj::ReadTraj( const char* file_name )	:
 ReadTraj::ReadTraj( const char* file_name, const char* topol_file ){
 	traj_file = file_name;
 	if( check_file_ext( ".pdb", topol_file) ){
-		Type = traj_type::pdb;
 		Positions = PDB(topol_file);
 		nframes = Positions.nModels;
 		Positions.MULTI = true;
-	}	
+	}else if ( check_file_ext( ".gro", topol_file) ){
+		GRO topology(topol_file);
+		pdbModel _topologyPDB( topology.get_pdb_from_gro() );
+		Positions = PDB();
+		Positions.add_model(_topologyPDB);
+		Positions.MULTI = true;
+	}
+
+	
 	if ( check_file_ext(".dcd",file_name) ){
 		Type = traj_type::dcd;
 	}else if ( check_file_ext(".xtc",file_name) ){
 		Type = traj_type::xtc;
+	}else if ( check_file_ext(".pdb",file_name) ){
+		Type = traj_type::pdb;
 	}
 }
 /*********************************************************/
@@ -144,6 +154,22 @@ PDB ReadTraj::sample(unsigned interval){
 			sampled.add_model( Positions.models[i] );
 			sampled.nModels++;
 		}
+	}
+	return sampled;
+}
+/*********************************************************/
+PDB ReadTraj::sample_chunk(unsigned _init, unsigned _final){
+	PDB sampled;
+	sampled.basename = Positions.basename;
+	sampled.MULTI = true;
+	
+	if (_final > nframes){
+		cout << "Final number of the chunk greater than the number of frames!!" << endl;
+		return sampled;
+	}		
+	for(unsigned int i=_init; i<_final; i++ ){
+		sampled.add_model( Positions.models[i] );
+		sampled.nModels++;
 	}
 	return sampled;
 }
