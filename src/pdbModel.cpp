@@ -236,30 +236,48 @@ void pdbModel::write_model(std::string out_name){
 	pdb_file << title << endl;
 	pdb_file << remark << endl;
 	
-	unsigned i,j,cont;
+	
+	std::vector<std::string> chain_names = {"A","B","C","D","E","F","G","H","I","J","L"};
+	std::string chain_name = chain_names[0];
+	unsigned chain_number = 0;
+	unsigned res_indx,atom_num  = 0;
+	unsigned i,j;
 	for( i=0; i<monomers.size(); i++ ){
 		for( j=0; j<monomers[i].r_atoms.size(); j++ ){
-			pdb_file<< std::setw(6) << std::left  << "ATOM" 
-					<< " "
-					<< std::setw(4) << std::right  << monomers[i].r_atoms[j].indx
+			if ( monomers.size() > 9999 ) {
+				if ( res_indx > 9998 ){
+					chain_number++;
+					res_indx = 0;
+					atom_num = 1;
+				}else{
+					if ( i > 0 ){
+						if ( monomers[i].r_atoms[0].res_indx != monomers[i-1].r_atoms[0].res_indx ){
+							res_indx++;
+						}
+					}
+				}
+				chain_name = chain_names[chain_number];
+			}else{ chain_name = monomers[i].r_atoms[j].chain_name; }
+			
+			
+			pdb_file<< "ATOM  " 
+					<< std::setw(5) << std::right << atom_num
 					<< " "
 					<< std::setw(4) << monomers[i].r_atoms[j].atom_name
 					<< " "
-					<< std::left << std::setw(4) << monomers[i].r_atoms[0].res_name
+					<< std::setw(3) << std::left << monomers[i].r_atoms[0].res_name
 					<< " "
-					<< std::right << std::setw(4) << monomers[i].r_atoms[0].res_indx
-					<< std::setw(5) << " "
-					<< std::setw(7) << monomers[i].r_atoms[j].xc
-					<< " "
-					<< std::setw(7) << monomers[i].r_atoms[j].yc
-					<< " "
-					<< std::setw(7) << monomers[i].r_atoms[j].zc
-					<< " "
-					<< std::setw(5)  << "1.00"
-					<< " "
-					<< std::setw(5) << monomers[i].r_atoms[j].b_factor
+					<< chain_name << std::setw(4) << std::right << res_indx					
+					<< "    "
+					<< std::setw(8) << std::right << monomers[i].r_atoms[j].xc
+					<< std::setw(8) << std::right << monomers[i].r_atoms[j].yc
+					<< std::setw(8) << std::right << monomers[i].r_atoms[j].zc
+					<< std::setw(6) << std::right << "1.00"
+					<< std::setw(6) << std::right << monomers[i].r_atoms[j].b_factor
+					<< "          "
+					<< monomers[i].r_atoms[j].atom_type
 					<< "\n";
-					cont++;
+					atom_num++;
 		}
 	}
 	pdb_file << "ENDMDL" << endl;

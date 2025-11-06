@@ -24,6 +24,7 @@
 #include "../include/read_traj.h"
 #include "../include/QCPinput.h"
 #include "../include/PDB.h"
+#include "../include/GRO.h"
 
 #include "../include/unit_test.h"
 

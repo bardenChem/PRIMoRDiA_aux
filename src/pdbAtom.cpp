@@ -43,7 +43,7 @@ pdbAtom::pdbAtom()		:
 /*********************************************************/
 pdbAtom::pdbAtom(std::string _res_name, unsigned _res_num, std::string element, double _xc, double _yc, double _zc):
 	atom_name(element)	,
-	atom_type("H")		,
+	atom_type(element)  ,
 	indx(1)				,
 	res_name(_res_name)	,
 	res_indx(_res_num)	,
@@ -53,7 +53,13 @@ pdbAtom::pdbAtom(std::string _res_name, unsigned _res_num, std::string element, 
 	sideC(false)		,
 	xc(_xc)			    ,
 	yc(_yc)			    ,
-	zc(_zc)			    {	
+	zc(_zc)			    {
+
+	 if ( this->is_hydrogen() ){
+		 atom_type = "H";
+	 }else{
+		 atom_type = element[0];
+	 }
 }
 /*********************************************************/
 pdbAtom::~pdbAtom(){}
@@ -172,7 +178,7 @@ bool pdbAtom::is_hydrogen(){
 	else if ( tmp1 == "1H" ) return true;
 	else if ( tmp1 == "2H" ) return true;
 	else if ( tmp1 == "3H" ) return true;
-	else return false;
+	else return false;	
 }
 /*********************************************************/
 double pdbAtom::get_distance(const pdbAtom& a2){

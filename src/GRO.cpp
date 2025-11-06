@@ -62,6 +62,7 @@ GRO::GRO(const char* gro_file):
 		std::ifstream buf(gro_file);
 		
 		buf.getline(gro_line,100);
+		buf.getline(gro_line,100);
 		string _grostring(gro_line);
 		nAtoms = std::stoi(_grostring);
 		
@@ -70,15 +71,14 @@ GRO::GRO(const char* gro_file):
 			buf.getline(gro_line,100);
 			string _grostring(gro_line);	
 			unsigned _resi =  std::stoi( _grostring.substr(0,5) );
-			string 	 _resn =  _grostring.substr(5,5);
-			_resn.erase( 0, _resn.find_first_not_of(" ") );
-			_resn.erase( _resn.find_first_not_of(" ") + 1 );
-			string _ele = _grostring.substr(10,5);
-			double _tmpXC = std::stod(_grostring.substr(20,8) );
-			double _tmpYC = std::stod(_grostring.substr(28,8) );
-			double _tmpZC = std::stod(_grostring.substr(36,8) );
-			pdbAtom _atom(_resn,_resi, _ele, _tmpXC,_tmpYC,_tmpZC);
-			tmp_atoms.emplace_back( std::move(_atom) ); 
+			string 	 _resn =  _grostring.substr(5,3);
+			string   _ele = _grostring.substr(11,4);
+			double   _tmpXC = std::stod(_grostring.substr(20,8) );
+			double   _tmpYC = std::stod(_grostring.substr(28,8) );
+			double   _tmpZC = std::stod(_grostring.substr(36,8) );
+			pdbAtom  _atom(_resn,_resi, _ele, _tmpXC,_tmpYC,_tmpZC);
+			_atom.indx = i+1;
+			atoms.emplace_back( std::move(_atom) ); 
 			
 		}
 		buf.getline(gro_line,100);
@@ -133,8 +133,7 @@ void GRO::write_gro(std::string out_name){
 	gro_file << std::fixed;
 	gro_file << "GRO file written by LQQCMMtools created by barden.igor@gmail.com" << endl;
 	
-	gro_file << "Title" << endl;
-	gro_file << atoms.size();
+	gro_file << atoms.size() << endl;
 	
 	for(unsigned i=0;i<atoms.size();i++){
 		
@@ -146,6 +145,7 @@ void GRO::write_gro(std::string out_name){
         gro_file << std::setw(8) << atoms[i].xc;
         gro_file << std::setw(8) << atoms[i].yc;
         gro_file << std::setw(8) << atoms[i].zc;
+		gro_file << endl;
 	}
 	gro_file << sides[0] <<  "  " << sides[1] << "  " << sides[2] << endl;
 	gro_file.close();
@@ -164,8 +164,13 @@ std::vector<molecule> GRO::get_systems(){
 	
 }
 /**********************************************************************/
-pdbModel GRO::get_pdb_from_gro(){
-	pdbModel _pdb(this->atoms);
+pdbModel GRO::get_pdb_from_gro(){	
+	for(unsigned i=0;i<nAtoms;i++){
+			atoms[i].xc *=10;
+			atoms[i].yc *=10;
+			atoms[i].zc *=10;		
+	}
+	pdbModel _pdb(this->atoms);	
 	return _pdb;
 }
 /**********************************************************************/
@@ -178,5 +183,10 @@ void GRO::print(){
 }
 /******************************************************************************/
 void UnitTest_GRO(){
+	const char* gro_md1  = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/md_1.gro";
+	GRO _gro_test(gro_md1);
+	_gro_test.write_gro("gro_test_write.gro");
+	pdbModel _pdbFile = _gro_test.get_pdb_from_gro();
+	_pdbFile.write_model("pdb_from_gro.pdb");
 	
 }

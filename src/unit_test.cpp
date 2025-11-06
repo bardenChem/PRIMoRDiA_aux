@@ -21,6 +21,7 @@
 #include "../include/pdbModel.h"
 #include "../include/PDB.h"
 #include "../include/read_traj.h"
+#include "../include/GRO.h"
 
 /*********************************************************************/
 UnitTests::UnitTests(){}
@@ -28,7 +29,7 @@ UnitTests::UnitTests(){}
 UnitTests::~UnitTests(){}
 /*********************************************************************/
 void UnitTests::run_unit_tests(){
-	ut_log.open();
+	//ut_log.open();
 	//UnitTest_atom();
 	//UnitTest_molecule();
 	//UnitTest_pdbAtom();
@@ -36,5 +37,6 @@ void UnitTests::run_unit_tests(){
 	//UnitTest_pdbModel();
 	//UnitTest_PDB();
 	//UnitTest_ReadTraj();
+	UnitTest_GRO();
 }
 ///////////////////////////////////////////////////////////////////////
