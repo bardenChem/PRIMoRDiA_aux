@@ -240,24 +240,32 @@ void pdbModel::write_model(std::string out_name){
 	std::vector<std::string> chain_names = {"A","B","C","D","E","F","G","H","I","J","L"};
 	std::string chain_name = chain_names[0];
 	unsigned chain_number = 0;
-	unsigned res_indx,atom_num  = 0;
+	unsigned res_indx     = 1;
+	unsigned atom_num     = 0;
 	unsigned i,j;
+	unsigned old_res    = monomers[0].r_atoms[0].res_indx;
+		
 	for( i=0; i<monomers.size(); i++ ){
 		for( j=0; j<monomers[i].r_atoms.size(); j++ ){
-			if ( monomers.size() > 9999 ) {
-				if ( res_indx > 9998 ){
-					chain_number++;
-					res_indx = 0;
-					atom_num = 1;
-				}else{
-					if ( i > 0 ){
-						if ( monomers[i].r_atoms[0].res_indx != monomers[i-1].r_atoms[0].res_indx ){
-							res_indx++;
-						}
+			chain_name = monomers[i].r_atoms[j].chain_name;
+			if (chain_name == " "){
+				chain_name = "A";
+			}else{
+				chain_name = monomers[i].r_atoms[j].chain_name;
+			}			
+			if ( res_indx > 9998 ){
+				chain_number++;
+				res_indx = 1;
+				atom_num = 1;
+			}else{
+				if ( i > 0 ){
+					if ( monomers[i].r_atoms[0].res_indx != old_res ){						
+						res_indx++;
+						old_res = monomers[i].r_atoms[0].res_indx; 
 					}
 				}
+			}
 				chain_name = chain_names[chain_number];
-			}else{ chain_name = monomers[i].r_atoms[j].chain_name; }
 			
 			
 			pdb_file<< "ATOM  " 

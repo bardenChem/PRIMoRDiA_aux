@@ -131,7 +131,7 @@ void GRO::write_gro(std::string out_name){
 	std::ofstream gro_file;
 	gro_file.open( out_name.c_str() );
 	gro_file << std::fixed;
-	gro_file << "GRO file written by LQQCMMtools created by barden.igor@gmail.com" << endl;
+	gro_file << "GRO file written by PRIMoRDiA created by barden.igor@gmail.com" << endl;
 	
 	gro_file << atoms.size() << endl;
 	
@@ -183,10 +183,9 @@ void GRO::print(){
 }
 /******************************************************************************/
 void UnitTest_GRO(){
-	const char* gro_md1  = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/md_1.gro";
+	const char* gro_md1  = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/traj.gro";
 	GRO _gro_test(gro_md1);
 	_gro_test.write_gro("gro_test_write.gro");
 	pdbModel _pdbFile = _gro_test.get_pdb_from_gro();
 	_pdbFile.write_model("pdb_from_gro.pdb");
-	
 }

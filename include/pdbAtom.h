@@ -43,6 +43,7 @@ class pdbAtom{
 		pdbAtom& operator=(pdbAtom&& rhs) noexcept;
 		pdbAtom(std::string& pdb_line);
 		bool operator==(const pdbAtom& rhs);
+		void extractElement(std::string _element);
 		bool is_hydrogen();
 		double get_distance(const pdbAtom& a2);
 		friend std::ostream& operator<<(std::ostream& out, const pdbAtom& obj);

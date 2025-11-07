@@ -55,11 +55,9 @@ pdbAtom::pdbAtom(std::string _res_name, unsigned _res_num, std::string element, 
 	yc(_yc)			    ,
 	zc(_zc)			    {
 
-	 if ( this->is_hydrogen() ){
-		 atom_type = "H";
-	 }else{
-		 atom_type = element[0];
-	 }
+	
+	this->extractElement(element);	 
+	 
 }
 /*********************************************************/
 pdbAtom::~pdbAtom(){}
@@ -172,13 +170,46 @@ pdbAtom::pdbAtom(std::string& pdb_line)	:
 /*********************************************************/
 bool pdbAtom::is_hydrogen(){
 	
-	string tmp1(atom_name,0,2);
+	string tmp(atom_name,0,2);
 	
-	if 		( tmp1 == " H" ) return true;
-	else if ( tmp1 == "1H" ) return true;
-	else if ( tmp1 == "2H" ) return true;
-	else if ( tmp1 == "3H" ) return true;
+	tmp.erase(0, tmp.find_first_not_of(" \t"));
+    tmp.erase(tmp.find_last_not_of(" \t") + 1);
+	
+    if (tmp[0] == 'H') atom_type = "H";
+	
 	else return false;	
+}
+/*********************************************************/
+void pdbAtom::extractElement(std::string _element){
+	
+	_element.erase(0, _element.find_first_not_of(" \t"));	
+    _element.erase(_element.find_last_not_of(" \t") + 1);
+	
+	if (_element.length() >= 2) {
+        // Common two-character elements
+        std::string first_two = _element.substr(0, 2);
+        if (first_two == "CL") {atom_type = "CL";} // Chlorine
+        else if (first_two == "NA") {atom_type = "NA";} // Sodium
+        else if (first_two == "MG") {atom_type = "MG";} // Magnesium
+        else if (first_two == "CA") {
+			if ( res_name != "CA" ){ 
+				atom_type = "C";				
+			}else{ atom_type = "CA"; }
+		} // Calcium
+        else if (first_two == "ZN") {atom_type = "ZN";} // Zinc
+        else if (first_two == "FE") {atom_type = "FE";} // Iron
+        else if (first_two == "CU") {atom_type = "CU";} // Copper
+        else if (first_two == "H1") {atom_type = "H"; } // hydrogen
+        else if (first_two == "H2") {atom_type = "H"; } // hydrogen
+        else if (first_two == "H3") {atom_type = "H"; } // hydrogen
+		else if (first_two == "1H") {atom_type = "H"; } // hydrogen
+        else if (first_two == "2H") {atom_type = "H"; } // hydrogen
+        else if (first_two == "3H") {atom_type = "H"; } // hydrogen
+		else{ atom_type = _element[0];}
+	}else{ 
+		atom_type = _element[0];	
+	}
+	
 }
 /*********************************************************/
 double pdbAtom::get_distance(const pdbAtom& a2){
