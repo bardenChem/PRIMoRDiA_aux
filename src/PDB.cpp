@@ -213,6 +213,7 @@ void PDB::init_models(unsigned frames){
 	if ( nModels == 1 ){
 		for( unsigned i=1;i<frames;i++){
 			models.emplace_back( models[0] );
+			models[i].model = i;
 		}
 	}
 	nModels = models.size();

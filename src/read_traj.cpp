@@ -37,6 +37,61 @@ using std::move;
 using std::cout;
 using std::endl;
 
+/********************************************************/
+TrjCRD::TrjCRD(){}
+/********************************************************/
+TrjCRD::TrjCRD(unsigned _nFrames){
+	xc.resize(_nFrames);
+	yc.resize(_nFrames);
+	zc.resize(_nFrames);	
+}
+/********************************************************/
+TrjCRD::TrjCRD( const TrjCRD& rhs ):
+	xc(rhs.xc),
+	yc(rhs.yc),
+	zc(rhs.zc){	
+}
+/********************************************************/
+TrjCRD& TrjCRD::operator=( const TrjCRD& rhs ){
+	if ( this != &rhs ){
+		xc = rhs.xc;
+		yc = rhs.yc;
+		zc = rhs.zc;
+	}
+	return *this;
+}
+/********************************************************/
+TrjCRD::TrjCRD(  TrjCRD&& rhs ) noexcept:
+	xc( move (rhs.xc) ),
+	yc( move (rhs.yc) ),
+	zc( move (rhs.zc) ){		
+}
+/********************************************************/
+TrjCRD& TrjCRD::operator=( TrjCRD&& rhs ) noexcept{
+	if ( this != &rhs ){
+		xc = move(rhs.xc);
+		yc = move(rhs.yc);
+		zc = move(rhs.zc);
+	}
+	return *this;
+}
+/********************************************************/
+void TrjCRD::init_frames(unsigned _nFrames)
+/********************************************************/
+TrjCRD::~TrjCRD(){}
+/********************************************************/
+pdbModel TrjCRD::create_pdb( const pdbModel& _topology, unsigned _frame){
+	pdbModel new_pdb(_topology);
+	unsigned pos = 0;
+	for(unsigned i=0; i<new_pdb.monomers.size();i++){
+		for(unsigned j=0; j<new_pdb.monomers[i].r_atoms.size(); j++){
+			new_pdb.monomers[i].r_atoms[j].xc = xc[pos];
+			new_pdb.monomers[i].r_atoms[j].xc = xc[pos];
+			new_pdb.monomers[i].r_atoms[j].xc = xc[pos++];
+		}	
+	}
+	return new_pdb;	
+}
 
 /*********************************************************/
 ReadTraj::ReadTraj()		:
@@ -72,8 +127,8 @@ ReadTraj::ReadTraj( const char* file_name, const char* topol_file ){
 		GRO topology(topol_file);
 		pdbModel _topologyPDB( topology.get_pdb_from_gro() );
 		Positions = PDB();
-		Positions.add_model(_topologyPDB);
 		Positions.MULTI = true;
+		Positions.add_model(_topologyPDB);
 	}
 
 	
@@ -174,6 +229,45 @@ PDB ReadTraj::sample_chunk(unsigned _init, unsigned _final){
 	return sampled;
 }
 /*********************************************************/
+void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_name){
+	
+	std::vector<unsigned> _list_molecules = Positions.models[0].get_res_list(_res_name);
+	std::vector< std::vector<double> > distances;
+	distances.resize(Positions.models.size());
+	
+	for(unsigned i=0;i<Positions.models.size();i++){
+		for (unsigned j=0; j<_list_molecules.size();j++){
+			double dist = Positions.models[i].monomers[_res_indx].smallest_distance( Positions.models[i].monomers[ _list_molecules[j] ] ); 
+			distances[i].push_back(dist);
+		}
+		std::sort(distances[i].begin(), distances[i].end());
+	}		
+	
+	std::ofstream outfile("sorted_distances.dat");
+    if(!outfile.is_open()) {
+        std::cerr << "Error: Could not open file for writing!" << std::endl;
+        return;
+    }
+    
+    // Write header (optional)
+    outfile << "#Frame ";
+	
+	for(unsigned i=0; i< _list_molecules.size(); i++){
+		outfile << Positions.models[0].monomers[i].name << _list_molecules[i] << " ";
+	}
+	outfile << "\n";
+    
+    // Write data - one frame per line
+    for(unsigned i=0; i < distances.size(); i++) {
+        outfile << i << " ";  // Frame number
+        for(double dist : distances[i]) {
+            outfile << dist << " ";
+        }
+        outfile << "\n";
+    }
+    outfile.close();
+}
+/*********************************************************/
 std::ostream& operator<<(std::ostream& out, const ReadTraj& obj){
 	out << "Outputting information about 'ReadTraj' instanced object!\n"
 		<< "File trajectory name: "	<< obj.traj_file
@@ -188,6 +282,14 @@ void ReadTraj::print(){
 }
 /*********************************************************/
 void UnitTest_ReadTraj(){
+	
+	const char* xtc_file = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/traj.xtc";
+	const char* gro_file = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/traj.gro";
+	
+	ReadTraj _xtc_test(xtc_file,gro_file);
+	_xtc_test.parse();
+	
+	
 	const char* dcd_file = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/scan1d.dcd";
 	const char* top_file = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/frame0.pdb";
 	const char* pdb_traj = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/1l2y.pdb";

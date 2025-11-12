@@ -68,7 +68,7 @@ pdbModel::pdbModel(std::vector<pdbAtom> atoms):
 	model(0)					,
 	nChains(0)					,
 	nResidues(0)				,
-	nAtoms(atoms.size())		{
+	nAtoms(0)		{
 	
 		
 	vector<pdbAtom> tmp_atoms;
@@ -585,6 +585,17 @@ std::ostream& operator<<(std::ostream& out, const pdbModel& obj){
 		<< "\n\tmodel index	"					<< obj.index;
 	return out;
 }
+/*********************************************************/
+std::vector<unsigned> pdbModel::get_res_list(std::string _name){
+	std::vector<unsigned> _list;
+	for(unsigned i=0; i<monomers.size();i++){
+		if ( monomers[i].name == _name ) {
+			_list.push_back(i);
+		}	
+	}
+	return _list;
+}
+
 /*********************************************************/
 void pdbModel::print(){
 	std::cout << *this << endl;

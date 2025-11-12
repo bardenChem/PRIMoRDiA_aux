@@ -65,6 +65,7 @@ class pdbModel{
 		void built_complex( const char* pdb_mol );
 		double atom_distance(unsigned a1, unsigned a2);
 		double atom_angle(unsigned a1, unsigned a2, unsigned a3);
+		std::vector<unsigned> get_res_list(std::string _name); 
 		friend std::ostream& operator<<(std::ostream& out, const pdbModel& obj);
 		void print();
 };

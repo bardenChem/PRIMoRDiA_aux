@@ -29,13 +29,30 @@ class PDB;
 /*****************************************************/
 enum traj_type{ pdb, dcd, xtc, gro, xyz, mol2, NONE };
 
+
+class TrjCRD{
+	public:
+		std::vector<double> xc;
+		std::vector<double> yc;
+		std::vector<double> zc;
+		TrjCRD();
+		TrjCRD(unsigned _nFrames);
+		TrjCRD( const TrjCRD& rhs );
+		TrjCRD& operator=( const TrjCRD& rhs );
+		TrjCRD(  TrjCRD&& rhs ) noexcept;
+		TrjCRD& operator=( TrjCRD&& rhs ) noexcept;
+		~TrjCRD();
+		pdbModel create_pdb( const pdbModel& _topology, unsigned _frame); 
+		void init_frames(unsigned _nFrames);
+};
+
 /*****************************************************/
 class ReadTraj{
 	public:
 		std::string traj_file;
 		unsigned int natoms;
 		unsigned int nframes;
-		PDB Positions;
+		TrjCRD Positions;
 		traj_type Type;
 		ReadTraj();
 		ReadTraj( const char* file_name );
@@ -45,8 +62,9 @@ class ReadTraj{
 		ReadTraj(  ReadTraj&& rhs ) noexcept;
 		ReadTraj& operator=( ReadTraj&& rhs ) noexcept;
 		void parse();
-		PDB sample(unsigned interval );
+		PDB sample(unsigned interval);
 		PDB sample_chunk(unsigned _init, unsigned _final );
+		void analysis_ac_from_molecules(unsigned _res_indx, std::string _res_name);
 		friend std::ostream& operator<<(std::ostream& out, const ReadTraj& obj);
 		void print();
 };
