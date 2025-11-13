@@ -24,25 +24,28 @@
 #include <fstream>
 
 #include "../include/geometry.h"
+#include "../include/pdbModel.h"
 /*****************************************************/
 class PDB;
+class pdbModel;
 /*****************************************************/
 enum traj_type{ pdb, dcd, xtc, gro, xyz, mol2, NONE };
 
 
 class TrjCRD{
 	public:
-		std::vector<double> xc;
-		std::vector<double> yc;
-		std::vector<double> zc;
+		std::vector< std::vector<double> >  xc;
+		std::vector< std::vector<double> >  yc;
+		std::vector< std::vector<double> >  zc;
+		pdbModel topology;
 		TrjCRD();
-		TrjCRD(unsigned _nFrames);
+		TrjCRD( pdbModel _topology);
 		TrjCRD( const TrjCRD& rhs );
 		TrjCRD& operator=( const TrjCRD& rhs );
 		TrjCRD(  TrjCRD&& rhs ) noexcept;
 		TrjCRD& operator=( TrjCRD&& rhs ) noexcept;
 		~TrjCRD();
-		pdbModel create_pdb( const pdbModel& _topology, unsigned _frame); 
+		pdbModel create_pdb( unsigned _frame); 
 		void init_frames(unsigned _nFrames);
 };
 

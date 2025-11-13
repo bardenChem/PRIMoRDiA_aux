@@ -20,6 +20,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <omp.h>
+
 
 #include "../include/global.h"
 #include "../include/pdbAtom.h"
@@ -40,16 +42,15 @@ using std::endl;
 /********************************************************/
 TrjCRD::TrjCRD(){}
 /********************************************************/
-TrjCRD::TrjCRD(unsigned _nFrames){
-	xc.resize(_nFrames);
-	yc.resize(_nFrames);
-	zc.resize(_nFrames);	
+TrjCRD::TrjCRD( pdbModel _topology):
+	topology(_topology){
 }
 /********************************************************/
 TrjCRD::TrjCRD( const TrjCRD& rhs ):
-	xc(rhs.xc),
-	yc(rhs.yc),
-	zc(rhs.zc){	
+	xc(rhs.xc)						,
+	yc(rhs.yc)						,
+	zc(rhs.zc)						,
+	topology(rhs.topology)			{	
 }
 /********************************************************/
 TrjCRD& TrjCRD::operator=( const TrjCRD& rhs ){
@@ -57,6 +58,7 @@ TrjCRD& TrjCRD::operator=( const TrjCRD& rhs ){
 		xc = rhs.xc;
 		yc = rhs.yc;
 		zc = rhs.zc;
+		topology = rhs.topology;
 	}
 	return *this;
 }
@@ -64,7 +66,8 @@ TrjCRD& TrjCRD::operator=( const TrjCRD& rhs ){
 TrjCRD::TrjCRD(  TrjCRD&& rhs ) noexcept:
 	xc( move (rhs.xc) ),
 	yc( move (rhs.yc) ),
-	zc( move (rhs.zc) ){		
+	zc( move (rhs.zc) ),
+	topology( move (rhs.topology) ){		
 }
 /********************************************************/
 TrjCRD& TrjCRD::operator=( TrjCRD&& rhs ) noexcept{
@@ -72,27 +75,39 @@ TrjCRD& TrjCRD::operator=( TrjCRD&& rhs ) noexcept{
 		xc = move(rhs.xc);
 		yc = move(rhs.yc);
 		zc = move(rhs.zc);
+		topology = move(rhs.topology);
 	}
 	return *this;
 }
 /********************************************************/
-void TrjCRD::init_frames(unsigned _nFrames)
+void TrjCRD::init_frames(unsigned _nFrames){
+	xc.resize(_nFrames);
+	yc.resize(_nFrames);
+	zc.resize(_nFrames);
+	
+	if (topology.nAtoms > 0){
+		for(unsigned i=0;i<_nFrames;i++){
+			xc[i].resize(topology.nAtoms);
+			yc[i].resize(topology.nAtoms);
+			zc[i].resize(topology.nAtoms);
+		}
+	}
+}
 /********************************************************/
 TrjCRD::~TrjCRD(){}
 /********************************************************/
-pdbModel TrjCRD::create_pdb( const pdbModel& _topology, unsigned _frame){
-	pdbModel new_pdb(_topology);
+pdbModel TrjCRD::create_pdb( unsigned _frame){
+	pdbModel new_pdb(topology);
 	unsigned pos = 0;
 	for(unsigned i=0; i<new_pdb.monomers.size();i++){
 		for(unsigned j=0; j<new_pdb.monomers[i].r_atoms.size(); j++){
-			new_pdb.monomers[i].r_atoms[j].xc = xc[pos];
-			new_pdb.monomers[i].r_atoms[j].xc = xc[pos];
-			new_pdb.monomers[i].r_atoms[j].xc = xc[pos++];
+			new_pdb.monomers[i].r_atoms[j].xc = xc[_frame][pos];
+			new_pdb.monomers[i].r_atoms[j].yc = yc[_frame][pos];
+			new_pdb.monomers[i].r_atoms[j].zc = zc[_frame][pos++];
 		}	
 	}
 	return new_pdb;	
 }
-
 /*********************************************************/
 ReadTraj::ReadTraj()		:
 	natoms(0)				,
@@ -112,26 +127,22 @@ ReadTraj::ReadTraj( const char* file_name )	:
 		cout << "No topology file provided! " << endl;
 	}else if( check_file_ext(".pdb",file_name) ){
 		Type = traj_type::pdb;
-		Positions = PDB(file_name);
-		nframes = Positions.nModels;
+		PDB _topology(file_name);
+		Positions = TrjCRD(_topology.models[0]);
 	}
 }
 /*********************************************************/
 ReadTraj::ReadTraj( const char* file_name, const char* topol_file ){
 	traj_file = file_name;
 	if( check_file_ext( ".pdb", topol_file) ){
-		Positions = PDB(topol_file);
-		nframes = Positions.nModels;
-		Positions.MULTI = true;
+		PDB _topology(topol_file);
+		Positions = TrjCRD(_topology.models[0]);
+		nframes   = 0;
 	}else if ( check_file_ext( ".gro", topol_file) ){
-		GRO topology(topol_file);
-		pdbModel _topologyPDB( topology.get_pdb_from_gro() );
-		Positions = PDB();
-		Positions.MULTI = true;
-		Positions.add_model(_topologyPDB);
+		GRO _topology(topol_file);
+		Positions = TrjCRD(_topology.get_pdb_from_gro()); 
 	}
-
-	
+	natoms = Positions.topology.nAtoms;
 	if ( check_file_ext(".dcd",file_name) ){
 		Type = traj_type::dcd;
 	}else if ( check_file_ext(".xtc",file_name) ){
@@ -182,18 +193,19 @@ ReadTraj& ReadTraj::operator=( ReadTraj&& rhs ) noexcept{
 void ReadTraj::parse(){
 	chemfiles::Trajectory traj( traj_file.c_str(), 'r' );
 	nframes = traj.nsteps();
-	Positions.init_models(nframes);
+	Positions.init_frames(nframes);
 	chemfiles::Frame frame = traj.read();
 	auto positions = frame.positions();
 	unsigned poss = 0;
 	for( unsigned i=0; i<nframes; i++){
 		frame = traj.read_step(i);
 		positions = frame.positions();
-		for( unsigned m =0; m<Positions.models[i].monomers.size(); m++){
-			for( unsigned n =0; n<Positions.models[i].monomers[m].r_atoms.size(); n++){
-				Positions.models[i].monomers[m].r_atoms[n].xc = positions[poss][0];
-				Positions.models[i].monomers[m].r_atoms[n].yc = positions[poss][1];
-				Positions.models[i].monomers[m].r_atoms[n].zc = positions[poss++][2];
+		for( unsigned m =0; m<Positions.topology.monomers.size(); m++){
+			for( unsigned n =0; n<Positions.topology.monomers[m].r_atoms.size(); n++){
+				Positions.xc[i][poss] = positions[poss][0];
+				Positions.yc[i][poss] = positions[poss][1];
+				Positions.zc[i][poss] = positions[poss][2];
+				poss++;
 			}
 		}
 		poss = 0;
@@ -202,11 +214,10 @@ void ReadTraj::parse(){
 /*********************************************************/
 PDB ReadTraj::sample(unsigned interval){
 	PDB sampled;
-	sampled.basename = Positions.basename;
 	sampled.MULTI = true;
 	for(unsigned int i=0; i<nframes; i++ ){
 		if ( i%interval == 0 ){
-			sampled.add_model( Positions.models[i] );
+			sampled.add_model( Positions.create_pdb(i) );
 			sampled.nModels++;
 		}
 	}
@@ -215,7 +226,6 @@ PDB ReadTraj::sample(unsigned interval){
 /*********************************************************/
 PDB ReadTraj::sample_chunk(unsigned _init, unsigned _final){
 	PDB sampled;
-	sampled.basename = Positions.basename;
 	sampled.MULTI = true;
 	
 	if (_final > nframes){
@@ -223,7 +233,7 @@ PDB ReadTraj::sample_chunk(unsigned _init, unsigned _final){
 		return sampled;
 	}		
 	for(unsigned int i=_init; i<_final; i++ ){
-		sampled.add_model( Positions.models[i] );
+		sampled.add_model( Positions.create_pdb(i) );
 		sampled.nModels++;
 	}
 	return sampled;
@@ -231,17 +241,24 @@ PDB ReadTraj::sample_chunk(unsigned _init, unsigned _final){
 /*********************************************************/
 void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_name){
 	
-	std::vector<unsigned> _list_molecules = Positions.models[0].get_res_list(_res_name);
+	std::vector<unsigned> _list_molecules = Positions.topology.get_res_list(_res_name);
 	std::vector< std::vector<double> > distances;
-	distances.resize(Positions.models.size());
+	distances.resize(Positions.xc.size());
 	
-	for(unsigned i=0;i<Positions.models.size();i++){
-		for (unsigned j=0; j<_list_molecules.size();j++){
-			double dist = Positions.models[i].monomers[_res_indx].smallest_distance( Positions.models[i].monomers[ _list_molecules[j] ] ); 
-			distances[i].push_back(dist);
+	unsigned i = 0;
+	#pragma omp parallel
+	{
+	#pragma omp for private(i)
+		for(i=0;i<Positions.xc.size();i++){
+		
+			pdbModel model_frame = Positions.create_pdb(i);
+			for (unsigned j=0; j<_list_molecules.size();j++){			
+				double dist = model_frame.monomers[_res_indx-1].smallest_distance( model_frame.monomers[ _list_molecules[j] ] ); 
+				distances[i].push_back(dist);
+			}
+			std::sort(distances[i].begin(), distances[i].end());
 		}
-		std::sort(distances[i].begin(), distances[i].end());
-	}		
+	}
 	
 	std::ofstream outfile("sorted_distances.dat");
     if(!outfile.is_open()) {
@@ -253,7 +270,7 @@ void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_n
     outfile << "#Frame ";
 	
 	for(unsigned i=0; i< _list_molecules.size(); i++){
-		outfile << Positions.models[0].monomers[i].name << _list_molecules[i] << " ";
+		outfile << Positions.topology.monomers[_list_molecules[i]].name << _list_molecules[i] << " ";
 	}
 	outfile << "\n";
     
@@ -266,12 +283,23 @@ void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_n
         outfile << "\n";
     }
     outfile.close();
+	
+	PDB sampled;
+	sampled.MULTI = true;
+	
+	for(unsigned i =0;i<distances.size();i++){
+		if ( distances[i][0]  < 5.0 ) {
+			sampled.add_model( Positions.create_pdb(i) );
+		}
+	}
+	sampled.basename = "analysis"+Positions.topology.monomers[_res_indx-1].name+"_"+_res_name;
+	sampled.split_models_in_files();
+	
 }
 /*********************************************************/
 std::ostream& operator<<(std::ostream& out, const ReadTraj& obj){
 	out << "Outputting information about 'ReadTraj' instanced object!\n"
 		<< "File trajectory name: "	<< obj.traj_file
-		<< "\nFile topology name: "	<< obj.Positions.basename
 		<< "\nNumber of frames: "	<< obj.nframes;
 	
 	return out;
@@ -288,8 +316,9 @@ void UnitTest_ReadTraj(){
 	
 	ReadTraj _xtc_test(xtc_file,gro_file);
 	_xtc_test.parse();
+	_xtc_test.analysis_ac_from_molecules(466,"CO2");
 	
-	
+	/*
 	const char* dcd_file = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/scan1d.dcd";
 	const char* top_file = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/frame0.pdb";
 	const char* pdb_traj = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/1l2y.pdb";
@@ -311,6 +340,7 @@ void UnitTest_ReadTraj(){
 	_samp.write_pdb("sampled_test.pdb");
 	system("pymol sampled_test.pdb");
 	ut_log.data << _traj_c << std::endl;
+	*/
 	
 }
 /////////////////////////////////////////////////////////////
