@@ -123,7 +123,7 @@ void PDB::split_models_in_files(){
 		name_ = basename;
 		name_ +="_";
 		name_ +=std::to_string(i);
-		name_ +="_.pdb";
+		name_ +=".pdb";
 		models[i].write_model(name_);
 	}
 }
@@ -157,7 +157,7 @@ void PDB::write_pdb(std::string out_name){
 	
 	unsigned int cont = 0;
 	for( unsigned k=0; k<models.size(); k++ ){
-		pdb_file << "MODEL\n";
+		pdb_file << "MODEL" << k+1 << endl;
 		for(unsigned i=0; i<models[k].monomers.size(); i++ ){
 			for( unsigned j=0; j<models[k].monomers[i].r_atoms.size(); j++ ){
 				pdb_file<< std::setw(6) << std::left  << "ATOM" 
@@ -238,9 +238,9 @@ void PDB::iterate_models(std::string func_call, std::vector<std::string>& parame
 		}else if ( parameters.size() == 4 ){
 			unsigned catom = std::stoi(parameters[0]);
 			unsigned rad = std::stod(parameters[1]);
-			bool Within = false;
+			bool Within = true;
 			bool ByRes = true;
-			if ( parameters[2] == "within" ){ Within = true;}
+			if ( parameters[2] == "invert" ){ Within = false;}
 			if ( parameters[3] == "byAtom" ){ ByRes = false; }
 			if ( ByRes ){
 				for( unsigned i=0; i<models.size(); i++) {
@@ -258,8 +258,8 @@ void PDB::iterate_models(std::string func_call, std::vector<std::string>& parame
 		if ( parameters.size() == 3 ){
 			string   res = parameters[0];
 			unsigned rad = std::stod(parameters[1]);
-			bool Within = false;
-			if ( parameters[2] == "within" ){ Within = true; }
+			bool Within = true;
+			if ( parameters[2] == "invert" ){ Within = false; }
 			for( unsigned i=0; i<models.size(); i++) {
 				vector<unsigned> selection = models[i].spherical_selection(res,rad,Within);
 				models[i] = models[i].prune_atoms_by_residue(selection);
@@ -267,10 +267,10 @@ void PDB::iterate_models(std::string func_call, std::vector<std::string>& parame
 		}else if ( parameters.size() == 4 ){
 			unsigned catom = std::stoi(parameters[0]);
 			unsigned rad = std::stod(parameters[1]);
-			bool Within = false;
+			bool Within = true;
 			bool ByRes = true;
-			if ( parameters[2] == "within" ){ Within = true; }
-			if ( parameters[3] == "byAtom" ){	ByRes = false; }
+			if ( parameters[2] == "invert" ){ Within = false; }
+			if ( parameters[3] == "byAtom" ){ ByRes = false; }
 			for( unsigned i=0; i<models.size(); i++) {
 				vector<unsigned> selection = models[i].spherical_selection(catom,rad,Within,ByRes);
 				models[i] = models[i].prune_atoms( selection );

@@ -67,7 +67,7 @@ class ReadTraj{
 		void parse();
 		PDB sample(unsigned interval);
 		PDB sample_chunk(unsigned _init, unsigned _final );
-		void analysis_ac_from_molecules(unsigned _res_indx, std::string _res_name);
+		void analysis_ac_from_molecules(unsigned _res_indx, std::string _molecule_name,double _radius, double _prune);
 		friend std::ostream& operator<<(std::ostream& out, const ReadTraj& obj);
 		void print();
 };

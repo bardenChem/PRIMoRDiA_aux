@@ -239,9 +239,9 @@ PDB ReadTraj::sample_chunk(unsigned _init, unsigned _final){
 	return sampled;
 }
 /*********************************************************/
-void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_name){
+void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _molecule_name, double _radius, double _prune){
 	
-	std::vector<unsigned> _list_molecules = Positions.topology.get_res_list(_res_name);
+	std::vector<unsigned> _list_molecules = Positions.topology.get_res_list(_molecule_name);
 	std::vector< std::vector<double> > distances;
 	distances.resize(Positions.xc.size());
 	
@@ -272,8 +272,7 @@ void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_n
 	for(unsigned i=0; i< _list_molecules.size(); i++){
 		outfile << Positions.topology.monomers[_list_molecules[i]].name << _list_molecules[i] << " ";
 	}
-	outfile << "\n";
-    
+	outfile << "\n";    
     // Write data - one frame per line
     for(unsigned i=0; i < distances.size(); i++) {
         outfile << i << " ";  // Frame number
@@ -288,12 +287,26 @@ void ReadTraj::analysis_ac_from_molecules(unsigned _res_indx, std::string _res_n
 	sampled.MULTI = true;
 	
 	for(unsigned i =0;i<distances.size();i++){
-		if ( distances[i][0]  < 5.0 ) {
+		if ( distances[i][0]  < _radius ) {
 			sampled.add_model( Positions.create_pdb(i) );
 		}
 	}
-	sampled.basename = "analysis"+Positions.topology.monomers[_res_indx-1].name+"_"+_res_name;
+	string res_name = Positions.topology.monomers[_res_indx-1].name;
+	if ( res_name[2] ==' '){
+		res_name = res_name.substr(0,2);
+	}
+	unsigned center = Positions.topology.monomers[_res_indx-1].r_atoms[0].indx -1;
+	sampled.basename = "analysis"+res_name+"_"+_molecule_name;
+	if (_prune > 0.0 ) {
+		string res_str = std::to_string(center);
+		string radius  = std::to_string(_prune);
+		std::vector<string> _parameters = { res_str, radius, "false","false"};
+		sampled.iterate_models("prune_atoms",_parameters);
+	}
+	
 	sampled.split_models_in_files();
+		
+	//std::ofstream R_script;
 	
 }
 /*********************************************************/
@@ -316,7 +329,7 @@ void UnitTest_ReadTraj(){
 	
 	ReadTraj _xtc_test(xtc_file,gro_file);
 	_xtc_test.parse();
-	_xtc_test.analysis_ac_from_molecules(466,"CO2");
+	_xtc_test.analysis_ac_from_molecules(466,"CO2",4.2,30.0);
 	
 	/*
 	const char* dcd_file = "/home/igorchem/primordia-code/PRIMoRDiA_aux/test_data/structure/scan1d.dcd";

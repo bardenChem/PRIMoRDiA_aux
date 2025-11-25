@@ -232,7 +232,7 @@ void pdbModel::write_model(std::string out_name){
 	pdb_file.open( out_name.c_str() );
 	pdb_file << std::fixed;
 	pdb_file.precision(3);
-	pdb_file << "PDB file written by LQQCMMtools created by barden.igor@gmail.com" << endl;
+	pdb_file << "PDB file written by PRIMoRDiA created by barden.igor@gmail.com" << endl;
 	pdb_file << title << endl;
 	pdb_file << remark << endl;
 	
@@ -241,7 +241,7 @@ void pdbModel::write_model(std::string out_name){
 	std::string chain_name = chain_names[0];
 	unsigned chain_number = 0;
 	unsigned res_indx     = 1;
-	unsigned atom_num     = 0;
+	unsigned atom_num     = 1;
 	unsigned i,j;
 	unsigned old_res    = monomers[0].r_atoms[0].res_indx;
 		
@@ -348,7 +348,7 @@ vector<unsigned> pdbModel::spherical_selection(unsigned center			,
 	unsigned count = 0;
 	unsigned old_res = -1;
 		
-	pdbAtom c_atom = this->pick_atom(center,true);	
+	pdbAtom c_atom = this->pick_atom(center,false);	
 	if ( byres ){
 		for(unsigned i=0;i<monomers.size();i++){
 			dist_calc = monomers[i].smallest_distance(c_atom);

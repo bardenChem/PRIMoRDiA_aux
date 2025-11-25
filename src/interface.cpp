@@ -95,6 +95,16 @@ void interface::run(){
 		double arg4 = stod(m_argv[3]); // tamanho do raio
 		PDB( m_argv[2].c_str() );
 	}
+	else if ( m_argv[1] == "-analysis_mol_from_center"){
+		ReadTraj TRJ( m_argv[2].c_str(), m_argv[3].c_str() );  //file and topology 
+		TRJ.parse();
+		unsigned res_indx    = stoi(m_argv[4]);
+		std::string mol_name = m_argv[5];
+		double radius        = stod(m_argv[6]);
+		double prune         = 0.0;
+		if ( m_argc > 6 ) { prune = stod(m_argv[7]); }
+		TRJ.analysis_ac_from_molecules(res_indx,mol_name,radius,prune);
+	} 
 	/*****************************************************************/
 	//creat input from QCP calculations
 	else if ( m_argv[1] == "-QCP_inp" ){
@@ -106,8 +116,8 @@ void interface::run(){
 	else if ( m_argv[1] == "-check_QCP" ){}
 	/*****************************************************************/
 	else if ( m_argv[1] == "-test" ) {
-		this->UnitTest();
-		//this->test();
+		//this->UnitTest();
+		this->test();
 	}
 	else if ( m_argv[1] == "-rH2O_traj" ){
 		if ( m_argv[2] == "pdbs_folder" ){
@@ -223,12 +233,21 @@ void interface::test(){
 	
 	ReadTraj TestTraj( DCD.c_str(), Top.c_str() );
 	TestTraj.parse();
-	*/
+	 
 	vector<int> ats = {4672, 5325, 5326, 5357 };
 	
 	std::string fn = "md.pdb";
 	traj_an Trajectory(fn,ats);
 	Trajectory.calc_distances( fn.c_str() );
+	*/
+	
+	const char* xtc_file = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/traj.xtc";
+	const char* gro_file = "/home/igorchem/CCDIR/PETROBRAS-F3/AC_DM/AC/traj.gro";
+	
+	ReadTraj _xtc_test(xtc_file,gro_file);
+	_xtc_test.parse();
+	_xtc_test.analysis_ac_from_molecules(466,"CO2",4.2,30.0);
+	
 }
 /**********************************************************************/
 void interface::UnitTest(){
