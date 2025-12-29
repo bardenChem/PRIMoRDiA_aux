@@ -268,14 +268,28 @@ void pdbModel::write_model(std::string out_name){
 				chain_name = chain_names[chain_number];
 			
 			
+			
+			std::string atom_name       = monomers[i].r_atoms[j].atom_name;
+			
+			const auto strBegin = atom_name.find_first_not_of(" \t\n\r");
+			const auto strEnd   = atom_name.find_last_not_of(" \t\n\r");
+				
+    
+			// 3. Return the substring between the non-space characters
+			const auto strRange = strEnd - strBegin + 1;
+			atom_name = atom_name.substr(strBegin, strRange);
+			if ( atom_name.size() < 4 ) {
+				atom_name = " "+atom_name;
+			}
 			pdb_file<< "ATOM  " 
-					<< std::setw(5) << std::right << atom_num
+					<< std::setw(5) << std::right << atom_num 
 					<< " "
-					<< std::setw(4) << monomers[i].r_atoms[j].atom_name
+					<< std::setw(4) << std::left << atom_name
 					<< " "
-					<< std::setw(3) << std::left << monomers[i].r_atoms[0].res_name
+					<< std::setw(3) << std::right << monomers[i].r_atoms[0].res_name
 					<< " "
-					<< chain_name << std::setw(4) << std::right << res_indx					
+					<< chain_name
+					<< std::setw(4) << std::right << res_indx					
 					<< "    "
 					<< std::setw(8) << std::right << monomers[i].r_atoms[j].xc
 					<< std::setw(8) << std::right << monomers[i].r_atoms[j].yc
@@ -283,7 +297,7 @@ void pdbModel::write_model(std::string out_name){
 					<< std::setw(6) << std::right << "1.00"
 					<< std::setw(6) << std::right << monomers[i].r_atoms[j].b_factor
 					<< "          "
-					<< monomers[i].r_atoms[j].atom_type
+					<< std::setw(2) << std::left << monomers[i].r_atoms[j].atom_type
 					<< "\n";
 					atom_num++;
 		}

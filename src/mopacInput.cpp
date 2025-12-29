@@ -65,7 +65,7 @@ void mopac_input::init( int chg				,
 	
 	
 	keywords.emplace_back(Method);
-	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE ");
+	keywords.emplace_back(" 1SCF ALLVECS VECTOR AUX LARGE cutoff=9.0 metal=(ZN(2+))");
 		
 	if ( MOZYME ){
 		keywords.emplace_back(" MOZYME");
