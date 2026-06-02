@@ -192,13 +192,13 @@ ReadTraj& ReadTraj::operator=( ReadTraj&& rhs ) noexcept{
 /*********************************************************/
 void ReadTraj::parse(){
 	chemfiles::Trajectory traj( traj_file.c_str(), 'r' );
-	nframes = traj.nsteps();
+	nframes = traj.size();
 	Positions.init_frames(nframes);
 	chemfiles::Frame frame = traj.read();
 	auto positions = frame.positions();
 	unsigned poss = 0;
 	for( unsigned i=0; i<nframes; i++){
-		frame = traj.read_step(i);
+		frame = traj.read_at(i);
 		positions = frame.positions();
 		for( unsigned m =0; m<Positions.topology.monomers.size(); m++){
 			for( unsigned n =0; n<Positions.topology.monomers[m].r_atoms.size(); n++){
