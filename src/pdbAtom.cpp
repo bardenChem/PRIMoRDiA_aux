@@ -138,15 +138,16 @@ pdbAtom::pdbAtom(std::string& pdb_line)	:
 	string atom_symbol = atom_name;
 	std::remove(atom_symbol.begin(), atom_symbol.end(), ' ');
 	atom_symbol = atom_symbol.substr(0,2);
-	if ( atom_symbol == "Mg") {
+	if ( atom_symbol == "Mg" || ( atom_symbol == "MG" ) ){
 		atom_type = "Mg";
-	}else if( atom_symbol == "Cl"){
+	}else if( atom_symbol == "Cl" || ( atom_symbol == "CL" ) ){
 		atom_type = "Cl";
-	}else if( atom_symbol == "Zn"){
+	}else if( atom_symbol == "Zn" || ( atom_symbol == "ZN" ) ){
 		atom_type = "Zn";
-	}else if( atom_symbol == "Ca"){
+		std::cout << "Zinc detected! Please check if the atom name is correct in the PDB file." << std::endl;
+	}else if( atom_symbol == "Ca"  ){
 		atom_type = "Ca";
-	}else if( atom_symbol == "Na"){
+	}else if( atom_symbol == "Na" || ( atom_symbol == "NA" ) ){
 		atom_type = "Na";
 	}else{
 		atom_type = atom_symbol.substr(0,1);
